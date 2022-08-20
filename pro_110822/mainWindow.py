@@ -19,8 +19,9 @@ class mainWindow(QMainWindow):
         self.setFixedSize(600, 800)
         self.mainLayout = QGridLayout()
         self.availableDevicesArea()
-        # self.setCent(self.mainLayout)
+        self.setCentralWidget(self.mainLayout)
         print("S")
+
 
     
     def availableDevicesArea(self):
