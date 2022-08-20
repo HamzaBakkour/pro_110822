@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
 
 from PySide6 import QtGui, QtCore, QtWidgets
 
-from scrollAreaTest3 import scrollPanel
+from scrollArea import scrollPanel
 
 
 import sys
@@ -22,15 +22,14 @@ class mainWindow(QMainWindow):
         super(mainWindow, self).__init__(parent)
         self.setWindowTitle("pro_110822")
         self.setFixedSize(600, 800)
-        self.form_widget = mainWindowWidgets(self) 
-        self.setCentralWidget(self.form_widget) 
+        self.mainWidget = mainWindowWidget(self) 
+        self.setCentralWidget(self.mainWidget) 
 
 
 
-class mainWindowWidgets(QtWidgets.QWidget):
-
+class mainWindowWidget(QtWidgets.QWidget):
     def __init__(self, parent):        
-        super(mainWindowWidgets, self).__init__(parent)
+        super(mainWindowWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
 
         self.availableDevicesWidget = scrollPanel()
@@ -38,8 +37,6 @@ class mainWindowWidgets(QtWidgets.QWidget):
 
         self.layout.addWidget(self.availableDevicesWidget)
         self.layout.addWidget(self.connectedDevices)
-
-
 
         self.setLayout(self.layout)
 
