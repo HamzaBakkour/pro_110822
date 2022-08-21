@@ -35,7 +35,7 @@ class mainWindowWidget(QtWidgets.QWidget):
         self.availableDevicesWidget = scrollPanel()
         self.connectedDevices = scrollPanel()
 
-        self.layout.addWidget(QLabel("Available devices"))
+        self.layout.addWidget(QLabel("Available Servers"))
         self.layout.addWidget(self.availableDevicesWidget)
         self.availableDevicesWidget.showAvaialableDevices()
 
@@ -44,6 +44,15 @@ class mainWindowWidget(QtWidgets.QWidget):
         self.layout.addWidget(self.connectedDevices)
 
         self.setLayout(self.layout)
+
+    def firstOpenView(self):
+        pass
+
+    def serverView(self):
+        pass
+
+    def connectedToServerView(self):
+        pass
 
 
 

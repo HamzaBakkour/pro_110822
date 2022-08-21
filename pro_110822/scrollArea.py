@@ -11,7 +11,6 @@ class scrollPanel(QScrollArea):
         self.initUI()
     
     def initUI(self):
-
         self.scroll_panel = QtWidgets.QWidget()
         self.scroll_panel_layout = QFormLayout(self.scroll_panel)
         self.scroll_panel_layout.setContentsMargins(0,0,0,0)
