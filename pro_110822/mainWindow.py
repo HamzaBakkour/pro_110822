@@ -26,7 +26,7 @@ class mainWindow(QMainWindow):
         self.setCentralWidget(self.mainWidget) 
 
 
-
+ 
 class mainWindowWidget(QtWidgets.QWidget):
     def __init__(self, parent):        
         super(mainWindowWidget, self).__init__(parent)

@@ -22,11 +22,9 @@ class scrollPanel(QScrollArea):
         self.setWidget(self.scroll_panel)
 
         available = networkScanner.get_connected_devices_name()
-
+ 
 
         for element in available:
             available_device = deviceWidget.device(element[0], element[2], False)
             self.scroll_panel_layout.addWidget(available_device)
-            
-    def addNetworkDevice(self, device_name : str, device_IP : str)-> None:
-        pass
+
