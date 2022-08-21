@@ -9,7 +9,7 @@ The module contains the following functions:
 - `get_host_network_infterfaces_id()` - Returns the id of the host's network interfaces.
 - `get_host_network_infterfaces_ipv4()` - Returns IPv4 addresses of the host's active network interfaces.
 - `get_host_ipaddress__netmask__broadcast()` - Returns the host's IP address, netmask and boradcast address.
-- `get_host_default_gateway()` - Returns the host's default gateway
+- `get_host_default_gateway()`pi - Returns the host's default gateway
 - `get_prefix(ip_address, netmask)` - Returns the network portion of an IP address given its netmask.
 - `get_network_address(ip_address, netmask)` -  Returns the network address of an IP address given its netmask.
 - `get_host_network_info()` - Returns information about the host's network.

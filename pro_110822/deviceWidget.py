@@ -1,4 +1,4 @@
-from xmlrpc.client import boolean
+from email.charset import QP
 from PySide6 import QtCore, QtWidgets
 
 from PySide6.QtWidgets import (
@@ -13,19 +13,38 @@ from PySide6.QtWidgets import (
 )
 
 class device(QtWidgets.QWidget):
-    def __init__(self,device_name: str, device_IP: list, its_the_host: boolean):        
+    def __init__(self,device_name: str, device_IP: list):        
         super(device, self).__init__()
         self.layout = QHBoxLayout(self)
+        device_nanme_and_ip_layout = QVBoxLayout()
+        buttons_layout = QHBoxLayout()
 
-        self.name = QLabel(device_name)
+        connect = QPushButton("Connect")
+        disconnect = QPushButton("Disconnect")
+        make_server =  QPushButton("Make Server")
+
+
+        if (device_name[-5:] == ".home"):
+            self.name = QLabel(device_name[:-5])
+        else:
+            self.name = QLabel(device_name)
+        
         self.address = QLabel(device_IP[0])
 
-        self.layout.addWidget(self.name)
-        self.layout.addWidget(self.address)
+        device_nanme_and_ip_layout.addWidget(self.name)
+        device_nanme_and_ip_layout.addWidget(self.address)
 
-        if (its_the_host):
-            self.its_me = QLabel('(This Device)')
-            self.layout.addWidget(self.its_me)
+
+        self.layout.addLayout(device_nanme_and_ip_layout)
+        if (device_name[-5:] == ".home"):
+            self.layout.addWidget(QLabel("(This device)"))
+        else:
+            buttons_layout.addWidget(make_server)
+        buttons_layout.addWidget(connect)
+        buttons_layout.addWidget(disconnect)
+        
+
+        self.layout.addLayout(buttons_layout)
 
 
         self.setLayout(self.layout)

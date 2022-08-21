@@ -2,7 +2,7 @@ import sys
 from PySide6 import QtGui, QtCore, QtWidgets
 from PySide6.QtWidgets import QApplication, QFormLayout, QScrollArea, QGridLayout, QPushButton
 import networkScanner
-import deviceWidget
+from deviceWidget import device
 
 class scrollPanel(QScrollArea):
 
@@ -25,6 +25,6 @@ class scrollPanel(QScrollArea):
  
 
         for element in available:
-            available_device = deviceWidget.device(element[0], element[2], False)
+            available_device = device(element[0], element[2])
             self.scroll_panel_layout.addWidget(available_device)
 

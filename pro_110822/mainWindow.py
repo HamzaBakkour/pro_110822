@@ -6,13 +6,13 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QGridLayout,
     QVBoxLayout,
-    QPushButton
+    QPushButton,
+    QLabel
 )
 
 from PySide6 import QtGui, QtCore, QtWidgets
 
 from scrollArea import scrollPanel
-
 
 import sys
 
@@ -34,8 +34,9 @@ class mainWindowWidget(QtWidgets.QWidget):
 
         self.availableDevicesWidget = scrollPanel()
         self.connectedDevices = scrollPanel()
-
+        self.layout.addWidget(QLabel("Available devices"))
         self.layout.addWidget(self.availableDevicesWidget)
+        self.layout.addWidget(QLabel("Connected devices"))
         self.layout.addWidget(self.connectedDevices)
 
         self.setLayout(self.layout)
