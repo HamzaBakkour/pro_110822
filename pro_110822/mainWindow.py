@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QScrollArea,
     QGridLayout,
+    QHBoxLayout,
     QVBoxLayout,
     QPushButton,
     QLabel
@@ -14,6 +15,8 @@ from PySide6 import QtGui, QtCore, QtWidgets
 
 from scrollArea import scrollPanel
 
+from firstOpenView import firstOpenView
+
 import sys
 
 class mainWindow(QMainWindow):
@@ -22,7 +25,7 @@ class mainWindow(QMainWindow):
         super(mainWindow, self).__init__(parent)
         self.setWindowTitle("pro_110822")
         self.setFixedSize(600, 800)
-        self.mainWidget = mainWindowWidget(self) 
+        self.mainWidget = mainWindowWidget(self)
         self.setCentralWidget(self.mainWidget) 
 
 
@@ -31,29 +34,20 @@ class mainWindowWidget(QtWidgets.QWidget):
     def __init__(self, parent):        
         super(mainWindowWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
-
-        self.availableDevicesWidget = scrollPanel()
-        self.connectedDevices = scrollPanel()
-
-        self.layout.addWidget(QLabel("Available Servers"))
-        self.layout.addWidget(self.availableDevicesWidget)
-        self.availableDevicesWidget.showAvaialableDevices()
-
-
-        self.layout.addWidget(QLabel("Connected devices"))
-        self.layout.addWidget(self.connectedDevices)
-
         self.setLayout(self.layout)
+        self.firstOpenView()
+
 
     def firstOpenView(self):
-        pass
+        view = firstOpenView()
+        self.layout.addWidget(view)
+
 
     def serverView(self):
         pass
 
     def connectedToServerView(self):
         pass
-
 
 
 app = QApplication([])

@@ -1,4 +1,3 @@
-from email.charset import QP
 from PySide6 import QtCore, QtWidgets
 
 from PySide6.QtWidgets import (
