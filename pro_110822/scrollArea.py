@@ -21,9 +21,8 @@ class scrollPanel(QScrollArea):
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setWidget(self.scroll_panel)
 
+    def showAvaialableDevices(self):
         available = networkScanner.get_connected_devices_name()
- 
-
         for element in available:
             available_device = device(element[0], element[2])
             self.scroll_panel_layout.addWidget(available_device)

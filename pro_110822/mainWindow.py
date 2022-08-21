@@ -34,8 +34,12 @@ class mainWindowWidget(QtWidgets.QWidget):
 
         self.availableDevicesWidget = scrollPanel()
         self.connectedDevices = scrollPanel()
+
         self.layout.addWidget(QLabel("Available devices"))
         self.layout.addWidget(self.availableDevicesWidget)
+        self.availableDevicesWidget.showAvaialableDevices()
+
+
         self.layout.addWidget(QLabel("Connected devices"))
         self.layout.addWidget(self.connectedDevices)
 
