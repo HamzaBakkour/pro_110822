@@ -18,10 +18,11 @@ from PySide6 import QtGui, QtCore, QtWidgets
 from firstOpenView import firstOpenView
 from serverView import serverView
 from connection import mouseAndKeyboardConnection
-from serverWorker import serverWorker
+from serverWorkers import listenForConnectionsWorker
 
 import sys
 import signal
+import socket
 
 class mainWindow(QMainWindow):
 
@@ -46,25 +47,37 @@ class mainWindow(QMainWindow):
         self.mainWindowView.makeServerButton.clicked.connect(self.makeServer)
 
 
+
+    def searchForServers(self):
+        pass
+
+
+
     def makeServer(self):
         self.mainWindowView.remove()
         self.mainWindowView = serverView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
 
-        self.connection = serverWorker(12345)
+        self.connection = listenForConnectionsWorker(12345)
         self.connection.signal.sendSignal.connect(self.poo)
         self.threabool.start(self.connection)
-
-
+        print("Created Server")
         
-        print("Creating Server")
-        return("Server")
- 
-    def poo(self):
-        print("poo")
+    def closeServer(self):
+        self.connection.serverConnection.terminateSocket()
+        print("S")
+    
 
-    def searchForAvialableDevices(self)-> dict:
-        pass
+
+    def poo(self, socket: socket.socket, addr: tuple):
+        print("poo")
+        print(socket)
+        print(addr)
+        self.closeServer()
+        print("Called terminate() from main thread")
+
+    # def searchForAvialableDevices(self)-> dict:
+    #     pass
 
 app = QApplication([])
 window = mainWindow()

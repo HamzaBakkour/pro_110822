@@ -21,9 +21,8 @@ class mouseAndKeyboardConnection():
 
 
   def acceptConnections(self)-> None:
-    c, addr = self.s.accept()
-    return c, addr 
-    print ('Got connection from', addr )
+    self.c, addr = self.s.accept()
+    return self.c, addr 
 
 
   def sendMouseMovement(self)->None:
@@ -72,19 +71,13 @@ class mouseAndKeyboardConnection():
       print('({}, {})'.format(dx, dy))
 
   def terminateSocket(self):
-    try:
-      for _ in range(0, 10):
-        self.c.send('TERMINATE'.encode())
-        self.c.send(' '.encode())
-        print("sent")
-        time.sleep(1)
-    except:
-      pass
-
     self.c.shutdown(socket.SHUT_RDWR)
     self.c.close()
+    self.s.close()
+    self.s.detach()
+    
 
-    self.listener.stop()
+
 
 
 
