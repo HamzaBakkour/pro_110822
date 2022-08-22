@@ -29,11 +29,11 @@ class firstOpenView(QtWidgets.QWidget):
         upperFrameLayout = QHBoxLayout()
         upperFrameLayout.addWidget(QLabel("Available servers"))
 
-        makeServerButton = QPushButton("Make Server")
-        makeServerButton.setCheckable(True)
-        makeServerButton.clicked.connect(self.makeServer)
+        self.makeServerButton = QPushButton("Make Server")
+        self.makeServerButton.setCheckable(True)
+        # makeServerButton.clicked.connect(self.makeServer)
 
-        upperFrameLayout.addWidget(makeServerButton)
+        upperFrameLayout.addWidget(self.makeServerButton)
         self.layout.addLayout(upperFrameLayout)
 
 
@@ -42,6 +42,11 @@ class firstOpenView(QtWidgets.QWidget):
         availableServers = scrollPanel()
         self.layout.addWidget(availableServers)
 
-    def makeServer(self):
-        print("Creating Server")
-        return("Server")
+    def remove(self):
+        self.deleteLater()
+
+
+
+    # def makeServer(self):
+    #     print("Creating Server")
+    #     return("Server")
