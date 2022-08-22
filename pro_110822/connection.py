@@ -72,8 +72,15 @@ class mouseAndKeyboardConnection():
       print('({}, {})'.format(dx, dy))
 
   def terminateSocket(self):
-    self.c.shutdown(socket.SHUT_RDWR)
-    self.c.close()
+    try:
+      self.c.shutdown(socket.SHUT_RDWR)
+      self.c.close()
+      
+    except AttributeError:#trying to close c before any connections were acepted
+                          #trying to close a connection that does not exist -> AttributeError
+                          #occure when try to close the server before any connections were accepted
+      print("terminateSocket exception AttributeError has occured")
+      pass
     self.s.close()
     print("Socket terminated")
     

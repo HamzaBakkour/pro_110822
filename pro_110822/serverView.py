@@ -27,8 +27,8 @@ class serverView(QtWidgets.QWidget):
 
     def setUpperFrame(self):
         upperFrameLayout = QHBoxLayout()
-        stopServerButton = QPushButton("Stop Server")
-        upperFrameLayout.addWidget(stopServerButton)
+        self.stopServerButton = QPushButton("Stop Server")
+        upperFrameLayout.addWidget(self.stopServerButton)
 
         self.layout.addLayout(upperFrameLayout)
 
@@ -48,3 +48,6 @@ class serverView(QtWidgets.QWidget):
         connectedDevicesAreaLayout.addWidget(connectedDevices)
 
         self.layout.addLayout(connectedDevicesAreaLayout)
+
+    def remove(self):
+        self.deleteLater()

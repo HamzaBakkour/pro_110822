@@ -57,21 +57,26 @@ class mainWindow(QMainWindow):
         self.mainWindowView.remove()
         self.mainWindowView = serverView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
+        self.mainWindowView.stopServerButton.clicked.connect(self.closeServer)
 
         self.connection = listenForConnectionsWorker(12345)
         self.connection.signal.sendSignal.connect(self.poo)
         self.threabool.start(self.connection)
         print("Created Server")
 
+
     def closeServer(self):
         self.connection.terminate = True
+        self.mainWindowView.remove()
+        self.mainWindowView = firstOpenView()
+        self.mainWidget.layout.addWidget(self.mainWindowView)
+        self.mainWindowView.makeServerButton.clicked.connect(self.makeServer)
     
 
 
     def poo(self, socket: socket.socket, addr: tuple):
         print(socket)
         print(addr)
-        self.closeServer()
 
     # def searchForAvialableServers(self)-> dict:
     #     pass
