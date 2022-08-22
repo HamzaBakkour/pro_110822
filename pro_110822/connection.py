@@ -21,7 +21,8 @@ class mouseAndKeyboardConnection():
 
 
   def acceptConnections(self)-> None:
-    self.c, addr = self.s.accept()
+    c, addr = self.s.accept()
+    return c, addr 
     print ('Got connection from', addr )
 
 

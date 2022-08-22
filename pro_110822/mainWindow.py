@@ -19,6 +19,7 @@ from serverView import serverView
 from connection import mouseAndKeyboardConnection
 
 import sys
+import signal
 
 class mainWindow(QMainWindow):
 

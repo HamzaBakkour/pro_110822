@@ -84,3 +84,19 @@
 |                                                          |
 |                                                          |
 ------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+Server:
+listning for connections
+got a connection
+start sending data
