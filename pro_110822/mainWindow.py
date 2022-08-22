@@ -62,21 +62,18 @@ class mainWindow(QMainWindow):
         self.connection.signal.sendSignal.connect(self.poo)
         self.threabool.start(self.connection)
         print("Created Server")
-        
+
     def closeServer(self):
-        self.connection.serverConnection.terminateSocket()
-        print("S")
+        self.connection.terminate = True
     
 
 
     def poo(self, socket: socket.socket, addr: tuple):
-        print("poo")
         print(socket)
         print(addr)
         self.closeServer()
-        print("Called terminate() from main thread")
 
-    # def searchForAvialableDevices(self)-> dict:
+    # def searchForAvialableServers(self)-> dict:
     #     pass
 
 app = QApplication([])

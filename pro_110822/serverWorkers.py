@@ -14,16 +14,17 @@ class listenForConnectionsWorker(QRunnable):
         self.serverPort = port
         self.signal = serverWorkerSignals()
         self.serverConnection = mouseAndKeyboardConnection()
+        self.serverConnection.initSocket(1)
+        self.terminate = False
 
     @Slot()
     def run(self)-> int:
-        
         self.serverConnection.listenForConnections(self.serverPort)
-        while(True):
+        while(self.terminate == False):
             try:
                 seocketConnection, addr = self.serverConnection.acceptConnections()
                 self.signal.sendSignal.emit(seocketConnection, addr)
-            except OSError: #Tryed to send data on something that is not a socket
-                print("Exception occured")
-                return (-9)
-
+            except TimeoutError: #Tryed to send data on something that is not a socket
+                print("Socket TimeoutEroor exception occured")
+        self.serverConnection.terminateSocket()
+        return(1)

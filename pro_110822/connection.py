@@ -5,12 +5,13 @@ import time
 
 
 class mouseAndKeyboardConnection():
-  def __init__(self)-> None:
-    self.initSocket()
+  def __init__(self)-> None:#None : blocking, 0 : None
+    pass
 
 
-  def initSocket(self)-> None:
-    self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)        
+  def initSocket(self, socketTimeout: int)-> None:
+    self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)     
+    self.s.settimeout(socketTimeout)
     print ("Socket successfully created")
 
 
@@ -74,7 +75,7 @@ class mouseAndKeyboardConnection():
     self.c.shutdown(socket.SHUT_RDWR)
     self.c.close()
     self.s.close()
-    self.s.detach()
+    print("Socket terminated")
     
 
 
