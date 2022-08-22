@@ -71,20 +71,23 @@ class mouseAndKeyboardConnection():
   def on_scroll(self, x, y, dx, dy):
       print('({}, {})'.format(dx, dy))
 
+
+
+
+
   def terminateSocket(self):
     try:
       self.c.shutdown(socket.SHUT_RDWR)
       self.c.close()
-      
-    except AttributeError:#trying to close c before any connections were acepted
+    except AttributeError:#trying to close c before any connections are acepted
                           #trying to close a connection that does not exist -> AttributeError
-                          #occure when try to close the server before any connections were accepted
+                          #occures when try to close the server before any connections are accepted
       print("terminateSocket exception AttributeError has occured")
       pass
+    #the socket creation is in the class init
     self.s.close()
     print("Socket terminated")
     
-
 
 
 

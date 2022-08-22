@@ -95,8 +95,11 @@
 
 
 
-
-Server:
-listning for connections
-got a connection
-start sending data
+*************************************************
+searchForServers()
+get list of available ip addresses
+check if server exist on each one of them
+return a list of dict
+    addr : server ip 
+    name : PC name
+*************************************************

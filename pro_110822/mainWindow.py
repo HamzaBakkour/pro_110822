@@ -19,6 +19,7 @@ from firstOpenView import firstOpenView
 from serverView import serverView
 from connection import mouseAndKeyboardConnection
 from serverWorkers import listenForConnectionsWorker
+from networkScannerWorker import searchForServersWorker
 
 import sys
 import signal
@@ -49,6 +50,7 @@ class mainWindow(QMainWindow):
 
 
     def searchForServers(self):
+        # self.testConntection = 
         pass
 
 

@@ -152,6 +152,7 @@ def get_ip_of_connected_devices_on_host_network()->list:
     return ip_of_connected_devices
 
 
+
 def get_connected_devices_name()->list:
     connected_devices_ip = get_ip_of_connected_devices_on_host_network()
     connected_devices_name__ip = []
