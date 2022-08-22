@@ -13,10 +13,10 @@ from PySide6.QtWidgets import (
 
 from PySide6 import QtGui, QtCore, QtWidgets
 
-from scrollArea import scrollPanel
 
 from firstOpenView import firstOpenView
 from serverView import serverView
+from connection import mouseAndKeyboardConnection
 
 import sys
 
@@ -44,28 +44,17 @@ class mainWindow(QMainWindow):
         self.mainWindowView.remove()
         self.mainWindowView = serverView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
+
+        self.connection = mouseAndKeyboardConnection()
+        self.connection.listenForConnections(12345)
+        self.connection.acceptConnections()
+        
         print("Creating Server")
         return("Server")
  
-# class mainWindowWidget(QtWidgets.QWidget):
-#     def __init__(self, parent):        
-#         super(mainWindowWidget, self).__init__(parent)
-#         self.layout = QVBoxLayout(self)
-#         self.setLayout(self.layout)
-#         self.firstOpenView()
-#         # self.serverView()
 
-
-#     def firstOpenView(self):
-#         view = firstOpenView()
-#         self.layout.addWidget(view)
-
-
-
-
-#     def connectedToServerView(self):
-#         pass
-
+    def searchForAvialableDevices(self)-> dict:
+        pass
 
 app = QApplication([])
 window = mainWindow()

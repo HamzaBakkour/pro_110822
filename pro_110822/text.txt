@@ -2,7 +2,7 @@
 ***First open***
 ------------------------------------------------------------
 |                                        [make server]     |
-|Available servers                                         |
+|Available servers                       [Refresh]         |
 |----------------------------------------------------------|
 |Server name                                               |
 |Server IP                                  [Connect]      |
@@ -59,7 +59,7 @@
 
 ***The device is Client and connected to server***
 ------------------------------------------------------------
-|                                        [make server]     |
+|                                                          |
 |Connected to server                                       |
 |----------------------------------------------------------|
 |Server name                                               |
