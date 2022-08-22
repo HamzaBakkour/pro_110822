@@ -16,6 +16,7 @@ from PySide6 import QtGui, QtCore, QtWidgets
 from scrollArea import scrollPanel
 
 from firstOpenView import firstOpenView
+from serverView import serverView
 
 import sys
 
@@ -26,7 +27,7 @@ class mainWindow(QMainWindow):
         self.setWindowTitle("pro_110822")
         self.setFixedSize(600, 800)
         self.mainWidget = mainWindowWidget(self)
-        self.setCentralWidget(self.mainWidget) 
+        self.setCentralWidget(self.mainWidget)
 
 
  
@@ -36,6 +37,7 @@ class mainWindowWidget(QtWidgets.QWidget):
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
         self.firstOpenView()
+        # self.serverView()
 
 
     def firstOpenView(self):
@@ -44,7 +46,9 @@ class mainWindowWidget(QtWidgets.QWidget):
 
 
     def serverView(self):
-        pass
+        view = serverView()
+        self.layout.addWidget(view)
+
 
     def connectedToServerView(self):
         pass
