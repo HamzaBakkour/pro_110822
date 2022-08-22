@@ -1,8 +1,10 @@
-from PySide6.QtCore import QRunnable, QObject
+# from PySide6.QtCore import *
+from PySide6.QtCore import QRunnable, QObject, Signal, Slot
+
 from connection import mouseAndKeyboardConnection
 
 class serverWorkerSignals(QObject):
-    sendSignal = pyqtSignal(object, object)
+    sendSignal = Signal(object, object)
 
 class serverWorker(QRunnable):
     def __init__(self, port: int)-> None:
@@ -10,10 +12,10 @@ class serverWorker(QRunnable):
         self.serverPort = port
         self.signal = serverWorkerSignals()
 
-    @pyqtSlot()
+    @Slot()
     def run(self):
         self.serverConnection = mouseAndKeyboardConnection()
-        self.serverConnection.listenForConnections()
+        self.serverConnection.listenForConnections(self.serverPort)
         while(True):
             seocketConnection, addr = self.serverConnection.acceptConnections()
             self.signal.sendSignal.emit(seocketConnection, addr)

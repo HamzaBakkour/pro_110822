@@ -1,4 +1,5 @@
 from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import QThreadPool
 
 from PySide6.QtWidgets import (
     QApplication,
@@ -17,6 +18,7 @@ from PySide6 import QtGui, QtCore, QtWidgets
 from firstOpenView import firstOpenView
 from serverView import serverView
 from connection import mouseAndKeyboardConnection
+from serverWorker import serverWorker
 
 import sys
 import signal
@@ -35,6 +37,9 @@ class mainWindow(QMainWindow):
         self.mainWidget.setLayout(self.mainWidget.layout)
         self.setCentralWidget(self.mainWidget)
 
+        #Craeting a thread pool for the main window class
+        self.threabool = QThreadPool()
+
         #Starting the main window with the firstOpenView view
         self.mainWindowView = firstOpenView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
@@ -46,13 +51,17 @@ class mainWindow(QMainWindow):
         self.mainWindowView = serverView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
 
-        self.connection = mouseAndKeyboardConnection()
-        self.connection.listenForConnections(12345)
-        self.connection.acceptConnections()
+        self.connection = serverWorker(12345)
+        self.connection.signal.sendSignal.connect(self.poo)
+        self.threabool.start(self.connection)
+
+
         
         print("Creating Server")
         return("Server")
  
+    def poo(self):
+        print("poo")
 
     def searchForAvialableDevices(self)-> dict:
         pass
