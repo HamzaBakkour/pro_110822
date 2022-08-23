@@ -18,9 +18,19 @@ class searchForServersWorker(QRunnable):
     @Slot()
     def run(self)-> int:
         devicesList = get_connected_devices_name()
+        serverFound = False
         for device in devicesList:
             print("Trying to connect ot {} with IP {}".format(device[0], device[1]))
-            self.searchConnection.connectToServer(device[1], self.serverPort)
+            try:
+                self.searchConnection.connectToServer(device[1], self.serverPort)
+                serverFound = True
+            except:
+                print("searhcForServersWorker connectToServer exceotion occured")
+                pass
+            if (serverFound):
+                self.signal.sendSignal.emit(device)
+                serverFound = False
+        return(1)
 
 
 

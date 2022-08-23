@@ -50,8 +50,11 @@ class mainWindow(QMainWindow):
 
 
     def searchForServers(self):
-        # self.testConntection = 
-        pass
+        self.searchConntection = searchForServersWorker(12345)
+        self.searchConntection.signal.sendSignal.connect(self.poo_2)
+        
+    def poo_2(self, server : list)-> None:
+        print(server)
 
 
 
