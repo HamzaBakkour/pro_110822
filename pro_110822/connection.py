@@ -9,7 +9,7 @@ class mouseAndKeyboardConnection():
     pass
 
 
-  def initSocket(self, socketTimeout: int)-> None:
+  def createSocket(self, socketTimeout: int)-> None:
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)     
     self.s.settimeout(socketTimeout)
     print ("Socket successfully created")
@@ -34,7 +34,7 @@ class mouseAndKeyboardConnection():
     self.s.connect((serverIP, port))#'192.168.0.6'
 
 
-  def getMouseMovement(self)->int:
+  def reciveMouseMovement(self)->int:
     mouse = Controller()
     while (True):
         data = self.s.recv(1024).decode()

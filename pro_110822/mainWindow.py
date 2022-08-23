@@ -45,8 +45,8 @@ class mainWindow(QMainWindow):
         #Starting the main window with the firstOpenView view
         self.mainWindowView = firstOpenView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
-        self.mainWindowView.makeServerButton.clicked.connect(self.makeServer)
-
+        self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
+        # self.searchForServers()
 
 
     def searchForServers(self):
@@ -58,24 +58,24 @@ class mainWindow(QMainWindow):
 
 
 
-    def makeServer(self):
+    def createServer(self):
         self.mainWindowView.remove()
         self.mainWindowView = serverView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
         self.mainWindowView.stopServerButton.clicked.connect(self.closeServer)
 
-        self.connection = listenForConnectionsWorker(12345)
-        self.connection.signal.sendSignal.connect(self.poo)
-        self.threabool.start(self.connection)
+        self.serverConnection = listenForConnectionsWorker(12345)
+        self.serverConnection.signal.sendSignal.connect(self.poo)
+        self.threabool.start(self.serverConnection)
         print("Created Server")
 
 
     def closeServer(self):
-        self.connection.terminate = True
+        self.serverConnection.terminate = True
         self.mainWindowView.remove()
         self.mainWindowView = firstOpenView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
-        self.mainWindowView.makeServerButton.clicked.connect(self.makeServer)
+        self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
     
 
 

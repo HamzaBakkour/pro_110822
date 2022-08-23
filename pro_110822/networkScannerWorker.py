@@ -12,7 +12,7 @@ class searchForServersWorker(QRunnable):
         super(searchForServersWorker, self).__init__()
         self.signal = searchForServersWorkerSignals()
         self.searchConnection = mouseAndKeyboardConnection()
-        self.searchConnection.initSocket(2)
+        self.searchConnection.createSocket(2)
         self.serverPort = port
     
     @Slot()
@@ -20,12 +20,11 @@ class searchForServersWorker(QRunnable):
         devicesList = get_connected_devices_name()
         serverFound = False
         for device in devicesList:
-            print("Trying to connect ot {} with IP {}".format(device[0], device[1]))
             try:
-                self.searchConnection.connectToServer(device[1], self.serverPort)
+                self.searchConnection.connectToServer(device[2][0], self.serverPort)
                 serverFound = True
-            except:
-                print("searhcForServersWorker connectToServer exceotion occured")
+            except OSError:
+                print("OSError in networkScannerWorker")
                 pass
             if (serverFound):
                 self.signal.sendSignal.emit(device)

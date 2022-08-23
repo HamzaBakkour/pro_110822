@@ -24,23 +24,23 @@ class firstOpenView(QtWidgets.QWidget):
 
 
     def setUpperFrame(self):
-        upperFrameLayout = QHBoxLayout()
-        upperFrameLayout.addWidget(QLabel("Available servers"))
+        self.upperFrameLayout = QHBoxLayout()
+        self.upperFrameLayout.addWidget(QLabel("Available servers"))
 
         self.makeServerButton = QPushButton("Make Server")
         self.makeServerButton.setCheckable(True)
         self.refresh = QPushButton("Refresh")
         self.refresh.setCheckable(True)
 
-        upperFrameLayout.addWidget(self.makeServerButton)
-        upperFrameLayout.addWidget(self.refresh)
-        self.layout.addLayout(upperFrameLayout)
+        self.upperFrameLayout.addWidget(self.makeServerButton)
+        self.upperFrameLayout.addWidget(self.refresh)
+        self.layout.addLayout(self.upperFrameLayout)
 
 
 
     def setAvailableServersArea(self):
-        availableServers = scrollPanel()
-        self.layout.addWidget(availableServers)
+        self.availableServers = scrollPanel()
+        self.layout.addWidget(self.availableServers)
 
     def remove(self):
         self.deleteLater()

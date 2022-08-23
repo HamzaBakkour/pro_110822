@@ -26,28 +26,28 @@ class serverView(QtWidgets.QWidget):
 
 
     def setUpperFrame(self):
-        upperFrameLayout = QHBoxLayout()
+        self.upperFrameLayout = QHBoxLayout()
         self.stopServerButton = QPushButton("Stop Server")
-        upperFrameLayout.addWidget(self.stopServerButton)
+        self.upperFrameLayout.addWidget(self.stopServerButton)
 
-        self.layout.addLayout(upperFrameLayout)
+        self.layout.addLayout(self.upperFrameLayout)
 
 
     def serverInfoFram(self):
-        serverFrameLayout = QVBoxLayout()
-        serverFrameLayout.addWidget(QLabel("Server Name : "))
-        serverFrameLayout.addWidget(QLabel("Server IP        : "))
+        self.serverFrameLayout = QVBoxLayout()
+        self.serverFrameLayout.addWidget(QLabel("Server Name : "))
+        self.serverFrameLayout.addWidget(QLabel("Server IP        : "))
 
-        self.layout.addLayout(serverFrameLayout)
+        self.layout.addLayout(self.serverFrameLayout)
   
 
     def connectedDevicesArea(self):
-        connectedDevicesAreaLayout = QVBoxLayout()
-        connectedDevices = scrollPanel()
-        connectedDevicesAreaLayout.addWidget(QLabel("Connected Devices"))
-        connectedDevicesAreaLayout.addWidget(connectedDevices)
+        self.connectedDevicesAreaLayout = QVBoxLayout()
+        self.connectedDevices = scrollPanel()
+        self.connectedDevicesAreaLayout.addWidget(QLabel("Connected Devices"))
+        self.connectedDevicesAreaLayout.addWidget(self.connectedDevices)
 
-        self.layout.addLayout(connectedDevicesAreaLayout)
+        self.layout.addLayout(self.connectedDevicesAreaLayout)
 
     def remove(self):
         self.deleteLater()
