@@ -29,11 +29,11 @@ class firstOpenView(QtWidgets.QWidget):
 
         self.makeServerButton = QPushButton("Make Server")
         self.makeServerButton.setCheckable(True)
-        self.refresh = QPushButton("Refresh")
-        self.refresh.setCheckable(True)
+        self.refreshButton = QPushButton("Refresh")
+        self.refreshButton.setCheckable(True)
 
         self.upperFrameLayout.addWidget(self.makeServerButton)
-        self.upperFrameLayout.addWidget(self.refresh)
+        self.upperFrameLayout.addWidget(self.refreshButton)
         self.layout.addLayout(self.upperFrameLayout)
 
 

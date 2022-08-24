@@ -29,8 +29,6 @@ class searchForServersWorker(QRunnable):
             if (serverFound):
                 self.signal.sendSignal.emit(device)
                 serverFound = False
+        self.searchConnection.terminateSocket()
+        print("searchForServersWorker socket terminated")
         return(1)
-
-
-
-

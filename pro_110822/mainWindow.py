@@ -1,4 +1,5 @@
 from PySide6 import QtCore, QtWidgets
+
 from PySide6.QtCore import QThreadPool
 
 from PySide6.QtWidgets import (
@@ -14,7 +15,6 @@ from PySide6.QtWidgets import (
 
 from PySide6 import QtGui, QtCore, QtWidgets
 
-
 from firstOpenView import firstOpenView
 from serverView import serverView
 from connection import mouseAndKeyboardConnection
@@ -22,7 +22,6 @@ from serverWorkers import listenForConnectionsWorker
 from networkScannerWorker import searchForServersWorker
 
 import sys
-import signal
 import socket
 
 class mainWindow(QMainWindow):
@@ -46,12 +45,14 @@ class mainWindow(QMainWindow):
         self.mainWindowView = firstOpenView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
         self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
+        self.mainWindowView.refreshButton.clicked.connect(self.searchForServers)
         # self.searchForServers()
 
 
     def searchForServers(self):
         self.searchConntection = searchForServersWorker(12345)
         self.searchConntection.signal.sendSignal.connect(self.poo_2)
+        self.threabool.start(self.searchConntection)
         
     def poo_2(self, server : list)-> None:
         print(server)
@@ -83,8 +84,6 @@ class mainWindow(QMainWindow):
         print(socket)
         print(addr)
 
-    # def searchForAvialableServers(self)-> dict:
-    #     pass
 
 app = QApplication([])
 window = mainWindow()
