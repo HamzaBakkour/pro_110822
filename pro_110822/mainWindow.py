@@ -77,6 +77,8 @@ class mainWindow(QMainWindow):
         self.mainWindowView = firstOpenView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
         self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
+        self.mainWindowView.refreshButton.clicked.connect(self.searchForServers)
+
     
 
 

@@ -14,7 +14,7 @@ class listenForConnectionsWorker(QRunnable):
         self.serverPort = port
         self.signal = serverWorkerSignals()
         self.serverConnection = mouseAndKeyboardConnection()
-        self.serverConnection.createSocket(1)
+        self.serverConnection.createSocket(5)
         self.terminate = False
 
     @Slot()
