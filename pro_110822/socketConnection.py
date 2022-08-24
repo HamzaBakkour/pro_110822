@@ -1,9 +1,17 @@
 import socket            
 from pynput.mouse import Listener, Controller
-import re
+
 
 import sys
+import os
 import traceback
+import logging
+import time
+import re
+
+
+# logging.basicConfig(filename=(time.strftime("%Y%m%d-%H%M%S") + os.path.basename(__file__) + '.txt'), level=logging.DEBUG,
+# format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
 
 
 class mouseAndKeyboardConnection():
@@ -32,8 +40,15 @@ class mouseAndKeyboardConnection():
     self.listener =  Listener(on_move = self.on_move, on_click = self.on_click, on_scroll = self.on_scroll)
     self.listener.start()
 
-  def connectToServer(self, serverIP : str, port : int)-> None:         
-    self.s.connect((serverIP, port))#'192.168.0.6'
+  def connectToServer(self, serverIP : str, port : int)-> None:
+    try:     
+      self.s.connect((serverIP, port))#'192.168.0.6'
+    except OSError:
+      part1 = str(sys.exc_info())
+      part2 = traceback.format_exc()
+      origin = re.search(r'File(.*?)\,', part2).group(1) 
+      loggMessage = origin + '\n' + part1  + '\n' + part2
+      logging.info(loggMessage)
 
 
   def reciveMouseMovement(self)->int:
@@ -52,8 +67,11 @@ class mouseAndKeyboardConnection():
                 x = re.search('aa(.*?)bb',data).group(1)
                 y = re.search('bb(.*?)cc',data).group(1)
             except AttributeError:#invaild data will casuse AttributeError
-                print(sys.exc_info())
-                print (traceback.format_exc())   
+                part1 = str(sys.exc_info())
+                part2 = traceback.format_exc()
+                origin = re.search(r'File(.*?)\,', part2).group(1) 
+                loggMessage = origin + '\n' + part1  + '\n' + part2
+                logging.info(loggMessage)
                 continue
         else:
             continue
@@ -86,8 +104,11 @@ class mouseAndKeyboardConnection():
                           #trying to close a connection that does not exist -> AttributeError
                           #occures when try to close the server before any connections are accepted
       # print("terminateSocket exception AttributeError has occured")
-      print(sys.exc_info())
-      print (traceback.format_exc())
+      part1 = str(sys.exc_info())
+      part2 = traceback.format_exc()
+      origin = re.search(r'File(.*?)\,', part2).group(1) 
+      loggMessage = origin + '\n' + part1  + '\n' + part2
+      logging.info(loggMessage)
       pass
     #the socket creation is in the class init
     self.s.close()

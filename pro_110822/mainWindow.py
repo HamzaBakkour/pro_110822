@@ -23,7 +23,16 @@ from searchForServersWorker import searchForServersWorker
 import socket
 
 import sys
-import traceback
+import os
+import logging
+import time
+
+# import pdb
+# pdb.post_mortem()
+
+logging.basicConfig(filename=(time.strftime("%Y%m%d-%H:%M:%S") + os.path.basename(__file__) + '.txt'), level=logging.DEBUG,
+format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
+
 
 class mainWindow(QMainWindow):
 

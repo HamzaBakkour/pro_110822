@@ -3,7 +3,15 @@ from networkScanner import get_connected_devices_name
 from socketConnection import mouseAndKeyboardConnection
 
 import sys
+import os
 import traceback
+import logging
+import time
+import re
+
+
+# logging.basicConfig(filename=(time.strftime("%Y%m%d-%H%M%S") + os.path.basename(__file__) + '.txt'), level=logging.DEBUG,
+# format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
 
 class searchForServersWorkerSignals(QObject):
     sendSignal = Signal(list)
@@ -26,8 +34,11 @@ class searchForServersWorker(QRunnable):
                 self.searchConnection.connectToServer(device[2][0], self.serverPort)
                 serverFound = True
             except ConnectionRefusedError:
-                print(sys.exc_info())
-                print (traceback.format_exc())
+                part1 = str(sys.exc_info())
+                part2 = traceback.format_exc()
+                origin = re.search(r'File(.*?)\,', part2).group(1) 
+                loggMessage = origin + '\n' + part1  + '\n' + part2
+                logging.info(loggMessage)
             if (serverFound):
                 self.signal.sendSignal.emit(device)
                 serverFound = False

@@ -24,8 +24,19 @@ import networkscan
 import ipaddress
 from netaddr import IPNetwork
 
+
 import sys
+import os
 import traceback
+import logging
+import time
+import re
+
+
+# logging.basicConfig(filename=(time.strftime("%Y%m%d-%H%M%S") + os.path.basename(__file__) + '.txt'), level=logging.DEBUG,
+# format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
+
+
 
 def get_host_ip_address()->str:
     """
@@ -74,8 +85,12 @@ def get_host_network_infterfaces_ipv4()->list:
             #Do not use any number if you want to get all the addresses family.
             interfaces_ipv4_addresses.append(netifaces.ifaddresses(interface_id)[2])
         except KeyError:
-            print(sys.exc_info())
-            print (traceback.format_exc())
+            part1 = str(sys.exc_info())
+            part2 = traceback.format_exc()
+            origin = re.search(r'File(.*?)\,', part2).group(1) 
+            loggMessage = origin + '\n' + part1  + '\n' + part2
+            logging.info(loggMessage)
+
     return interfaces_ipv4_addresses
 
 
@@ -164,8 +179,11 @@ def get_connected_devices_name()->list:
         try:
             connected_devices_name__ip.append(socket.gethostbyaddr(device_ip))
         except:
-            print(sys.exc_info())
-            print (traceback.format_exc())
+            part1 = str(sys.exc_info())
+            part2 = traceback.format_exc()
+            origin = re.search(r'File(.*?)\,', part2).group(1) 
+            loggMessage = origin + '\n' + part1  + '\n' + part2
+            logging.info(loggMessage)
 
     return sorted(connected_devices_name__ip)
 
