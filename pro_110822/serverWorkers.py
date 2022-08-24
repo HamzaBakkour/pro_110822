@@ -1,7 +1,7 @@
 # from PySide6.QtCore import *
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
 
-from connection import mouseAndKeyboardConnection
+from socketConnection import mouseAndKeyboardConnection
 
 from time import sleep
 

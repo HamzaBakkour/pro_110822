@@ -1,6 +1,6 @@
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
 from networkScanner import get_connected_devices_name
-from connection import mouseAndKeyboardConnection
+from socketConnection import mouseAndKeyboardConnection
 from time import sleep
 
 

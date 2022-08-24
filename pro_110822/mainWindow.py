@@ -17,9 +17,8 @@ from PySide6 import QtGui, QtCore, QtWidgets
 
 from firstOpenView import firstOpenView
 from serverView import serverView
-from connection import mouseAndKeyboardConnection
 from serverWorkers import listenForConnectionsWorker
-from networkScannerWorker import searchForServersWorker
+from searchForServersWorker import searchForServersWorker
 
 import sys
 import socket
