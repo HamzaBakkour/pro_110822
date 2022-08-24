@@ -3,7 +3,8 @@ from PySide6.QtCore import QRunnable, QObject, Signal, Slot
 
 from socketConnection import mouseAndKeyboardConnection
 
-from time import sleep
+import sys
+import traceback
 
 class serverWorkerSignals(QObject):
     sendSignal = Signal(object, object)
@@ -25,7 +26,8 @@ class listenForConnectionsWorker(QRunnable):
                 seocketConnection, addr = self.serverConnection.acceptConnections()
                 self.signal.sendSignal.emit(seocketConnection, addr)
             except TimeoutError: #Tryed to send data on something that is not a socket
-                # print("Socket TimeoutEroor exception occured")
-                pass
+                print(sys.exc_info())
+                print (traceback.format_exc())
+                
         self.serverConnection.terminateSocket()
         return(1)

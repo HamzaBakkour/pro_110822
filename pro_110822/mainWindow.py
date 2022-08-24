@@ -17,11 +17,13 @@ from PySide6 import QtGui, QtCore, QtWidgets
 
 from firstOpenView import firstOpenView
 from serverView import serverView
-from serverWorkers import listenForConnectionsWorker
+from listenForConnectionsWorker import listenForConnectionsWorker
 from searchForServersWorker import searchForServersWorker
 
-import sys
 import socket
+
+import sys
+import traceback
 
 class mainWindow(QMainWindow):
 

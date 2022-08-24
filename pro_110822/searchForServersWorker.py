@@ -1,8 +1,9 @@
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
 from networkScanner import get_connected_devices_name
 from socketConnection import mouseAndKeyboardConnection
-from time import sleep
 
+import sys
+import traceback
 
 class searchForServersWorkerSignals(QObject):
     sendSignal = Signal(list)
@@ -19,15 +20,14 @@ class searchForServersWorker(QRunnable):
     def run(self)-> int:
         devicesList = get_connected_devices_name()
         serverFound = False
-        print("Deivce list : ", devicesList)
         for device in devicesList:
             try:
-                print("search for server worker trying to connect to {} at ip {} and port {}".format(device[0] , device[2][0], self.serverPort))
+                # print("search for server worker trying to connect to {} at ip {} and port {}".format(device[0] , device[2][0], self.serverPort))
                 self.searchConnection.connectToServer(device[2][0], self.serverPort)
                 serverFound = True
-            except OSError:
-                print("OSError in networkScannerWorker")
-                pass
+            except ConnectionRefusedError:
+                print(sys.exc_info())
+                print (traceback.format_exc())
             if (serverFound):
                 self.signal.sendSignal.emit(device)
                 serverFound = False

@@ -1,7 +1,9 @@
 import socket            
 from pynput.mouse import Listener, Controller
 import re
-import time
+
+import sys
+import traceback
 
 
 class mouseAndKeyboardConnection():
@@ -50,7 +52,8 @@ class mouseAndKeyboardConnection():
                 x = re.search('aa(.*?)bb',data).group(1)
                 y = re.search('bb(.*?)cc',data).group(1)
             except AttributeError:#invaild data will casuse AttributeError
-                print("AttributeError")     
+                print(sys.exc_info())
+                print (traceback.format_exc())   
                 continue
         else:
             continue
@@ -82,7 +85,9 @@ class mouseAndKeyboardConnection():
     except AttributeError:#trying to close c before any connections are acepted
                           #trying to close a connection that does not exist -> AttributeError
                           #occures when try to close the server before any connections are accepted
-      print("terminateSocket exception AttributeError has occured")
+      # print("terminateSocket exception AttributeError has occured")
+      print(sys.exc_info())
+      print (traceback.format_exc())
       pass
     #the socket creation is in the class init
     self.s.close()

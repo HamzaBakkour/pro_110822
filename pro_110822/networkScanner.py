@@ -24,6 +24,9 @@ import networkscan
 import ipaddress
 from netaddr import IPNetwork
 
+import sys
+import traceback
+
 def get_host_ip_address()->str:
     """
     Returns the IP address of the host.
@@ -71,7 +74,8 @@ def get_host_network_infterfaces_ipv4()->list:
             #Do not use any number if you want to get all the addresses family.
             interfaces_ipv4_addresses.append(netifaces.ifaddresses(interface_id)[2])
         except KeyError:
-            pass
+            print(sys.exc_info())
+            print (traceback.format_exc())
     return interfaces_ipv4_addresses
 
 
@@ -160,7 +164,8 @@ def get_connected_devices_name()->list:
         try:
             connected_devices_name__ip.append(socket.gethostbyaddr(device_ip))
         except:
-            print ('could not get the name of : {}\n'.format(device_ip))
+            print(sys.exc_info())
+            print (traceback.format_exc())
 
     return sorted(connected_devices_name__ip)
 
