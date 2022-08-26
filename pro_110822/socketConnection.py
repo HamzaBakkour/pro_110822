@@ -3,15 +3,11 @@ from pynput.mouse import Listener, Controller
 
 
 import sys
-import os
 import traceback
 import logging
-import time
 import re
 
-
-# logging.basicConfig(filename=(time.strftime("%Y%m%d-%H%M%S") + os.path.basename(__file__) + '.txt'), level=logging.DEBUG,
-# format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
+import pdb
 
 
 class mouseAndKeyboardConnection():
@@ -20,19 +16,39 @@ class mouseAndKeyboardConnection():
 
 
   def createSocket(self, socketTimeout: int)-> None:
-    self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)     
-    self.s.settimeout(socketTimeout)
-    print ("Socket successfully created")
+    try:
+      self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)     
+      self.s.settimeout(socketTimeout)
+      self.c = socket.socket()
+      print ("Socket successfully created")
+    except:
+      part1 = str(sys.exc_info())
+      part2 = traceback.format_exc()
+      origin = re.search(r'File(.*?)\,', part2).group(1) 
+      loggMessage = origin + '\n' + part1  + '\n' + part2
+      logging.info(loggMessage)
 
 
   def listenForConnections(self, port : int):
-    self.s.bind(('', port))        
-    self.s.listen(5)    
-    print ("socket is listening")
+    try:
+      if (self.isPortInUse(12345)):
+        print ("port is not availabel")
+      else:
+        self.s.bind(('', port))        
+        self.s.listen(5)    
+        print ("port availabel socket is listening")
 
+      
+    except:
+      part1 = str(sys.exc_info())
+      part2 = traceback.format_exc()
+      origin = re.search(r'File(.*?)\,', part2).group(1) 
+      loggMessage = origin + '\n' + part1  + '\n' + part2
+      logging.info(loggMessage)
 
   def acceptConnections(self)-> None:
     self.c, addr = self.s.accept()
+    # pdb.set_trace()
     return self.c, addr 
 
 
@@ -44,11 +60,13 @@ class mouseAndKeyboardConnection():
     try:     
       self.s.connect((serverIP, port))#'192.168.0.6'
     except OSError:
-      part1 = str(sys.exc_info())
-      part2 = traceback.format_exc()
-      origin = re.search(r'File(.*?)\,', part2).group(1) 
-      loggMessage = origin + '\n' + part1  + '\n' + part2
-      logging.info(loggMessage)
+      print ("Connection refuesd at {}:{}".format(serverIP, port))
+      # part1 = str(sys.exc_info())
+      # part2 = traceback.format_exc()
+      # origin = re.search(r'File(.*?)\,', part2).group(1) 
+      # loggMessage = origin + '\n' + part1  + '\n' + part2
+      # logging.info(loggMessage)
+      pass
 
 
   def reciveMouseMovement(self)->int:
@@ -98,25 +116,36 @@ class mouseAndKeyboardConnection():
 
   def terminateSocket(self):
     try:
-      self.c.shutdown(socket.SHUT_RDWR)
-      self.c.close()
-    except AttributeError:#trying to close c before any connections are acepted
-                          #trying to close a connection that does not exist -> AttributeError
-                          #occures when try to close the server before any connections are accepted
-      # print("terminateSocket exception AttributeError has occured")
-      part1 = str(sys.exc_info())
-      part2 = traceback.format_exc()
-      origin = re.search(r'File(.*?)\,', part2).group(1) 
-      loggMessage = origin + '\n' + part1  + '\n' + part2
-      logging.info(loggMessage)
-      pass
-    #the socket creation is in the class init
-    self.s.close()
-    print("Socket terminated")
+      if(self.stillConnected()):
+        self.c.shutdown(socket.SHUT_RDWR)
+        self.c.close()
+        self.s.close()
+        print("Connected Socket terminated")
+    except :#trying to close c before any connections are acepted
+                          # trying to close a connection that does not exist -> AttributeError
+                          # occures when try to close the server before any connections are accepted
+                          # part1 = str(sys.exc_info())
+        part1 = str(sys.exc_info())
+        part2 = traceback.format_exc()
+        origin = re.search(r'File(.*?)\,', part2).group(1) 
+        loggMessage = origin + '\n' + part1  + '\n' + part2
+        logging.info(loggMessage)
+      
+    print("Not Connected Socket terminated")
     
 
 
 
+  def stillConnected(self)-> bool:
+    try:
+      self.c.sendall(b"bing")
+      return True
+    except:
+      return False
+
+  def isPortInUse(self, port: int)-> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
 
 # server = mouseAndKeyboardConnection()
 # server.listenForConnections(12345)

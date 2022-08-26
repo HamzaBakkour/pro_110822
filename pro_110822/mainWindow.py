@@ -29,8 +29,10 @@ import time
 
 # import pdb
 # pdb.post_mortem()
+# pdb.set_trace()
 
-logging.basicConfig(filename=(time.strftime("%Y%m%d-%H:%M:%S") + os.path.basename(__file__) + '.txt'), level=logging.DEBUG,
+
+logging.basicConfig(filename=(time.strftime("%Y%m%d---%H_%M_%S") + '.txt'), level=logging.DEBUG,
 format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
 
 
@@ -56,16 +58,17 @@ class mainWindow(QMainWindow):
         self.mainWidget.layout.addWidget(self.mainWindowView)
         self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
         self.mainWindowView.refreshButton.clicked.connect(self.searchForServers)
-        # self.searchForServers()
 
 
     def searchForServers(self):
         self.searchConntection = searchForServersWorker(12345)
+        # self.searchConntection = listenForConnectionsWorker(12345)
+
         self.searchConntection.signal.sendSignal.connect(self.poo_2)
         self.threabool.start(self.searchConntection)
         
     def poo_2(self, server : list)-> None:
-        print(server)
+        print("Found server", server)
 
 
 
@@ -100,4 +103,4 @@ class mainWindow(QMainWindow):
 app = QApplication([])
 window = mainWindow()
 window.show()
-sys.exit(app.exec_())
+sys.exit(app.exec())

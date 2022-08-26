@@ -33,9 +33,6 @@ import time
 import re
 
 
-# logging.basicConfig(filename=(time.strftime("%Y%m%d-%H%M%S") + os.path.basename(__file__) + '.txt'), level=logging.DEBUG,
-# format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
-
 
 
 def get_host_ip_address()->str:
@@ -83,7 +80,10 @@ def get_host_network_infterfaces_ipv4()->list:
             #the interface has an IPv4 address. Hence the try except KeyError.
             #Use [23] insted of [2] if you want IPv6 address.
             #Do not use any number if you want to get all the addresses family.
-            interfaces_ipv4_addresses.append(netifaces.ifaddresses(interface_id)[2])
+            if (2 in netifaces.ifaddresses(interface_id).keys()):
+                interfaces_ipv4_addresses.append(netifaces.ifaddresses(interface_id)[2])
+            else:
+                continue
         except KeyError:
             part1 = str(sys.exc_info())
             part2 = traceback.format_exc()
@@ -192,3 +192,4 @@ def get_connected_devices_name()->list:
 # print(get_ip_of_connected_devices_on_host_network())
 # print(get_connected_devices_name())
 
+x = get_host_network_infterfaces_ipv4()

@@ -35,11 +35,14 @@ class listenForConnectionsWorker(QRunnable):
                 seocketConnection, addr = self.serverConnection.acceptConnections()
                 self.signal.sendSignal.emit(seocketConnection, addr)
             except TimeoutError: #Tryed to send data on something that is not a socket
-                part1 = str(sys.exc_info())
-                part2 = traceback.format_exc()
-                origin = re.search(r'File(.*?)\,', part2).group(1) 
-                loggMessage = origin + '\n' + part1  + '\n' + part2
-                logging.info(loggMessage)
-
+                # part1 = str(sys.exc_info())
+                # part2 = traceback.format_exc()
+                # origin = re.search(r'File(.*?)\,', part2).group(1) 
+                # loggMessage = origin + '\n' + part1  + '\n' + part2
+                # logging.info(loggMessage)
+                pass
+        
+        print("listenForConnectionsWorker terminated")
         self.serverConnection.terminateSocket()
+        print("listenForConnectionsWorker returned")
         return(1)
