@@ -25,12 +25,10 @@ class searchForServersWorker(QRunnable):
     
     @Slot()
     def run(self)-> int:
-        # pdb.set_trace()
-        
+        print("Searching for servers.")
         serverFound = False
         for device in self.devicesList:
             try:
-                # print("search for server worker trying to connect to {} at ip {} and port {}".format(device[0] , device[2][0], self.serverPort))
                 self.searchForServerConnection.connectToServer(device[2][0], self.serverPort)
                 serverFound = True
             except ConnectionRefusedError:
@@ -44,5 +42,5 @@ class searchForServersWorker(QRunnable):
                 serverFound = False
         self.searchForServerConnection.terminateSocket()
 
-        print("searchForServersWorker socket terminatedxx")
+        print("Searching for servers ended.")
         return(1)

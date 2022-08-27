@@ -19,6 +19,7 @@ from firstOpenView import firstOpenView
 from serverView import serverView
 from listenForConnectionsWorker import listenForConnectionsWorker
 from searchForServersWorker import searchForServersWorker
+from progressBar import progressBar
 
 import socket
 
@@ -46,7 +47,7 @@ class mainWindow(QMainWindow):
 
         #Set the main window widget
         self.mainWidget = QtWidgets.QWidget()
-        self.mainWidget.layout = QVBoxLayout()
+        self.mainWidget.layout = QGridLayout()
         self.mainWidget.setLayout(self.mainWidget.layout)
         self.setCentralWidget(self.mainWidget)
 
@@ -59,45 +60,52 @@ class mainWindow(QMainWindow):
         self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
         self.mainWindowView.refreshButton.clicked.connect(self.searchForServers)
 
+        #Set the progress bar
+        self.pbarWidget = progressBar()
+        self.mainWidget.layout.addWidget(self.pbarWidget)
+
 
     def searchForServers(self):
         self.searchConntection = searchForServersWorker(12345)
-        # self.searchConntection = listenForConnectionsWorker(12345)
-
         self.searchConntection.signal.sendSignal.connect(self.poo_2)
         self.threabool.start(self.searchConntection)
         
-    def poo_2(self, server : list)-> None:
-        print("Found server", server)
 
+    def poo_2(self, server : list)-> None:
+        print("Search for server got respond from: ", server[2])
 
 
     def createServer(self):
         self.mainWindowView.remove()
+        self.pbarWidget.remove()
         self.mainWindowView = serverView()
+        self.pbarWidget = progressBar()
         self.mainWidget.layout.addWidget(self.mainWindowView)
+        self.mainWidget.layout.addWidget(self.pbarWidget)
         self.mainWindowView.stopServerButton.clicked.connect(self.closeServer)
-
         self.serverConnection = listenForConnectionsWorker(12345)
         self.serverConnection.signal.sendSignal.connect(self.poo)
         self.threabool.start(self.serverConnection)
-        print("Created Server")
+
+
+    def poo(self, socket: socket.socket, addr: tuple):
+        print("Server recived connection request from")
+        print(addr)
 
 
     def closeServer(self):
         self.serverConnection.terminate = True
         self.mainWindowView.remove()
+        self.pbarWidget.remove()
         self.mainWindowView = firstOpenView()
+        self.pbarWidget = progressBar()
         self.mainWidget.layout.addWidget(self.mainWindowView)
+        self.mainWidget.layout.addWidget(self.pbarWidget)
         self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
         self.mainWindowView.refreshButton.clicked.connect(self.searchForServers)
 
     
 
-
-    def poo(self, socket: socket.socket, addr: tuple):
-        print(socket)
-        print(addr)
 
 
 app = QApplication([])

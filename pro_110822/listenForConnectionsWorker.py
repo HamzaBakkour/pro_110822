@@ -1,6 +1,5 @@
 # from PySide6.QtCore import *
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
-
 from socketConnection import mouseAndKeyboardConnection
 
 import sys
@@ -26,9 +25,11 @@ class listenForConnectionsWorker(QRunnable):
         self.serverConnection = mouseAndKeyboardConnection()
         self.serverConnection.createSocket(5)
         self.terminate = False
+        print("Server created.")
 
     @Slot()
     def run(self)-> int:
+        print("Server listning for connection")
         self.serverConnection.listenForConnections(self.serverPort)
         while(self.terminate == False):
             try:
@@ -42,7 +43,6 @@ class listenForConnectionsWorker(QRunnable):
                 # logging.info(loggMessage)
                 pass
         
-        print("listenForConnectionsWorker terminated")
         self.serverConnection.terminateSocket()
-        print("listenForConnectionsWorker returned")
+        print("Server terminated")
         return(1)
