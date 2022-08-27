@@ -67,22 +67,12 @@ class mainWindow(QMainWindow):
 
 
     def searchForServers(self):
-        self.connectedDeives = getConnectedDevicesInfoWorker()
-        self.connectedDeives.signal.sendSignal.connect(self.poo_2)
-        self.threabool.start(self.connectedDeives)
-
-
-
-        
-
-    def poo_2(self, devices : list)-> None:
-        self.searchConntection = searchForServersWorker(12345, devices)
-        self.searchConntection.signal.sendSignal.connect(self.poo_3)
+        self.searchConntection = searchForServersWorker(12345)
+        self.searchConntection.signal.sendSignal.connect(self.poo_2)
         self.threabool.start(self.searchConntection)
 
-    def poo_3(self, device : list)-> None:
-        print("******Deives : ", device)
-        pass
+    def poo_2(self, device : list)-> None:
+        print("emoted from searchForServers : ", device)
 
     def createServer(self):
         self.mainWindowView.remove()

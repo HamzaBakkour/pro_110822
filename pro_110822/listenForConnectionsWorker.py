@@ -10,8 +10,6 @@ import time
 import re
 
 
-# logging.basicConfig(filename=(time.strftime("%Y%m%d-%H%M%S") + os.path.basename(__file__) + '.txt'), level=logging.DEBUG,
-# format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
 
 
 class serverWorkerSignals(QObject):

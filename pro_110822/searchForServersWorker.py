@@ -1,5 +1,6 @@
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
 from socketConnection import mouseAndKeyboardConnection
+from networkScannerCls import netWrokScanner
 
 import sys
 import os
@@ -14,13 +15,14 @@ class searchForServersWorkerSignals(QObject):
     sendSignal = Signal(object)
 
 class searchForServersWorker(QRunnable):
-    def __init__(self, port: int, servers : list)-> None:
+    def __init__(self, port: int)-> None:
         super(searchForServersWorker, self).__init__()
         self.signal = searchForServersWorkerSignals()
         self.searchForServerConnection = mouseAndKeyboardConnection()
         self.searchForServerConnection.createSocket(5)
         self.serverPort = port
-        self.devicesList = servers
+        scan = netWrokScanner()
+        self.devicesList = scan.get_local_address_from_arp()
     
     @Slot()
     def run(self)-> int:
@@ -28,7 +30,7 @@ class searchForServersWorker(QRunnable):
         serverFound = False
         for device in self.devicesList:
             try:
-                self.searchForServerConnection.connectToServer(device[2][0], self.serverPort)
+                self.searchForServerConnection.connectToServer(device, self.serverPort)
                 serverFound = True
             except ConnectionRefusedError:
                 part1 = str(sys.exc_info())

@@ -176,6 +176,6 @@ class netWrokScanner():
 
 
 
-x = netWrokScanner()
-r = x.get_local_address_from_arp()
-print(r)
+# x = netWrokScanner()
+# r = x.get_local_address_from_arp()
+# print(r)
