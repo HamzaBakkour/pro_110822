@@ -19,6 +19,7 @@ from firstOpenView import firstOpenView
 from serverView import serverView
 from listenForConnectionsWorker import listenForConnectionsWorker
 from searchForServersWorker import searchForServersWorker
+from getConnectedDevicesInfoWorker import getConnectedDevicesInfoWorker
 from progressBar import progressBar
 
 import socket
@@ -66,14 +67,22 @@ class mainWindow(QMainWindow):
 
 
     def searchForServers(self):
-        self.searchConntection = searchForServersWorker(12345)
-        self.searchConntection.signal.sendSignal.connect(self.poo_2)
-        self.threabool.start(self.searchConntection)
+        self.connectedDeives = getConnectedDevicesInfoWorker()
+        self.connectedDeives.signal.sendSignal.connect(self.poo_2)
+        self.threabool.start(self.connectedDeives)
+
+
+
         
 
-    def poo_2(self, server : list)-> None:
-        print("Search for server got respond from: ", server[2])
+    def poo_2(self, devices : list)-> None:
+        self.searchConntection = searchForServersWorker(12345, devices)
+        self.searchConntection.signal.sendSignal.connect(self.poo_3)
+        self.threabool.start(self.searchConntection)
 
+    def poo_3(self, device : list)-> None:
+        print("******Deives : ", device)
+        pass
 
     def createServer(self):
         self.mainWindowView.remove()

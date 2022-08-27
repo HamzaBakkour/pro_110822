@@ -1,5 +1,4 @@
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
-from networkScanner import get_connected_devices_name
 from socketConnection import mouseAndKeyboardConnection
 
 import sys
@@ -15,13 +14,13 @@ class searchForServersWorkerSignals(QObject):
     sendSignal = Signal(object)
 
 class searchForServersWorker(QRunnable):
-    def __init__(self, port: int)-> None:
+    def __init__(self, port: int, servers : list)-> None:
         super(searchForServersWorker, self).__init__()
         self.signal = searchForServersWorkerSignals()
         self.searchForServerConnection = mouseAndKeyboardConnection()
         self.searchForServerConnection.createSocket(5)
         self.serverPort = port
-        self.devicesList = get_connected_devices_name()
+        self.devicesList = servers
     
     @Slot()
     def run(self)-> int:
