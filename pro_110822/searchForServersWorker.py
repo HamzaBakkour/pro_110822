@@ -10,13 +10,14 @@ import time
 import re
 
 import pdb
-
+# pdb.set_trace()
 class searchForServersWorkerSignals(QObject):
     connectionOkSignal = Signal(object, object, object)
     pbarSignal = Signal(object, object)
 
 class searchForServersWorker(QRunnable):
     def __init__(self, port: int)-> None:
+        
         super(searchForServersWorker, self).__init__()
         self.signal = searchForServersWorkerSignals()
         self.searchForServerConnection = mouseAndKeyboardConnection()
@@ -24,11 +25,9 @@ class searchForServersWorker(QRunnable):
         self.serverPort = port
         self.scan = netWrokScanner()
 
-
-            
-    
     @Slot()
     def run(self)-> int:
+        # pdb.set_trace()
         devicesList = self.scan.get_local_address_from_arp()
         devicesName = self.scan.get_connected_devices_name()
 
@@ -42,9 +41,6 @@ class searchForServersWorker(QRunnable):
             loggMessage = origin + '\n' + part1  + '\n' + part2
             logging.info(loggMessage)
             exit(-1)
-
-        
-        
 
         for device_IP in devicesList:
             try:

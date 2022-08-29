@@ -96,9 +96,14 @@
 
 
 *************************************************
-Things to print:
-    [Refresh]:
-        (15)Looking for servers
-        ()  Every IP/90 -> (%)
-        Try every IP and add (%) to the bar
+What do we have,
+    a socket connection to a server.
+
+What does that mean,
+    we have successfully established a connection to the server.
+    
+What do we want to do now,
+    Tell the user that we are connected.
+    Start sending mouse data.
+
 *************************************************

@@ -21,6 +21,7 @@ from listenForConnectionsWorker import listenForConnectionsWorker
 from searchForServersWorker import searchForServersWorker
 from progressBar import progressBar
 from deviceWidget import device
+from reciveMouseMovementWorker import reciveMouseMovementWorker
 
 import socket
 
@@ -69,6 +70,9 @@ class mainWindow(QMainWindow):
         self.mainWidget.layout.addWidget(self.pbarWidget)
         self.pbarValue = 0
 
+        #############
+        self.recivemouseMovementWorkers = []
+
 
     def searchForServers(self):
         self.reseatPbar()
@@ -88,8 +92,17 @@ class mainWindow(QMainWindow):
         self.mainWindowView.addDeivce(self.serverDevice1)
         self.serverDevice1.connectToServer.clicked.connect(lambda: self.establishConnectionToServer(serverIP, serverPort))
 
-    def establishConnectionToServer(self, servrIP, serverPort):
-        print("test", servrIP, serverPort)
+
+
+
+
+    def establishConnectionToServer(self ,serverIP: str, serverPort: int):
+        self.recivemouseMovementWorkers.append(reciveMouseMovementWorker(serverIP, serverPort))
+        self.threabool.start(self.recivemouseMovementWorkers[-1])
+
+
+
+
 
 
     def updatePbar(self, value, text):
@@ -117,7 +130,7 @@ class mainWindow(QMainWindow):
         self.mainWidget.layout.addWidget(self.pbarWidget)
         self.mainWindowView.stopServerButton.clicked.connect(self.closeServer)
         self.serverConnection = listenForConnectionsWorker(12345)
-        self.serverConnection.signal.sendSignal.connect(self.poo)
+        self.serverConnection.signal.recivedConnection.connect(self.poo)
         self.threabool.start(self.serverConnection)
 
 

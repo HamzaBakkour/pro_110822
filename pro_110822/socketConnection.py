@@ -37,8 +37,6 @@ class mouseAndKeyboardConnection():
         self.s.bind(('', port))        
         self.s.listen(5)    
         print ("port availabel socket is listening")
-
-      
     except:
       part1 = str(sys.exc_info())
       part2 = traceback.format_exc()

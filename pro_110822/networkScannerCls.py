@@ -157,7 +157,6 @@ class netWrokScanner():
 
 
     def get_connected_devices_name(self)->list:
-        
         connected_devices_ip = self.get_ip_of_connected_devices_on_host_network()
         connected_devices_name__ip = []
         for device_ip in connected_devices_ip:
@@ -168,11 +167,17 @@ class netWrokScanner():
                 part2 = traceback.format_exc()
                 origin = re.search(r'File(.*?)\,', part2).group(1) 
                 loggMessage = origin + '\n' + part1  + '\n' + part2
-                logging.info(loggMessage)
+                print("***********************************************")
+                print("This was supposed to be a log message")
+                print("It creates a dummy,")
+                print("Message is: ")
+                print(loggMessage)
+                print("***********************************************")
+                # logging.info(loggMessage)
 
         return sorted(connected_devices_name__ip)
 
 
 
-x = netWrokScanner()
-print(x.get_connected_devices_name())
+# x = netWrokScanner()
+# print(x.get_connected_devices_name())

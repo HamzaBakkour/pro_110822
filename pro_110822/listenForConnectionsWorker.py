@@ -13,7 +13,7 @@ import re
 
 
 class serverWorkerSignals(QObject):
-    sendSignal = Signal(object, object)
+    recivedConnection = Signal(object, object)
 
 class listenForConnectionsWorker(QRunnable):
     def __init__(self, port: int)-> None:
@@ -32,7 +32,7 @@ class listenForConnectionsWorker(QRunnable):
         while(self.terminate == False):
             try:
                 seocketConnection, addr = self.serverConnection.acceptConnections()
-                self.signal.sendSignal.emit(seocketConnection, addr)
+                self.signal.recivedConnection.emit(seocketConnection, addr)
             except TimeoutError: #Tryed to send data on something that is not a socket
                 # part1 = str(sys.exc_info())
                 # part2 = traceback.format_exc()
