@@ -20,6 +20,7 @@ from serverView import serverView
 from listenForConnectionsWorker import listenForConnectionsWorker
 from searchForServersWorker import searchForServersWorker
 from progressBar import progressBar
+from deviceWidget import device
 
 import socket
 
@@ -71,19 +72,24 @@ class mainWindow(QMainWindow):
 
     def searchForServers(self):
         self.reseatPbar()
+        self.reseatAvaialbleServersArea()
+
+
         self.updatePbar(15, "Searching for servers.")
         self.searchConntection = searchForServersWorker(12345)
-        self.searchConntection.signal.connectionOkSignal.connect(self.establishConnectionToServer)
+        self.searchConntection.signal.connectionOkSignal.connect(self.addServerToServersArea)
         self.searchConntection.signal.pbarSignal.connect(self.updatePbar)
         self.threabool.start(self.searchConntection)
 
-        
 
-        
+    def addServerToServersArea(self, serverName : str, serverIP: str, serverPort: int)-> None:
+        print("emited from searchForServers : ", serverName, serverIP)
+        self.serverDevice1 = device(serverName, serverIP)
+        self.mainWindowView.addDeivce(self.serverDevice1)
+        self.serverDevice1.connectToServer.clicked.connect(lambda: self.establishConnectionToServer(serverIP, serverPort))
 
-    def establishConnectionToServer(self, server : str, port: int)-> None:
-        print("emoted from searchForServers : ", server, port)
-        pass
+    def establishConnectionToServer(self, servrIP, serverPort):
+        print("test", servrIP, serverPort)
 
 
     def updatePbar(self, value, text):
@@ -95,6 +101,8 @@ class mainWindow(QMainWindow):
             self.pbarWidget.Value(self.pbarValue)
             self.pbarWidget.Text(text)
 
+    def reseatAvaialbleServersArea(self):
+        self.mainWindowView.availableServers.reseat()
 
     def reseatPbar(self):
         self.pbarValue = 0

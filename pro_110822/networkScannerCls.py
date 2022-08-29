@@ -147,7 +147,7 @@ class netWrokScanner():
 
     def get_ip_of_connected_devices_on_host_network(self)->list:
         host_network_info = self.get_host_network_info()
-        available_ip_addresses_on_host_network = self.get_available_ip_addresses_on_host_network()
+        available_ip_addresses_on_host_network = self.get_local_address_from_arp()
 
         ip_of_connected_devices = []
         for ip_address in available_ip_addresses_on_host_network:
@@ -174,4 +174,5 @@ class netWrokScanner():
 
 
 
-
+x = netWrokScanner()
+print(x.get_connected_devices_name())

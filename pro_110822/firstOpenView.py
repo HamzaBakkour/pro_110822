@@ -44,5 +44,10 @@ class firstOpenView(QtWidgets.QWidget):
         self.availableServers = scrollPanel()
         self.layout.addWidget(self.availableServers)
 
+    def addDeivce(self, device: QtWidgets.QWidget):
+        self.availableServers.addDevice(device)
+        pass
+
+
     def remove(self):
         self.deleteLater()

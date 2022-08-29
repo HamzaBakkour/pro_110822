@@ -57,7 +57,7 @@ class mouseAndKeyboardConnection():
     self.listener.start()
 
   def connectToServer(self, serverIP : str, port : int)-> None:
-    try:     
+    try:
       self.s.connect((serverIP, port))#'192.168.0.6'
     except:
       # print ("Connection refuesd at {}:{}".format(serverIP, port))
