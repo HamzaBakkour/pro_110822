@@ -96,10 +96,9 @@
 
 
 *************************************************
-searchForServers()
-get list of available ip addresses
-check if server exist on each one of them
-return a list of dict
-    addr : server ip 
-    name : PC name
+Things to print:
+    [Refresh]:
+        (15)Looking for servers
+        ()  Every IP/90 -> (%)
+        Try every IP and add (%) to the bar
 *************************************************

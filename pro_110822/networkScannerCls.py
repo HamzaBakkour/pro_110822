@@ -159,7 +159,6 @@ class netWrokScanner():
     def get_connected_devices_name(self)->list:
         
         connected_devices_ip = self.get_ip_of_connected_devices_on_host_network()
-        # connected_devices_ip = ["asd", "2134"]
         connected_devices_name__ip = []
         for device_ip in connected_devices_ip:
             try:
@@ -176,6 +175,3 @@ class netWrokScanner():
 
 
 
-# x = netWrokScanner()
-# r = x.get_local_address_from_arp()
-# print(r)

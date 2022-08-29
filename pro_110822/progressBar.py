@@ -17,18 +17,22 @@ class progressBar(QtWidgets.QWidget):
     def __init__(self):        
         super(progressBar, self).__init__()
         self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(10,0,10,0)
+        # self.layout.setSpacing(0)
 
 
-        self.setFixedSize(600, 38)
+        self.setFixedSize(600, 20)
 
         self.pbar = QProgressBar(self)
         self.pbar.setAlignment(QtCore.Qt.AlignCenter)
         self.pbar.setFormat("")
-        self.pbar.setValue(20)
+        self.pbar.setValue(0)
+        self.pbar.setGeometry(0,0,20,30)
 
 
-        self.txt = QLabel("asdasdasd asasdasdasdasdasddasdas asda sdasd asd asd as d")
-        # self.txt = QLabel("")
+        # self.txt = QLabel("asdasdasd asasdasdasdasdasddasdas asda sdasd asd asd as d")
+        self.txt = QLabel("")
+        self.txt.setGeometry(0,0,400,20)
 
 
         self.layout.addWidget(self.pbar)
@@ -38,15 +42,16 @@ class progressBar(QtWidgets.QWidget):
 
         self.setLayout(self.layout)
 
-    def pbarValue(self, value: int)-> None:
+    def Value(self, value: int)-> None:
         self.pbar.setValue(value)
 
-    def pbarText(self, text: str)-> None:
+    def Text(self, text: str)-> None:
         self.txt.setText(text)
+        self.txt.adjustSize()
 
-    def pbarReseat(self):
+    def Reseat(self):
         self.pbar.setValue(0)
-        self.txt.setText('')
+        self.txt.setText(' ')
 
     def remove(self):
         self.deleteLater()

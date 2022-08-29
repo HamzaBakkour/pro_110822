@@ -18,6 +18,8 @@ class serverView(QtWidgets.QWidget):
     def __init__(self):        
         super(serverView, self).__init__()
         self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(10,30,10,0)
+        self.layout.setSpacing(0)
         self.setLayout(self.layout)
         self.setUpperFrame()
         self.serverInfoFram()

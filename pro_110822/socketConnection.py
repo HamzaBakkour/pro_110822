@@ -60,7 +60,7 @@ class mouseAndKeyboardConnection():
     try:     
       self.s.connect((serverIP, port))#'192.168.0.6'
     except OSError:
-      print ("Connection refuesd at {}:{}".format(serverIP, port))
+      # print ("Connection refuesd at {}:{}".format(serverIP, port))
       # part1 = str(sys.exc_info())
       # part2 = traceback.format_exc()
       # origin = re.search(r'File(.*?)\,', part2).group(1) 

@@ -19,7 +19,6 @@ from firstOpenView import firstOpenView
 from serverView import serverView
 from listenForConnectionsWorker import listenForConnectionsWorker
 from searchForServersWorker import searchForServersWorker
-from getConnectedDevicesInfoWorker import getConnectedDevicesInfoWorker
 from progressBar import progressBar
 
 import socket
@@ -49,6 +48,9 @@ class mainWindow(QMainWindow):
         #Set the main window widget
         self.mainWidget = QtWidgets.QWidget()
         self.mainWidget.layout = QGridLayout()
+        self.mainWidget.layout.setContentsMargins(0,0,0,0)
+        self.mainWidget.layout.setSpacing(0)
+
         self.mainWidget.setLayout(self.mainWidget.layout)
         self.setCentralWidget(self.mainWidget)
 
@@ -64,15 +66,39 @@ class mainWindow(QMainWindow):
         #Set the progress bar
         self.pbarWidget = progressBar()
         self.mainWidget.layout.addWidget(self.pbarWidget)
+        self.pbarValue = 0
 
 
     def searchForServers(self):
+        self.reseatPbar()
+        self.updatePbar(15, "Searching for servers.")
         self.searchConntection = searchForServersWorker(12345)
         self.searchConntection.signal.sendSignal.connect(self.poo_2)
+        self.searchConntection.signal.pbarSignal.connect(self.updatePbar)
         self.threabool.start(self.searchConntection)
 
+        
+
+        
+
     def poo_2(self, device : list)-> None:
-        print("emoted from searchForServers : ", device)
+        # print("emoted from searchForServers : ", device)
+        pass
+
+
+    def updatePbar(self, value, text):
+        print(text)
+        if (value == 999):
+            self.reseatPbar()
+        else:
+            self.pbarValue = self.pbarValue + value
+            self.pbarWidget.Value(self.pbarValue)
+            self.pbarWidget.Text(text)
+
+
+    def reseatPbar(self):
+        self.pbarValue = 0
+        self.pbarWidget.Reseat()
 
     def createServer(self):
         self.mainWindowView.remove()
