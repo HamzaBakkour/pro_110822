@@ -52,21 +52,22 @@ class mouseAndKeyboardConnection():
     return self.c, addr 
 
 
-  def sendMouseMovement(self)->None:
+  def sendMouseMovement(self)->bool:
     self.listener =  Listener(on_move = self.on_move, on_click = self.on_click, on_scroll = self.on_scroll)
     self.listener.start()
 
   def connectToServer(self, serverIP : str, port : int)-> None:
     try:     
       self.s.connect((serverIP, port))#'192.168.0.6'
-    except OSError:
+    except:
       # print ("Connection refuesd at {}:{}".format(serverIP, port))
       # part1 = str(sys.exc_info())
       # part2 = traceback.format_exc()
       # origin = re.search(r'File(.*?)\,', part2).group(1) 
       # loggMessage = origin + '\n' + part1  + '\n' + part2
       # logging.info(loggMessage)
-      pass
+      return False
+    return True
 
 
   def reciveMouseMovement(self)->int:

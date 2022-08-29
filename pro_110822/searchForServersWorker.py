@@ -12,7 +12,7 @@ import re
 import pdb
 
 class searchForServersWorkerSignals(QObject):
-    sendSignal = Signal(object)
+    connectionOkSignal = Signal(object, object)
     pbarSignal = Signal(object, object)
 
 class searchForServersWorker(QRunnable):
@@ -34,25 +34,28 @@ class searchForServersWorker(QRunnable):
             self.progressValue = 85/len(self.devicesList)
             self.signal.pbarSignal.emit(0, ('Found ' + str(len(self.devicesList)) + ' device/s'))
         except ZeroDivisionError:
-            print("searchForServersWorkerSignals, self.devicesList is zero, self.progressValue = 85/len(self.devicesList)")
-            exit(0)
+            part1 = str(sys.exc_info())
+            part2 = traceback.format_exc()
+            origin = re.search(r'File(.*?)\,', part2).group(1) 
+            loggMessage = origin + '\n' + part1  + '\n' + part2
+            logging.info(loggMessage)
+            exit(-1)
 
-        connectionOK = False
         for device in self.devicesList:
             try:
-                self.signal.pbarSignal.emit(self.progressValue, ('Trying ' + device))
-                self.searchForServerConnection.connectToServer(device, self.serverPort)
-                connectionOK = True
-            except ConnectionRefusedError:
+                self.signal.pbarSignal.emit(self.progressValue, ('Trying ' + device + ':' + str(self.serverPort)))
+                if(self.searchForServerConnection.connectToServer(device, self.serverPort)):
+                    self.signal.pbarSignal.emit(0, (device + ':' + str(self.serverPort) +' connection OK!.'))
+                    self.signal.connectionOkSignal.emit(device, self.serverPort)
+                else:
+                    self.signal.pbarSignal.emit(0, (device + ':' + str(self.serverPort) +' connection refused!.'))
+            except :
                 part1 = str(sys.exc_info())
                 part2 = traceback.format_exc()
                 origin = re.search(r'File(.*?)\,', part2).group(1) 
                 loggMessage = origin + '\n' + part1  + '\n' + part2
                 logging.info(loggMessage)
-            if (connectionOK):
-                self.signal.pbarSignal.emit(0, (device + ' connection OK!.'))
-                self.signal.sendSignal.emit(device)
-                connectionOK = False
+
         self.searchForServerConnection.terminateSocket()
         self.signal.pbarSignal.emit(999, ' ')
 

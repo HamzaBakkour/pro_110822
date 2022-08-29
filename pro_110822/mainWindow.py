@@ -73,7 +73,7 @@ class mainWindow(QMainWindow):
         self.reseatPbar()
         self.updatePbar(15, "Searching for servers.")
         self.searchConntection = searchForServersWorker(12345)
-        self.searchConntection.signal.sendSignal.connect(self.poo_2)
+        self.searchConntection.signal.connectionOkSignal.connect(self.establishConnectionToServer)
         self.searchConntection.signal.pbarSignal.connect(self.updatePbar)
         self.threabool.start(self.searchConntection)
 
@@ -81,8 +81,8 @@ class mainWindow(QMainWindow):
 
         
 
-    def poo_2(self, device : list)-> None:
-        # print("emoted from searchForServers : ", device)
+    def establishConnectionToServer(self, server : str, port: int)-> None:
+        print("emoted from searchForServers : ", server, port)
         pass
 
 
