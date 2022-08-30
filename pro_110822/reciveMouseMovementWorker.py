@@ -9,8 +9,7 @@ import logging
 import time
 import re
 
-import pdb
-# pdb.set_trace()
+# import pdb
 class reciveMouseMovementWorkerSignals(QObject):
     updateSignal = Signal(object)
 
@@ -24,11 +23,14 @@ class reciveMouseMovementWorker(QRunnable):
 
     def initConnection(self):
         self.connection.createSocket(None)
-        self.connection.connectToServer(self.serverIP, self.serverPort)
-        pass
 
+    def connectToServer(self):
+        self.connection.connectToServer(self.serverIP, self.serverPort)
 
     @Slot()
     def run(self)-> int:
         self.initConnection()
+        self. connectToServer()
+        self.connection.c.send('Hello'.encode())
         self.connection.reciveMouseMovement()
+        # self.connection.reciveMouseMovement()

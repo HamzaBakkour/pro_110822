@@ -46,8 +46,15 @@ class mouseAndKeyboardConnection():
 
   def acceptConnections(self)-> None:
     self.c, addr = self.s.accept()
-    # pdb.set_trace()
     return self.c, addr 
+
+
+  def acceptClientConnection(self, clientIP):
+    self.c, addr = self.s.accept()
+    while(addr[0] != clientIP):
+      self.c.shutdown(socket.SHUT_RDWR)
+      self.c.close()
+      self.c, addr = self.s.accept()
 
 
   def sendMouseMovement(self)->bool:

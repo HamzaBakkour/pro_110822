@@ -32,7 +32,12 @@ class listenForConnectionsWorker(QRunnable):
         while(self.terminate == False):
             try:
                 seocketConnection, addr = self.serverConnection.acceptConnections()
-                self.signal.recivedConnection.emit(seocketConnection, addr)
+                data = self.serverConnection.s.recv(1024).decode()
+                if(data):
+                    self.signal.recivedConnection.emit(data, addr)
+                else:
+                    self.signal.recivedConnection.emit(seocketConnection, addr)
+
             except TimeoutError: #Tryed to send data on something that is not a socket
                 # part1 = str(sys.exc_info())
                 # part2 = traceback.format_exc()
