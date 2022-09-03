@@ -18,19 +18,15 @@ class reciveMouseMovementWorker(QRunnable):
         super(reciveMouseMovementWorker, self).__init__()
         self.serverIP = serverIP
         self.serverPort = serverPort
-        self.connection = mouseAndKeyboardConnection()
-        
 
-    def initConnection(self):
-        self.connection.createSocket(None)
-
-    def connectToServer(self):
-        self.connection.connectToServer(self.serverIP, self.serverPort)
 
     @Slot()
     def run(self)-> int:
-        self.initConnection()
-        self. connectToServer()
-        self.connection.c.send('Hello'.encode())
-        self.connection.reciveMouseMovement()
-        # self.connection.reciveMouseMovement()
+        s = socket.socket()
+        s.connect((self.serverIP, self.serverPort))
+        print("recived : ")
+        print (s.recv(1024).decode())
+        s.close()
+
+
+

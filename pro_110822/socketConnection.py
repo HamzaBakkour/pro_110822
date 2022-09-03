@@ -35,7 +35,7 @@ class mouseAndKeyboardConnection():
         print ("port is not availabel")
       else:
         self.s.bind(('', port))        
-        self.s.listen(5)    
+        self.s.listen()    
         print ("port availabel socket is listening")
     except:
       part1 = str(sys.exc_info())
@@ -77,6 +77,7 @@ class mouseAndKeyboardConnection():
 
   def reciveMouseMovement(self)->int:
     mouse = Controller()
+    print("Reciving mouse movement")
     while (True):
         data = self.s.recv(1024).decode()
         print(data)
@@ -102,6 +103,7 @@ class mouseAndKeyboardConnection():
 
         x = int(x)
         y = int(y)
+        print("x:", x, "y:", y)
         mouse.position = (x, y)
 
 

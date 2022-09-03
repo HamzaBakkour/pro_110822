@@ -93,17 +93,9 @@ class mainWindow(QMainWindow):
         self.serverDevice1.connectToServer.clicked.connect(lambda: self.establishConnectionToServer(serverIP, serverPort))
 
 
-
-
-
     def establishConnectionToServer(self ,serverIP: str, serverPort: int):
         self.recivemouseMovementWorkers.append(reciveMouseMovementWorker(serverIP, serverPort))
         self.threabool.start(self.recivemouseMovementWorkers[-1])
-
-
-
-
-
 
     def updatePbar(self, value, text):
         print(text)
@@ -130,13 +122,13 @@ class mainWindow(QMainWindow):
         self.mainWidget.layout.addWidget(self.pbarWidget)
         self.mainWindowView.stopServerButton.clicked.connect(self.closeServer)
         self.serverConnection = listenForConnectionsWorker(12345)
-        self.serverConnection.signal.recivedConnection.connect(self.poo)
+        self.serverConnection.signal.recivedConnection.connect(self.dataFromListningToConnectionsWorker)
         self.threabool.start(self.serverConnection)
 
 
-    def poo(self, socket: socket.socket, addr: tuple):
-        print("Server recived connection request from")
-        print(addr)
+    def dataFromListningToConnectionsWorker(self, data : str):
+        print("Recived from listenForConnectionsWorker")
+        print("data: ", data)
 
 
     def closeServer(self):
