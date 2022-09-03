@@ -34,10 +34,8 @@ import time
 # pdb.post_mortem()
 # pdb.set_trace()
 
-
 logging.basicConfig(filename=(time.strftime("%Y%m%d---%H_%M_%S") + '.txt'), level=logging.DEBUG,
 format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
-
 
 class mainWindow(QMainWindow):
 
@@ -70,14 +68,14 @@ class mainWindow(QMainWindow):
         self.mainWidget.layout.addWidget(self.pbarWidget)
         self.pbarValue = 0
 
-        #############
+        
         self.recivemouseMovementWorkers = []
+
 
 
     def searchForServers(self):
         self.reseatPbar()
         self.reseatAvaialbleServersArea()
-
 
         self.updatePbar(15, "Searching for servers.")
         self.searchConntection = searchForServersWorker(12345)
@@ -85,13 +83,11 @@ class mainWindow(QMainWindow):
         self.searchConntection.signal.pbarSignal.connect(self.updatePbar)
         self.threabool.start(self.searchConntection)
 
-
     def addServerToServersArea(self, serverName : str, serverIP: str, serverPort: int)-> None:
         print("emited from searchForServers : ", serverName, serverIP)
         self.serverDevice1 = device(serverName, serverIP)
         self.mainWindowView.addDeivce(self.serverDevice1)
         self.serverDevice1.connectToServer.clicked.connect(lambda: self.establishConnectionToServer(serverIP, serverPort))
-
 
     def establishConnectionToServer(self ,serverIP: str, serverPort: int):
         self.recivemouseMovementWorkers.append(reciveMouseMovementWorker(serverIP, serverPort))
@@ -125,11 +121,9 @@ class mainWindow(QMainWindow):
         self.serverConnection.signal.recivedConnection.connect(self.dataFromListningToConnectionsWorker)
         self.threabool.start(self.serverConnection)
 
-
     def dataFromListningToConnectionsWorker(self, data : str):
         print("Recived from listenForConnectionsWorker")
         print("data: ", data)
-
 
     def closeServer(self):
         self.serverConnection.terminate = True
@@ -141,10 +135,6 @@ class mainWindow(QMainWindow):
         self.mainWidget.layout.addWidget(self.pbarWidget)
         self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
         self.mainWindowView.refreshButton.clicked.connect(self.searchForServers)
-
-    
-
-
 
 app = QApplication([])
 window = mainWindow()

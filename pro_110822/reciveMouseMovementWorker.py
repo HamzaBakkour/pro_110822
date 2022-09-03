@@ -9,7 +9,6 @@ import logging
 import time
 import re
 
-# import pdb
 class reciveMouseMovementWorkerSignals(QObject):
     updateSignal = Signal(object)
 
