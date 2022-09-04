@@ -1,3 +1,14 @@
+#pro_110822/firstOpenView.py
+"""
+The programs main window module
+
+CLASS firstOpenView constins the following methods:
+    - `__init__`
+    - `setUpperFrame`
+    - `setAvailableServersArea`
+    - `addDevice`
+"""
+
 from PySide6 import QtCore, QtWidgets
 
 from PySide6.QtWidgets import (
@@ -15,7 +26,44 @@ from scrollArea import scrollPanel
 
 
 class firstOpenView(QtWidgets.QWidget):
-    def __init__(self):        
+    """
+    First open view is a supclass of `PySide6.QtWidgets.QWidget`.  
+    This is the first dispalyed view when the program is started.  
+    <pre>
+
+    ------------------------------------------------------------  
+    |                                        [make server]     |  
+    |Available servers                       [Refresh]         |  
+    |----------------------------------------------------------|  
+    |Server name                                               |  
+    |Server IP                                  [Connect]      |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    |                                                          |  
+    ------------------------------------------------------------  
+
+    </pre>
+    """
+    def __init__(self):
+        """
+        Constructor method.  
+        Initiate the first open view.  
+        """
         super(firstOpenView, self).__init__()
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(10,30,10,0)
@@ -26,6 +74,16 @@ class firstOpenView(QtWidgets.QWidget):
 
 
     def setUpperFrame(self):
+        """
+        <pre>
+
+        ------------------------------------------------------------
+        |                                        [make server]     |
+        |Available servers                       [Refresh]         |
+        |----------------------------------------------------------|
+
+        </pre>
+        """
         self.upperFrameLayout = QHBoxLayout()
         self.upperFrameLayout.addWidget(QLabel("Available servers"))
 
@@ -41,13 +99,58 @@ class firstOpenView(QtWidgets.QWidget):
 
 
     def setAvailableServersArea(self):
+        """
+        Available servers area is an instance of the class `scrollPaneel`  
+        
+        <pre>
+
+        |----------------------------------------------------------|
+        |Server name                                               |
+        |Server IP                                  [Connect]      |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        |                                                          |
+        ------------------------------------------------------------
+
+        </pre>
+        """
         self.availableServers = scrollPanel()
         self.layout.addWidget(self.availableServers)
 
     def addDeivce(self, device: QtWidgets.QWidget):
+        """
+        <pre>
+
+        |----------------------------------------------------------|
+        |Server name                                               |
+        |Server IP                                  [Connect]      |
+
+        </pre>
+          
+        Discovered servers on the local network will be added to the  
+        first open view.  
+        The user can click the `Connect` button to connect to the server.  
+        """
         self.availableServers.addDevice(device)
-        pass
 
 
     def remove(self):
+        """
+        Delete the first open view widget.
+        """
         self.deleteLater()

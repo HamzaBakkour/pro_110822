@@ -1,0 +1,55 @@
+site_name: Pro_110822
+
+use_directory_urls: false
+
+site_description: A framework for macros and automation for mkdocs
+docs_dir: docs # indispensable or readthedocs will fail
+theme: 
+  name: material
+  language: en
+  features:
+    # - navigation.instant
+    # - navigation.tabs
+    - toc.integrate
+    # - content.tabs.link
+  palette:
+    scheme: slate
+    primary: teal
+    accent: teal
+repo_url: https://github.com/fralau/mkdocs_macros_plugin
+edit_uri: edit/master/webdoc/docs/
+copyright: © Laurent Franceschetti, 2020. This work is licensed under CC BY-SA 4.0.
+
+
+nav:
+    - Overview: index.md
+    - 'The Code': 
+      - mainWindow.md
+      - firstOpenView.md
+      - serverView.md
+      - listenForConnectionsWorker.md
+      - searchForServersWorker.md
+      - socketConnection.md
+      - networkScannerCls.md
+      - reciveMouseMovementWorker.md
+      - sendMouseMovementWorker.md
+      - scrollArea.md
+      - deviceWidget.md
+      - progressBar.md
+    - Tests:
+      - "Tips and Tricks": tips.md
+      - "Troubleshooting": troubleshooting.md
+      - "Asking for help?": help.md
+    - Licence: contribute.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+plugins:
+  - mkdocstrings
+  - search
+  - include-markdown
