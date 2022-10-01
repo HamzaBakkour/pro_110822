@@ -1,6 +1,6 @@
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
-from socketConnection import mouseAndKeyboardConnection
-from networkScannerCls import netWrokScanner
+from socketconnection import MouseAndKeyboardConnection
+from networkscannercls import NetWrokScanner
 
 import sys
 import os
@@ -11,19 +11,19 @@ import re
 
 import pdb
 # pdb.set_trace()
-class searchForServersWorkerSignals(QObject):
+class SearchForServersWorkerSignals(QObject):
     connectionOkSignal = Signal(object, object, object)
     pbarSignal = Signal(object, object)
 
-class searchForServersWorker(QRunnable):
+class SearchForServersWorker(QRunnable):
     def __init__(self, port: int)-> None:
         
-        super(searchForServersWorker, self).__init__()
-        self.signal = searchForServersWorkerSignals()
-        self.searchForServerConnection = mouseAndKeyboardConnection()
-        self.searchForServerConnection.createSocket(5)
+        super(SearchForServersWorker, self).__init__()
+        self.signal = SearchForServersWorkerSignals()
+        self.searchForServerConnection = MouseAndKeyboardConnection()
+        self.searchForServerConnection.create_socket(5)
         self.serverPort = port
-        self.scan = netWrokScanner()
+        self.scan = NetWrokScanner()
 
     @Slot()
     def run(self)-> int:
@@ -45,7 +45,7 @@ class searchForServersWorker(QRunnable):
         for device_IP in devicesList:
             try:
                 self.signal.pbarSignal.emit(self.progressValue, ('Trying ' + device_IP + ':' + str(self.serverPort)))
-                if(self.searchForServerConnection.connectToServer(device_IP, self.serverPort)):
+                if(self.searchForServerConnection.connect_to_server(device_IP, self.serverPort)):
                     self.signal.pbarSignal.emit(0, (device_IP + ':' + str(self.serverPort) +' connection OK!.'))
                     found = False
                     for name in devicesName:
@@ -64,7 +64,7 @@ class searchForServersWorker(QRunnable):
                 loggMessage = origin + '\n' + part1  + '\n' + part2
                 logging.info(loggMessage)
 
-        self.searchForServerConnection.terminateSocket()
+        self.searchForServerConnection.terminate_socket()
         self.signal.pbarSignal.emit(999, ' ')
 
 

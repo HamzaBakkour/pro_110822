@@ -1,0 +1,11 @@
+deviceWidget.py
+	device
+		__init__
+			device_name
+			device_IP
+			device_name_and_ip_layout
+			name
+			address
+		layout
+		buttons_layout
+		connectToServer

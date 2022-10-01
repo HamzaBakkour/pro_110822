@@ -13,9 +13,9 @@ from PySide6.QtWidgets import (
 )
 
 
-class progressBar(QtWidgets.QWidget):
+class ProgressBar(QtWidgets.QWidget):
     def __init__(self):        
-        super(progressBar, self).__init__()
+        super(ProgressBar, self).__init__()
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(10,0,10,0)
         # self.layout.setSpacing(0)
@@ -42,14 +42,14 @@ class progressBar(QtWidgets.QWidget):
 
         self.setLayout(self.layout)
 
-    def Value(self, value: int)-> None:
+    def value(self, value: int)-> None:
         self.pbar.setValue(value)
 
-    def Text(self, text: str)-> None:
+    def text(self, text: str)-> None:
         self.txt.setText(text)
         self.txt.adjustSize()
 
-    def Reseat(self):
+    def reseat(self):
         self.pbar.setValue(0)
         self.txt.setText(' ')
 

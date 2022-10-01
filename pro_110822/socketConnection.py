@@ -10,12 +10,12 @@ import re
 import pdb
 
 
-class mouseAndKeyboardConnection():
+class MouseAndKeyboardConnection():
   def __init__(self)-> None:#None : blocking, 0 : None
     pass
 
 
-  def createSocket(self, socketTimeout: int)-> None:
+  def create_socket(self, socketTimeout: int)-> None:
     try:
       self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)     
       self.s.settimeout(socketTimeout)
@@ -29,9 +29,9 @@ class mouseAndKeyboardConnection():
       logging.info(loggMessage)
 
 
-  def listenForConnections(self, port : int):
+  def listen_for_connections(self, port : int):
     try:
-      if (self.isPortInUse(12345)):
+      if (self.is_port_in_use(12345)):
         print ("port is not availabel")
       else:
         self.s.bind(('', port))        
@@ -44,12 +44,12 @@ class mouseAndKeyboardConnection():
       loggMessage = origin + '\n' + part1  + '\n' + part2
       logging.info(loggMessage)
 
-  def acceptConnections(self)-> None:
+  def accept_connections(self)-> None:
     self.c, addr = self.s.accept()
     return self.c, addr 
 
 
-  def acceptClientConnection(self, clientIP):
+  def accept_client_connection(self, clientIP):
     self.c, addr = self.s.accept()
     while(addr[0] != clientIP):
       self.c.shutdown(socket.SHUT_RDWR)
@@ -57,11 +57,11 @@ class mouseAndKeyboardConnection():
       self.c, addr = self.s.accept()
 
 
-  def sendMouseMovement(self)->bool:
+  def send_mouse_movement(self)->bool:
     self.listener =  Listener(on_move = self.on_move, on_click = self.on_click, on_scroll = self.on_scroll)
     self.listener.start()
 
-  def connectToServer(self, serverIP : str, port : int)-> None:
+  def connect_to_server(self, serverIP : str, port : int)-> None:
     try:
       self.s.connect((serverIP, port))#'192.168.0.6'
     except:
@@ -75,7 +75,7 @@ class mouseAndKeyboardConnection():
     return True
 
 
-  def reciveMouseMovement(self)->int:
+  def recive_mouse_movement(self)->int:
     mouse = Controller()
     print("Reciving mouse movement")
     while (True):
@@ -122,9 +122,9 @@ class mouseAndKeyboardConnection():
 
 
 
-  def terminateSocket(self):
+  def terminate_socket(self):
     try:
-      if(self.stillConnected()):
+      if(self.still_connected()):
         self.c.shutdown(socket.SHUT_RDWR)
         self.c.close()
         self.s.close()
@@ -144,14 +144,14 @@ class mouseAndKeyboardConnection():
 
 
 
-  def stillConnected(self)-> bool:
+  def still_connected(self)-> bool:
     try:
       self.c.sendall(b"bing")
       return True
     except:
       return False
 
-  def isPortInUse(self, port: int)-> bool:
+  def is_port_in_use(self, port: int)-> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
 

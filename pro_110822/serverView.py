@@ -11,23 +11,23 @@ from PySide6.QtWidgets import (
     QLabel
 )
 
-from scrollArea import scrollPanel
+from scrollarea import ScrollPanel
 
 
-class serverView(QtWidgets.QWidget):
+class ServerView(QtWidgets.QWidget):
     def __init__(self):        
-        super(serverView, self).__init__()
+        super(ServerView, self).__init__()
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(10,30,10,0)
         self.layout.setSpacing(0)
         self.setLayout(self.layout)
-        self.setUpperFrame()
-        self.serverInfoFram()
-        self.connectedDevicesArea()
+        self.set_upper_frame()
+        self.server_info_fram()
+        self.connected_devices_area()
 
 
 
-    def setUpperFrame(self):
+    def set_upper_frame(self):
         self.upperFrameLayout = QHBoxLayout()
         self.stopServerButton = QPushButton("Stop Server")
         self.upperFrameLayout.addWidget(self.stopServerButton)
@@ -35,7 +35,7 @@ class serverView(QtWidgets.QWidget):
         self.layout.addLayout(self.upperFrameLayout)
 
 
-    def serverInfoFram(self):
+    def server_info_fram(self):
         self.serverFrameLayout = QVBoxLayout()
         self.serverFrameLayout.addWidget(QLabel("Server Name : "))
         self.serverFrameLayout.addWidget(QLabel("Server IP        : "))
@@ -43,9 +43,9 @@ class serverView(QtWidgets.QWidget):
         self.layout.addLayout(self.serverFrameLayout)
   
 
-    def connectedDevicesArea(self):
+    def connected_devices_area(self):
         self.connectedDevicesAreaLayout = QVBoxLayout()
-        self.connectedDevices = scrollPanel()
+        self.connectedDevices = ScrollPanel()
         self.connectedDevicesAreaLayout.addWidget(QLabel("Connected Devices"))
         self.connectedDevicesAreaLayout.addWidget(self.connectedDevices)
 

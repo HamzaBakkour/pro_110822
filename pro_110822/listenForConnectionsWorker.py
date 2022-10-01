@@ -1,6 +1,6 @@
 # from PySide6.QtCore import *
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
-from socketConnection import mouseAndKeyboardConnection
+from socketconnection import MouseAndKeyboardConnection
 
 import sys
 import os
@@ -14,16 +14,16 @@ import datetime
 
 import pdb
 
-class serverWorkerSignals(QObject):
+class ServerWorkerSignals(QObject):
     recivedConnection = Signal(object)
 
-class listenForConnectionsWorker(QRunnable):
+class ListenForConnectionsWorker(QRunnable):
     def __init__(self, port: int)-> None:
-        super(listenForConnectionsWorker, self).__init__()
+        super(ListenForConnectionsWorker, self).__init__()
         self.serverPort = port
         self.terminate = False
 
-        self.signal = serverWorkerSignals()
+        self.signal = ServerWorkerSignals()
 
 
     @Slot()
@@ -31,16 +31,16 @@ class listenForConnectionsWorker(QRunnable):
         host = socket.gethostname()
         port = 12345
 
-        server_socket = socket.socket()
+        serverSocket = socket.socket()
         sendMovementSocket = socket.socket()
 
-        server_socket.bind((host, port))
+        serverSocket.bind((host, port))
         sendMovementSocket.bind((host, 12346))
 
         while(True):
             print("Started")
-            server_socket.listen(1)
-            conn, address = server_socket.accept()  
+            serverSocket.listen(1)
+            conn, address = serverSocket.accept()  
             print("Connection from: " + str(address))
             while True:
                 sendMovementSocket.listen(60)

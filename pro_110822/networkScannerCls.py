@@ -36,7 +36,7 @@ import pdb
 
 
 
-class netWrokScanner():
+class NetWrokScanner():
     def __init__(self):
         pass
     
@@ -68,7 +68,8 @@ class netWrokScanner():
                 loggMessage = origin + '\n' + part1  + '\n' + part2
                 logging.info(loggMessage)
         return interfaces_ipv4_addresses
-    def get_host_ipaddress__netmask__broadcast(self)->dict:
+
+    def get_host_ipaddress_netmask_broadcast(self)->dict:
         host_ip_address = self.get_host_ip_address()
         active_interfaces_ipv4 = self.get_host_network_infterfaces_ipv4()
         host_netmask = ''
@@ -108,7 +109,7 @@ class netWrokScanner():
     def get_host_network_info(self)-> dict:
         # host : ip address, netmask, broadcast, gateway, prefix, network address
 
-        network_info = self.get_host_ipaddress__netmask__broadcast()
+        network_info = self.get_host_ipaddress_netmask_broadcast()
         network_info.update({'host_gateway' : self.get_host_default_gateway()})
         network_info.update({'host_prefix' : self.get_prefix(network_info['host_ip_address'] ,network_info['host_netmask'])})
         network_info.update({'host_network_address' : self.get_network_address(network_info['host_ip_address'], network_info['host_netmask'])})

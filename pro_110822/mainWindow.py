@@ -31,13 +31,13 @@ from PySide6.QtWidgets import (
 
 from PySide6 import QtGui, QtCore, QtWidgets
 
-from firstOpenView import firstOpenView
-from serverView import serverView
-from listenForConnectionsWorker import listenForConnectionsWorker
-from searchForServersWorker import searchForServersWorker
-from progressBar import progressBar
-from deviceWidget import device
-from reciveMouseMovementWorker import reciveMouseMovementWorker
+from firstopenview import FirstOpenView
+from serverview import ServerView
+from listenforconnectionsworker import ListenForConnectionsWorker
+from searchforserversworker import SearchForServersWorker
+from progressbar import ProgressBar
+from devicewidget import Device
+from recivemousemovementworker import ReciveMouseMovementWorker
 
 import socket
 
@@ -55,14 +55,9 @@ logging.basicConfig(filename=(time.strftime("%Y%m%d---%H_%M_%S") + '.txt'), leve
 format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
 
 
-class mainWindow(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self, parent=None)-> None:
-        """
-        Constructor method.
-        Initiate the main window.
-        The main window is a supclass of `PySide6.QtWidgets.QMainWindow`
-        """
-        super(mainWindow, self).__init__(parent)
+        super(MainWindow, self).__init__(parent)
         #Main window title
         self.setWindowTitle("pro_110822")
         #Main window resulotion
@@ -80,15 +75,15 @@ class mainWindow(QMainWindow):
         self.threabool = QThreadPool()
 
         #Start the main window with the firstOpenView view
-        self.mainWindowView = firstOpenView()
+        self.mainWindowView = FirstOpenView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
         #Connect the start server button to the funciton createServer
-        self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
+        self.mainWindowView.makeServerButton.clicked.connect(self.create_server)
         #Connect the refresh button to the funciton searchForServers
-        self.mainWindowView.refreshButton.clicked.connect(self.searchForServers)
+        self.mainWindowView.refreshButton.clicked.connect(self.search_for_servers)
 
         #Set the progress bar
-        self.pbarWidget = progressBar()
+        self.pbarWidget = ProgressBar()
         self.mainWidget.layout.addWidget(self.pbarWidget)
         self.pbarValue = 0
 
@@ -98,136 +93,95 @@ class mainWindow(QMainWindow):
 
 
 
-    def searchForServers(self):
-        """
-        Search for available servers on the local network.
-        """
-        self.reseatPbar()
-        self.reseatAvaialbleServersArea()
-        self.updatePbar(15, "Searching for servers.")
+    def search_for_servers(self):
+        self.reseat_p_bar()
+        self.reseat_avaialble_servers_area()
+        self.update_p_bar(15, "Searching for servers.")
         #Set the search for servers worker
-        self.searchConntection = searchForServersWorker(12345)
+        self.searchConntection = SearchForServersWorker(12345)
         #Connect the worker's connectionOkSignal signal to the function addServerToServersArea
         #The worker will send this signal to the main thread in case it manages to connect to a server on the local network
-        self.searchConntection.signal.connectionOkSignal.connect(self.addServerToServersArea)
+        self.searchConntection.signal.connectionOkSignal.connect(self.add_server_to_servers_area)
         #The worker will send this signal to the main thread to update the progress bar when it manages to connect to a server on the local network
-        self.searchConntection.signal.pbarSignal.connect(self.updatePbar)
+        self.searchConntection.signal.pbarSignal.connect(self.update_p_bar)
         #Start the woker
         self.threabool.start(self.searchConntection)
 
 
 
-    def addServerToServersArea(self, serverName : str, serverIP: str, serverPort: int)-> None:
-        """
-        Add a widget with the server name and IP to firstOpenView.
-        This method is trigere by `searchForServers` method.
-
-        Args:
-            serverName
-            serverIP
-            serverPort
-        """
+    def add_server_to_servers_area(self, serverName : str, serverIP: str, serverPort: int)-> None:
         print("emited from searchForServers : ", serverName, serverIP)
-        self.serverDevice1 = device(serverName, serverIP)
+        self.serverDevice1 = Device(serverName, serverIP)
         self.mainWindowView.addDeivce(self.serverDevice1)
-        self.serverDevice1.connectToServer.clicked.connect(lambda: self.establishConnectionToServer(serverIP, serverPort))
+        self.serverDevice1.connectToServer.clicked.connect(lambda: self.establish_connection_to_server(serverIP, serverPort))
 
 
 
 
-    def createServer(self):
-        """
-        Change the main window view from `firstOpenView` to `serverView`.
-        Start the server worker.
-        This worker will liten to connections on port `12345`.
-        """
+    def create_server(self):
         #Remove the current view.
         self.mainWindowView.remove()
         self.pbarWidget.remove()
         #Set the view to serverView.
-        self.mainWindowView = serverView()
-        self.pbarWidget = progressBar()
+        self.mainWindowView = ServerView()
+        self.pbarWidget = ProgressBar()
         self.mainWidget.layout.addWidget(self.mainWindowView)
         self.mainWidget.layout.addWidget(self.pbarWidget)
         #Connect the server button to the fuction closeServer.
-        self.mainWindowView.stopServerButton.clicked.connect(self.closeServer)
+        self.mainWindowView.stopServerButton.clicked.connect(self.close_server)
         #Set the server worker. This worker will listen for connection on the port 12345
-        self.serverConnection = listenForConnectionsWorker(12345)
+        self.serverConnection = ListenForConnectionsWorker(12345)
         #Connect the wroker's recivedConnection signal to the function  dataFromListningToConnectionsWorker
-        self.serverConnection.signal.recivedConnection.connect(self.dataFromListningToConnectionsWorker)
+        self.serverConnection.signal.recivedConnection.connect(self.data_from_listning_to_connections_worker)
         #Start the worker
         self.threabool.start(self.serverConnection)
 
 
-    def establishConnectionToServer(self ,serverIP: str, serverPort: int):
-        """
-        Establish connection to server to get mouse movement.
-
-        Args:
-            serverIP
-            serverPort
-        """
+    def establish_connection_to_server(self ,serverIP: str, serverPort: int):
         #Add a worker to the list recivemouseMovementWorkers.
-        self.recivemouseMovementWorkers.append(reciveMouseMovementWorker(serverIP, serverPort))
+        self.recivemouseMovementWorkers.append(ReciveMouseMovementWorker(serverIP, serverPort))
         #Start the worker
         self.threabool.start(self.recivemouseMovementWorkers[-1])
 
 
 
-    def closeServer(self):
-        """
-        Terminate the `listenForConnectionsWorker` worker.
-        Change the main view from `serverView` to `firstOpenView`
-        """
+    def close_server(self):
         self.serverConnection.terminate = True
         self.mainWindowView.remove()
         self.pbarWidget.remove()
-        self.mainWindowView = firstOpenView()
-        self.pbarWidget = progressBar()
+        self.mainWindowView = FirstOpenView()
+        self.pbarWidget = ProgressBar()
         self.mainWidget.layout.addWidget(self.mainWindowView)
         self.mainWidget.layout.addWidget(self.pbarWidget)
-        self.mainWindowView.makeServerButton.clicked.connect(self.createServer)
-        self.mainWindowView.refreshButton.clicked.connect(self.searchForServers)
+        self.mainWindowView.makeServerButton.clicked.connect(self.create_server)
+        self.mainWindowView.refreshButton.clicked.connect(self.search_for_servers)
 
 
 
-    def reseatAvaialbleServersArea(self):
-        """
-        Remove all the servers widges from `serverView`
-        """
+    def reseat_avaialble_servers_area(self):
         self.mainWindowView.availableServers.reseat()
 
 
 
-    def dataFromListningToConnectionsWorker(self, data : str):
-        """
-        XX
-        """
+    def data_from_listning_to_connections_worker(self, data : str):
         print("Recived from listenForConnectionsWorker")
         print("data: ", data)
 
 
 
-    def updatePbar(self, value, text):
-        """
-        This method is triggered by `searchForServersWorker` worker.
-        It updates the progress bar.
-        """
+    def update_p_bar(self, value, text):
         print(text)
         if (value == 999):
-            self.reseatPbar()
+            self.reseat_p_bar()
         else:
             self.pbarValue = self.pbarValue + value
-            self.pbarWidget.Value(self.pbarValue)
-            self.pbarWidget.Text(text)
+            self.pbarWidget.value(self.pbarValue)
+            self.pbarWidget.text(text)
 
 
-    def reseatPbar(self):
-        """
-        Reseat the progress bar.
-        """
+    def reseat_p_bar(self):
         self.pbarValue = 0
-        self.pbarWidget.Reseat()
+        self.pbarWidget.reseat()
 
 
 
@@ -236,6 +190,6 @@ class mainWindow(QMainWindow):
 
 
 app = QApplication([])
-window = mainWindow()
+window = MainWindow()
 window.show()
 sys.exit(app.exec())

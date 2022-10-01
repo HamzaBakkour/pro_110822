@@ -2,9 +2,9 @@ import sys
 from PySide6 import QtGui, QtCore, QtWidgets
 from PySide6.QtWidgets import QApplication, QFormLayout, QScrollArea, QGridLayout, QPushButton
 # import networkScanner
-from deviceWidget import device
+from devicewidget import Device
 
-class scrollPanel(QScrollArea):
+class ScrollPanel(QScrollArea):
 
     def __init__(self, parent= None):
         super().__init__()

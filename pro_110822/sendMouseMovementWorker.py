@@ -1,5 +1,5 @@
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
-from socketConnection import mouseAndKeyboardConnection
+from socketconnection import MouseAndKeyboardConnection
 import socket
 
 import sys
@@ -11,24 +11,24 @@ import re
 
 # import pdb
 
-class sendMouseMovementWorkerSignals(QObject):
+class SendMouseMovementWorkerSignals(QObject):
     updateSignal = Signal(object)
 
-class sendMouseMovementWorker(QRunnable):
+class SendMouseMovementWorker(QRunnable):
     def __init__(self, clientIP: str)-> None:
-        super(sendMouseMovementWorker, self).__init__()
+        super(SendMouseMovementWorker, self).__init__()
         self.clientIP = clientIP
-        self.connection = mouseAndKeyboardConnection()
+        self.connection = MouseAndKeyboardConnection()
         
 
-    def initConnection(self):
-        self.connection.createSocket(None)
+    def init_connection(self):
+        self.connection.create_socket(None)
 
-    def acceptConnectionFromClient(self):
-        self.connection.acceptClientConnection(self.serverIP)
+    def accept_connection_from_client(self):
+        self.connection.accept_client_connection(self.serverIP)
 
     @Slot()
     def run(self)-> int:
-        self.initConnection()
-        self. acceptConnectionFromClient()
-        self.connection.sendMouseMovement()
+        self.init_connection()
+        self. accept_connection_from_client()
+        self.connection.send_mouse_movement()
