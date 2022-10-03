@@ -13,26 +13,18 @@ class ReciveMouseMovementWorkerSignals(QObject):
     updateSignal = Signal(object)
 
 class ReciveMouseMovementWorker(QRunnable):
-    def __init__(self, serverIP: str, serverPort: int)-> None:
+    def __init__(self, serverIP: str, serverPort: str)-> None:
         super(ReciveMouseMovementWorker, self).__init__()
         self.serverIP = serverIP
-        self.serverPort = serverPort
+        self.serverPort = int(serverPort)
 
 
     @Slot()
     def run(self)-> int:
-        port = 12346
-
-        clientSocket = socket.socket() 
-        clientSocket.connect(('192.168.0.5', port)) 
-        message = input(" -> ") 
+        clientSocket = socket.socket()
+        clientSocket.connect((self.serverIP, self.serverPort)) 
+        message = " " 
         while message.lower().strip() != 'bye':
-            clientSocket.send(message.encode())  
             data = clientSocket.recv(1024).decode()  
             print('Received from server: ' + data)  
-            message = input(" -> ")  
-        clientSocket.close()  
-
-
-
-
+        clientSocket.close()

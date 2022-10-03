@@ -58,6 +58,7 @@ format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
 class MainWindow(QMainWindow):
     def __init__(self, parent=None)-> None:
         super(MainWindow, self).__init__(parent)
+        self.vm = False
         #Main window title
         self.setWindowTitle("pro_110822")
         #Main window resulotion
@@ -92,7 +93,7 @@ class MainWindow(QMainWindow):
 
 
 
-
+##################################################################################################################################################################
     def search_for_servers(self):
         self.reseat_p_bar()
         self.reseat_avaialble_servers_area()
@@ -107,13 +108,26 @@ class MainWindow(QMainWindow):
         #Start the woker
         self.threabool.start(self.searchConntection)
 
-
-
     def add_server_to_servers_area(self, serverName : str, serverIP: str, serverPort: int)-> None:
         print("emited from searchForServers : ", serverName, serverIP)
         self.serverDevice1 = Device(serverName, serverIP)
-        self.mainWindowView.addDeivce(self.serverDevice1)
+        self.mainWindowView.add_deivce(self.serverDevice1)
         self.serverDevice1.connectToServer.clicked.connect(lambda: self.establish_connection_to_server(serverIP, serverPort))
+
+    def establish_connection_to_server(self ,serverIP: str, serverPort: int):
+        clientSocket = socket.socket()
+        clientSocket.connect((serverIP, 12346))
+        print("waiting on data from server (which port to use)")
+        data = clientSocket.recv(1024).decode()  
+        print('Received from server: ' + data)
+        #Add a worker to the list recivemouseMovementWorkers.
+        self.recivemouseMovementWorkers.append(ReciveMouseMovementWorker(serverIP, data))
+        #Start the worker
+        self.threabool.start(self.recivemouseMovementWorkers[-1])
+        clientSocket.close()
+
+##################################################################################################################################################################
+
 
 
 
@@ -135,14 +149,6 @@ class MainWindow(QMainWindow):
         self.serverConnection.signal.recivedConnection.connect(self.data_from_listning_to_connections_worker)
         #Start the worker
         self.threabool.start(self.serverConnection)
-
-
-    def establish_connection_to_server(self ,serverIP: str, serverPort: int):
-        #Add a worker to the list recivemouseMovementWorkers.
-        self.recivemouseMovementWorkers.append(ReciveMouseMovementWorker(serverIP, serverPort))
-        #Start the worker
-        self.threabool.start(self.recivemouseMovementWorkers[-1])
-
 
 
     def close_server(self):

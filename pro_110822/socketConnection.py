@@ -63,14 +63,14 @@ class MouseAndKeyboardConnection():
 
   def connect_to_server(self, serverIP : str, port : int)-> None:
     try:
-      self.s.connect((serverIP, port))#'192.168.0.6'
+      self.s.connect((serverIP, port))
     except:
-      # print ("Connection refuesd at {}:{}".format(serverIP, port))
-      # part1 = str(sys.exc_info())
-      # part2 = traceback.format_exc()
-      # origin = re.search(r'File(.*?)\,', part2).group(1) 
-      # loggMessage = origin + '\n' + part1  + '\n' + part2
-      # logging.info(loggMessage)
+      print ("Connection refuesd at {}:{}".format(serverIP, port))
+      part1 = str(sys.exc_info())
+      part2 = traceback.format_exc()
+      origin = re.search(r'File(.*?)\,', part2).group(1) 
+      loggMessage = origin + '\n' + part1  + '\n' + part2 + "\nserverIP: " + serverIP + "\nport: " + str(port)
+      logging.info(loggMessage)
       return False
     return True
 

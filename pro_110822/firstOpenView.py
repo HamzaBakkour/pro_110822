@@ -55,7 +55,7 @@ class FirstOpenView(QtWidgets.QWidget):
         self.layout.addWidget(self.availableServers)
 
     def add_deivce(self, device: QtWidgets.QWidget):
-        self.availableServers.addDevice(device)
+        self.availableServers.add_device(device)
 
 
     def remove(self):

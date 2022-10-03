@@ -8,9 +8,9 @@ class ScrollPanel(QScrollArea):
 
     def __init__(self, parent= None):
         super().__init__()
-        self.initUI()
+        self.init_ui()
     
-    def initUI(self):
+    def init_ui(self):
         self.scroll_panel = QtWidgets.QWidget()
         self.scroll_panel_layout = QFormLayout(self.scroll_panel)
 
@@ -19,7 +19,7 @@ class ScrollPanel(QScrollArea):
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setWidget(self.scroll_panel)
 
-    def addDevice(self, device: QtWidgets.QWidget):
+    def add_device(self, device: QtWidgets.QWidget):
         self.scroll_panel_layout.addWidget(device)
     
     def reseat(self):
