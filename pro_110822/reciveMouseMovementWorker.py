@@ -1,5 +1,4 @@
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
-from socketconnection import MouseAndKeyboardConnection
 import socket
 
 import sys
@@ -22,7 +21,8 @@ class ReciveMouseMovementWorker(QRunnable):
     @Slot()
     def run(self)-> int:
         clientSocket = socket.socket()
-        clientSocket.connect((self.serverIP, self.serverPort)) 
+        clientSocket.connect((self.serverIP, self.serverPort))
+        print("connected to server at ", self.serverIP, ":" ,self.serverPort)
         message = " " 
         while message.lower().strip() != 'bye':
             data = clientSocket.recv(1024).decode()  

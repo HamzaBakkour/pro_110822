@@ -74,6 +74,8 @@ class MainWindow(QMainWindow):
 
         #Craete a thread pool, will be used to spwan workers
         self.threabool = QThreadPool()
+        self.threabool.setMaxThreadCount(12)
+
 
         #Start the main window with the firstOpenView view
         self.mainWindowView = FirstOpenView()
@@ -123,6 +125,7 @@ class MainWindow(QMainWindow):
         #Add a worker to the list recivemouseMovementWorkers.
         self.recivemouseMovementWorkers.append(ReciveMouseMovementWorker(serverIP, data))
         #Start the worker
+
         self.threabool.start(self.recivemouseMovementWorkers[-1])
         clientSocket.close()
 
