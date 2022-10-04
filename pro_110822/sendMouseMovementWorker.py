@@ -40,7 +40,7 @@ class SendMouseMovementWorker(QRunnable):
     def run(self)-> int:
         serverSocket = socket.socket()
         host = socket.gethostname()
-        serverSocket.bind((host, self.socketPort))
+        serverSocket.bind(('', self.socketPort))
         serverSocket.listen()
         connS, addressS = serverSocket.accept()
         print("Connection from: XXX" + str(addressS) + "accepted")

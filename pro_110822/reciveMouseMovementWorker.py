@@ -26,7 +26,6 @@ class ReciveMouseMovementWorker(QRunnable):
 
         mouse = Controller()
         print("Reciving mouse movement")
-        time.sleep(5)
         while (True):
             data = clientSocket.recv(1024).decode()
             print(data)

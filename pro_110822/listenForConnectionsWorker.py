@@ -29,23 +29,31 @@ class ListenForConnectionsWorker(QRunnable):
     @Slot()
     def run(self)-> int:
         host = socket.gethostname()
-        serverSocket = socket.socket()
-        infoToClientSocket = socket.socket()
-        serverSocket.bind((host, self.serverPort))
-        infoToClientSocket.bind((host, 12346))
+        self.serverSocket = socket.socket()
+        self.serverInfoToClientSocket = socket.socket()
+        self.serverSocket.bind(('', self.serverPort))
+        self.serverInfoToClientSocket.bind(('', 12346))
 
-        while(True):
+        while (self.terminate == False):
             print("server is listning for connections")
-            serverSocket.listen(1)
-            conn, address = serverSocket.accept()  
-            print("Connection from: " + str(address))
-            while True:
-                infoToClientSocket.listen(60)
-                connS, addressS = infoToClientSocket.accept()
-                #This data tells the client which port to use to recive mouse movement
-                self.signal.createSocket.emit(addressS, "12348")
+            self.serverSocket.listen(5)
+            try:
+                conn, address = self.serverSocket.accept()
+                print("Connection from: " + str(address))
+            except:
+                pass
+            
+            while (self.terminate == False):
+                self.serverInfoToClientSocket.listen(60)
+                try:
+                    connS, addressS = self.serverInfoToClientSocket.accept()
+                    self.signal.createSocket.emit(addressS, "12348")
+                    #This data tells the client which port to use to recive mouse movement
+                    data = "12348"
+                    connS.send(data.encode())  
+                except:
+                    print("**INFO** listenforconnectionsworker.py ListenForConnectionsWorker run [2]")
+                    
 
-                data = "12348"
-                connS.send(data.encode())  
+
             print("breaked")
-        conn.close() 

@@ -133,10 +133,6 @@ class MainWindow(QMainWindow):
 
 ##################################################################################################################################################################
 
-
-
-
-
     def create_server(self):
         #Remove the current view.
         self.mainWindowView.remove()
@@ -158,6 +154,16 @@ class MainWindow(QMainWindow):
 
     def close_server(self):
         self.serverConnection.terminate = True
+        try:
+            self.serverConnection.serverSocket.close()
+            self.serverConnection.serverInfoToClientSocket.close()
+            print("Connected Socket terminated")
+        except :#trying to close c before any connections are acepted
+                            # trying to close a connection that does not exist -> AttributeError
+                            # occures when try to close the server before any connections are accepted
+                            # part1 = str(sys.exc_info())
+
+            print("Not Connected Socket terminated")
         self.mainWindowView.remove()
         self.pbarWidget.remove()
         self.mainWindowView = FirstOpenView()
@@ -197,10 +203,6 @@ class MainWindow(QMainWindow):
     def reseat_p_bar(self):
         self.pbarValue = 0
         self.pbarWidget.reseat()
-
-
-
-
 
 
 
