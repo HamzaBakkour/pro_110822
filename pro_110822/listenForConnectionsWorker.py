@@ -15,7 +15,7 @@ import datetime
 import pdb
 
 class ServerWorkerSignals(QObject):
-    recivedConnection = Signal(object)
+    createSocket = Signal(object, object)
 
 class ListenForConnectionsWorker(QRunnable):
     def __init__(self, port: int)-> None:
@@ -29,28 +29,23 @@ class ListenForConnectionsWorker(QRunnable):
     @Slot()
     def run(self)-> int:
         host = socket.gethostname()
-        port = 12345
-
         serverSocket = socket.socket()
-        sendMovementSocket = socket.socket()
-
-        serverSocket.bind((host, port))
-        sendMovementSocket.bind((host, 12346))
+        infoToClientSocket = socket.socket()
+        serverSocket.bind((host, self.serverPort))
+        infoToClientSocket.bind((host, 12346))
 
         while(True):
-            print("Started")
+            print("server is listning for connections")
             serverSocket.listen(1)
             conn, address = serverSocket.accept()  
             print("Connection from: " + str(address))
             while True:
-                sendMovementSocket.listen(60)
-                connS, addressS = sendMovementSocket.accept()  
-                print("Waiting for data")
-                data = connS.recv(1024).decode()
-                if not data:
-                    break
-                print("from connected user: " + str(data))
-                data = input(' -> ')
+                infoToClientSocket.listen(60)
+                connS, addressS = infoToClientSocket.accept()
+                #This data tells the client which port to use to recive mouse movement
+                self.signal.createSocket.emit(addressS, "12348")
+
+                data = "12348"
                 connS.send(data.encode())  
             print("breaked")
         conn.close() 

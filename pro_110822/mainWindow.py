@@ -38,6 +38,7 @@ from searchforserversworker import SearchForServersWorker
 from progressbar import ProgressBar
 from devicewidget import Device
 from recivemousemovementworker import ReciveMouseMovementWorker
+from sendmousemovementworker import SendMouseMovementWorker
 
 import socket
 
@@ -58,7 +59,7 @@ format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
 class MainWindow(QMainWindow):
     def __init__(self, parent=None)-> None:
         super(MainWindow, self).__init__(parent)
-        self.vm = False
+
         #Main window title
         self.setWindowTitle("pro_110822")
         #Main window resulotion
@@ -92,6 +93,7 @@ class MainWindow(QMainWindow):
 
         #This list is used to store XX 
         self.recivemouseMovementWorkers = []
+        self.sendmouseMovmentWorkers = []                                
 
 
 
@@ -149,7 +151,7 @@ class MainWindow(QMainWindow):
         #Set the server worker. This worker will listen for connection on the port 12345
         self.serverConnection = ListenForConnectionsWorker(12345)
         #Connect the wroker's recivedConnection signal to the function  dataFromListningToConnectionsWorker
-        self.serverConnection.signal.recivedConnection.connect(self.data_from_listning_to_connections_worker)
+        self.serverConnection.signal.createSocket.connect(self.data_from_listning_to_connections_worker)
         #Start the worker
         self.threabool.start(self.serverConnection)
 
@@ -172,9 +174,13 @@ class MainWindow(QMainWindow):
 
 
 
-    def data_from_listning_to_connections_worker(self, data : str):
+    def data_from_listning_to_connections_worker(self, address : str, port : str):
         print("Recived from listenForConnectionsWorker")
-        print("data: ", data)
+        print("address: ", address[0])
+        print("port: ", port)
+
+        self.sendmouseMovmentWorkers.append(SendMouseMovementWorker(address[0], port))
+        self.threabool.start(self.sendmouseMovmentWorkers[-1])
 
 
 
