@@ -16,3 +16,11 @@ ServerWidget
 line 118
 change the name of the function
 add_device to add_server_widget
+
+line 148
+change the name of serverConnection to
+listning connection
+
+line 150
+change the name of createSocket to
+recivedRquestforConnecting
