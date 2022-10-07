@@ -1,0 +1,26 @@
+mainwindow.py
+line 81 -> 92
+put them in a function 
+will affect line 167 -> 174
+
+line 109
+change the name of connectionOkSignal 
+to foundServer
+
+line 117
+change the name of serverDevice1
+to serverWidget
+change the name of Device to 
+ServerWidget
+
+line 118
+change the name of the function
+add_device to add_server_widget
+
+line 148
+change the name of serverConnection to
+listning connection
+
+line 150
+change the name of createSocket to
+recivedRquestforConnecting
