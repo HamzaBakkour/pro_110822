@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
         self.searchConntection = SearchForServersWorker(12345)
         #Connect the worker's connectionOkSignal signal to the function addServerToServersArea
         #The worker will send this signal to the main thread in case it manages to connect to a server on the local network
-        self.searchConntection.signal.connectionOkSignal.connect(self.add_server_to_servers_area)
+        self.searchConntection.signal.foundServer.connect(self.add_server_to_servers_area)
         #The worker will send this signal to the main thread to update the progress bar when it manages to connect to a server on the local network
         self.searchConntection.signal.pbarSignal.connect(self.update_p_bar)
         #Start the woker
@@ -114,9 +114,9 @@ class MainWindow(QMainWindow):
 
     def add_server_to_servers_area(self, serverName : str, serverIP: str, serverPort: int)-> None:
         print("emited from searchForServers : ", serverName, serverIP)
-        self.serverDevice1 = Device(serverName, serverIP)
-        self.mainWindowView.add_deivce(self.serverDevice1)
-        self.serverDevice1.connectToServer.clicked.connect(lambda: self.establish_connection_to_server(serverIP, serverPort))
+        self.serverWidget = Device(serverName, serverIP)
+        self.mainWindowView.add_deivce(self.serverWidget)
+        self.serverWidget.connectToServer.clicked.connect(lambda: self.establish_connection_to_server(serverIP, serverPort))
 
     def establish_connection_to_server(self ,serverIP: str, serverPort: int):
         clientSocket = socket.socket()
@@ -145,18 +145,18 @@ class MainWindow(QMainWindow):
         #Connect the server button to the fuction closeServer.
         self.mainWindowView.stopServerButton.clicked.connect(self.close_server)
         #Set the server worker. This worker will listen for connection on the port 12345
-        self.serverConnection = ListenForConnectionsWorker(12345)
+        self.listningConnection = ListenForConnectionsWorker(12345)
         #Connect the wroker's recivedConnection signal to the function  dataFromListningToConnectionsWorker
-        self.serverConnection.signal.createSocket.connect(self.data_from_listning_to_connections_worker)
+        self.listningConnection.signal.recivedRequestForConnection.connect(self.data_from_listning_to_connections_worker)
         #Start the worker
-        self.threabool.start(self.serverConnection)
+        self.threabool.start(self.listningConnection)
 
 
     def close_server(self):
-        self.serverConnection.terminate = True
+        self.listningConnection.terminate = True
         try:
-            self.serverConnection.serverSocket.close()
-            self.serverConnection.serverInfoToClientSocket.close()
+            self.listningConnection.serverSocket.close()
+            self.listningConnection.serverInfoToClientSocket.close()
             print("Connected Socket terminated")
         except :#trying to close c before any connections are acepted
                             # trying to close a connection that does not exist -> AttributeError

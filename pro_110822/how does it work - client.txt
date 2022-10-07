@@ -1,0 +1,10 @@
+#searchforconnectionsworker.py
+
+client search for servers on port 12345
+
+	if found -> add server widget with connect button
+
+		if the connect button is pressed ->
+			create a socket and connect to server
+			at port 12346
+

@@ -12,7 +12,7 @@ import re
 import pdb
 # pdb.set_trace()
 class SearchForServersWorkerSignals(QObject):
-    connectionOkSignal = Signal(object, object, object)
+    foundServer = Signal(object, object, object)
     pbarSignal = Signal(object, object)
 
 class SearchForServersWorker(QRunnable):
@@ -50,10 +50,10 @@ class SearchForServersWorker(QRunnable):
                     found = False
                     for name in devicesName:
                         if device_IP in name[2]:
-                            self.signal.connectionOkSignal.emit(name[0], device_IP, self.serverPort)
+                            self.signal.foundServer.emit(name[0], device_IP, self.serverPort)
                             found = True
                     if (not found):
-                        self.signal.connectionOkSignal.emit("Unknown", device_IP, self.serverPort)
+                        self.signal.foundServer.emit("Unknown", device_IP, self.serverPort)
 
                 else:
                     self.signal.pbarSignal.emit(0, (device_IP + ':' + str(self.serverPort) +' connection refused!.'))

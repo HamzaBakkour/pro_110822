@@ -15,7 +15,7 @@ import datetime
 import pdb
 
 class ServerWorkerSignals(QObject):
-    createSocket = Signal(object, object)
+    recivedRequestForConnection = Signal(object, object)
 
 class ListenForConnectionsWorker(QRunnable):
     def __init__(self, port: int)-> None:
@@ -47,7 +47,7 @@ class ListenForConnectionsWorker(QRunnable):
                 self.serverInfoToClientSocket.listen(60)
                 try:
                     connS, addressS = self.serverInfoToClientSocket.accept()
-                    self.signal.createSocket.emit(addressS, "12348")
+                    self.signal.recivedRequestForConnection.emit(addressS, "12348")
                     #This data tells the client which port to use to recive mouse movement
                     data = "12348"
                     connS.send(data.encode())  

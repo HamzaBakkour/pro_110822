@@ -1,0 +1,16 @@
+server is listning for connections at 12345
+	recived a connection request -> accept it
+
+	recived a request to get mouse and keyboard
+		-> create a socket, bind to port
+			send the port number to client
+
+The server has a Listner + on_move, on_click, on_press
+	The on_move, on_click, on_press will send to the
+	currently acitve connection.
+
+**slove the following issue**
+server has multible connected clients
+	ex: client 1 using socket 1
+	       client 2 using socket 2
+	       client 3 using socket 3
