@@ -14,46 +14,29 @@ import datetime
 
 import pdb
 
-class ServerWorkerSignals(QObject):
-    recivedRequestForConnection = Signal(object, object)
+class ListningWorkerSignals(QObject):
+    connectionFromClient = Signal(object)
 
 class ListenForConnectionsWorker(QRunnable):
-    def __init__(self, port: int)-> None:
+    def __init__(self, listningSocket : socket.socket)-> None:
         super(ListenForConnectionsWorker, self).__init__()
-        self.serverPort = port
-        self.terminate = False
 
-        self.signal = ServerWorkerSignals()
-
+        self.workerSocket = listningSocket
+        self.signal = ListningWorkerSignals()
 
     @Slot()
     def run(self)-> int:
-        host = socket.gethostname()
-        self.serverSocket = socket.socket()
-        self.serverInfoToClientSocket = socket.socket()
-        self.serverSocket.bind(('', self.serverPort))
-        self.serverInfoToClientSocket.bind(('', 12346))
 
-        while (self.terminate == False):
-            print("server is listning for connections")
-            self.serverSocket.listen(5)
-            try:
-                conn, address = self.serverSocket.accept()
-                print("Connection from: " + str(address))
-            except:
-                pass
+        print("Server is listning for connections at port 12345")
+        while (True):
             
-            while (self.terminate == False):
-                self.serverInfoToClientSocket.listen(60)
-                try:
-                    connS, addressS = self.serverInfoToClientSocket.accept()
-                    self.signal.recivedRequestForConnection.emit(addressS, "12348")
-                    #This data tells the client which port to use to recive mouse movement
-                    data = "12348"
-                    connS.send(data.encode())  
-                except:
-                    print("**INFO** listenforconnectionsworker.py ListenForConnectionsWorker run [2]")
-                    
+            self.workerSocket.listen(1)
+            # try:
+            conn, address = self.workerSocket.accept()
+            print("Client at {} searching for server".format(str(address)))
+            self.signal.connectionFromClient.emit(address)
+            # except:
+                # pass
+        
 
-
-            print("breaked")
+            print("breaked11111111")

@@ -1,16 +1,38 @@
-server is listning for connections at 12345
-	recived a connection request -> accept it
+server create a serverSocket, bind it at 12345
 
-	recived a request to get mouse and keyboard
-		-> create a socket, bind to port
-			send the port number to client
+server create two workers and pass serverSocket to them. 
+	one worker will listen for connections and accept them
+			And
+	one worker will recive requests
 
-The server has a Listner + on_move, on_click, on_press
-	The on_move, on_click, on_press will send to the
-	currently acitve connection.
+		recive a request (string)
+			emit to the server the port number
+						+
+			send to the client the port number
 
-**slove the following issue**
-server has multible connected clients
-	ex: client 1 using socket 1
-	       client 2 using socket 2
-	       client 3 using socket 3
+				the server will create a socket and bind it
+				to that port number
+
+				each socket that the server creates will
+				be added to a list
+
+				the server has a variable called  activeSharingSocket
+				this variable equals the socket that is reciving
+				mouse and keyboard 
+
+				to send mouse and keyboard to another client,
+				activeSharingSocket will equal another index
+
+the server has a Listner with on_move, on_click, on_press.
+these functions will send data on the server variable activeSharingSocket
+
+
+the client will create a socket and connect it to the port number
+	that it recived from the server
+
+
+
+
+
+
+

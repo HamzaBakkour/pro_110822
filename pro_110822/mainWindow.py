@@ -34,6 +34,7 @@ from PySide6 import QtGui, QtCore, QtWidgets
 from firstopenview import FirstOpenView
 from serverview import ServerView
 from listenforconnectionsworker import ListenForConnectionsWorker
+from listenforrequestsworker import ListningForRequstsWorker
 from searchforserversworker import SearchForServersWorker
 from progressbar import ProgressBar
 from devicewidget import Device
@@ -144,10 +145,19 @@ class MainWindow(QMainWindow):
         self.mainWidget.layout.addWidget(self.pbarWidget)
         #Connect the server button to the fuction closeServer.
         self.mainWindowView.stopServerButton.clicked.connect(self.close_server)
+
+        self.serverSocket = socket.socket()
+        self.serverSocket.bind(('', 12345))
+
         #Set the server worker. This worker will listen for connection on the port 12345
-        self.listningConnection = ListenForConnectionsWorker(12345)
+        self.listningConnection = ListenForConnectionsWorker(self.serverSocket)
+        self.recivingRequestsConnection = ListningForRequstsWorker(self.serverSocket)
+
+
         #Connect the wroker's recivedConnection signal to the function  dataFromListningToConnectionsWorker
-        self.listningConnection.signal.recivedRequestForConnection.connect(self.data_from_listning_to_connections_worker)
+        self.listningConnection.signal.connectionFromClient.connect(self.data_from_listning_to_connections_worker)
+        self.recivingRequestsConnection.signal.dataFromClient.connect(self.data_from_listning_to_connections_worker)
+
         #Start the worker
         self.threabool.start(self.listningConnection)
 
@@ -180,13 +190,21 @@ class MainWindow(QMainWindow):
 
 
 
-    def data_from_listning_to_connections_worker(self, address : str, port : str):
-        print("Recived from listenForConnectionsWorker")
-        print("address: ", address[0])
-        print("port: ", port)
+    def data_from_listning_to_connections_worker(self, address : str):
+        print("Emited from ListenForConnectionsWorker -> MainWindow : " + address)
 
-        self.sendmouseMovmentWorkers.append(SendMouseMovementWorker(address[0], port))
-        self.threabool.start(self.sendmouseMovmentWorkers[-1])
+    def data_from_listning_to_requests_worker(self, data : str):
+        print("Emited from recivingRequestsConnection -> MainWindow : " + data)
+
+
+
+    # def data_from_listning_to_connections_worker(self, address : str, port : str):
+    #     print("Recived from listenForConnectionsWorker")
+    #     print("address: ", address[0])
+    #     print("port: ", port)
+
+    #     self.sendmouseMovmentWorkers.append(SendMouseMovementWorker(address[0], port))
+    #     self.threabool.start(self.sendmouseMovmentWorkers[-1])
 
 
 

@@ -24,6 +24,7 @@ import networkscan
 import ipaddress
 from netaddr import IPNetwork
 import subprocess
+import asyncio
 
 import sys
 import os
@@ -34,7 +35,7 @@ import re
 
 import pdb
 
-
+from asyncioping import main_ping
 
 class NetWrokScanner():
     def __init__(self):
@@ -126,7 +127,7 @@ class NetWrokScanner():
         return arp_list
 
 
-    def get_local_address_from_arp(self):
+    def get_local_addresses_from_arp(self):
         netWorkInfo = self.get_host_network_info()
         arp_list = self.get_arp()
         local_ip = []
@@ -146,9 +147,18 @@ class NetWrokScanner():
 
         return local_ip
 
+    def get_local_addresses_from_ping(self):
+        networkInfo = self.get_host_network_info()
+        firstThreeOctate = networkInfo['host_ip_address'].replace(networkInfo['host_ip_address'].split('.')[3], '')[:-1]
+        pingResult = asyncio.run(main_ping(firstThreeOctate))
+        result = [i for i in pingResult if (i != networkInfo['host_ip_address'])]
+        return result
+
+
+
     def get_ip_of_connected_devices_on_host_network(self)->list:
         host_network_info = self.get_host_network_info()
-        available_ip_addresses_on_host_network = self.get_local_address_from_arp()
+        available_ip_addresses_on_host_network = self.get_local_addresses_from_ping()
 
         ip_of_connected_devices = []
         for ip_address in available_ip_addresses_on_host_network:
@@ -164,21 +174,23 @@ class NetWrokScanner():
             try:
                 connected_devices_name__ip.append(socket.gethostbyaddr(device_ip))
             except:
-                part1 = str(sys.exc_info())
-                part2 = traceback.format_exc()
-                origin = re.search(r'File(.*?)\,', part2).group(1) 
-                loggMessage = origin + '\n' + part1  + '\n' + part2
-                print("***********************************************")
-                print("This was supposed to be a log message")
-                print("It creates a dummy,")
-                print("Message is: ")
-                print(loggMessage)
-                print("***********************************************")
+                # part1 = str(sys.exc_info())
+                # part2 = traceback.format_exc()
+                # origin = re.search(r'File(.*?)\,', part2).group(1) 
+                # loggMessage = origin + '\n' + part1  + '\n' + part2
+                # print("***********************************************")
+                # print("This was supposed to be a log message")
+                # print("It creates a dummy,")
+                # print("Message is: ")
+                # print(loggMessage)
+                # print("***********************************************")
                 # logging.info(loggMessage)
+                pass
 
         return sorted(connected_devices_name__ip)
 
 
 
-# x = netWrokScanner()
+# x = NetWrokScanner()
+# x.get_local_addresses_from_ping()
 # print(x.get_connected_devices_name())
