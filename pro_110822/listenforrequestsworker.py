@@ -18,25 +18,27 @@ class ListningForRequestsWorkerSignals(QObject):
     dataFromClient = Signal(object)
 
 class ListningForRequstsWorker(QRunnable):
-    def __init__(self, listningSocket : socket.socket)-> None:
+    def __init__(self, *listningSocket : socket.socket)-> None:
         super(ListningForRequstsWorker, self).__init__()
 
-        self.workerSocket = listningSocket
+        self.workerSocket = listningSocket[0]
         self.signal = ListningForRequestsWorkerSignals()
 
 
     @Slot()
     def run(self)-> int:
 
-        print("Server is waiting for requsts at port 12345")
+        print("\nServer is waiting for requsts at port 12345")
         while (True):
             
-            try:
-                data = self.workerSocket.recv(1024).decode()
-                self.signal.dataFromClient.emit(data)
-                # print("Recived the following request from client " + data)
-            except:
-                pass
+            # try:
+            # data = self.workerSocket.recv(1024).decode()
+            # self.signal.dataFromClient.emit(data)
+            # print("Recived the following request from client " + data)
+            # except:
+            #     time.sleep(1)
+            time.sleep(60)
+            pass
         
 
-            print("breaked222222")
+            # print("breaked222222")
