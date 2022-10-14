@@ -152,17 +152,14 @@ class MainWindow(QMainWindow):
 
         #Set the server worker. This worker will listen for connection on the port 12345
         self.listningConnection = ListenForConnectionsWorker(self.serverSocket)
-        self.recivingRequestsConnection = ListningForRequstsWorker(self.serverSocket)
 
 
         #Connect the wroker's recivedConnection signal to the function  dataFromListningToConnectionsWorker
         self.listningConnection.signal.connectionFromClient.connect(self.data_from_listning_to_connections_worker)
-        self.recivingRequestsConnection.signal.dataFromClient.connect(self.data_from_listning_to_requests_worker)
 
         #Start the worker
         
         self.threabool.start(self.listningConnection)
-        self.threabool.start(self.recivingRequestsConnection)
 
 
     def close_server(self):
@@ -193,8 +190,8 @@ class MainWindow(QMainWindow):
 
 
 
-    def data_from_listning_to_connections_worker(self, address : str):
-        print("Emited from ListenForConnectionsWorker -> MainWindow : " ,address)
+    def data_from_listning_to_connections_worker(self, data : str):
+        print("Emited from ListenForConnectionsWorker -> MainWindow : ", data)
         # try:
         #     data = self.serverSocket.recv(1024).decode()
         #     print(data)
@@ -202,8 +199,7 @@ class MainWindow(QMainWindow):
         #     print(str(e))
         #     print("break 33333333333")
 
-    def data_from_listning_to_requests_worker(self, data : str):
-        print("Emited from recivingRequestsConnection -> MainWindow : " + data)
+
 
 
 
