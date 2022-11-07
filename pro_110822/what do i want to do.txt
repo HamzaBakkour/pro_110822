@@ -1,0 +1,6 @@
+Start a script and pass the port that it should listen to.
+
+Send to the script the shortcuts that it should care about.
+
+Being able to change the shortcuts on the fly.
+

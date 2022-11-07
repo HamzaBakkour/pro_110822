@@ -192,24 +192,25 @@ class MainWindow(QMainWindow):
 
     def data_from_listning_to_connections_worker(self, data : str):
         print("Emited from ListenForConnectionsWorker -> MainWindow : ", data)
-        # try:
-        #     data = self.serverSocket.recv(1024).decode()
-        #     print(data)
-        # except Exception as e :
-        #     print(str(e))
-        #     print("break 33333333333")
+        dataType = data.split('!')[0]
+
+        if (dataType == 'C'):
+            clientScreenRezW = data.split('!')[1]
+            clientScreenRezH = data.split('!')[2]
+            clientReceiveSocketPort = data.split('!')[3]
+            clientReceiveSocketIP = data.split('!')[4]
+            self.create_sending_socket((clientScreenRezW, clientScreenRezH), clientReceiveSocketIP, clientReceiveSocketPort)
+
+        # print("{} : {} : {} : {} : {}".format(dataType, clientScreenRezW, clientScreenRezH, clientReceiveSocketPort, clientReceiveSocketIP))
 
 
 
 
-
-    # def data_from_listning_to_connections_worker(self, address : str, port : str):
-    #     print("Recived from listenForConnectionsWorker")
-    #     print("address: ", address[0])
-    #     print("port: ", port)
-
-    #     self.sendmouseMovmentWorkers.append(SendMouseMovementWorker(address[0], port))
-    #     self.threabool.start(self.sendmouseMovmentWorkers[-1])
+    def create_sending_socket(self, ReseiveRez : tuple, receiveIP : str, receivePort : str):
+        receivePort = int(receivePort)
+        self.sendmouseMovmentWorkers.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+        self.sendmouseMovmentWorkers[-1].connect((receiveIP, receivePort))
+        
 
 
 
