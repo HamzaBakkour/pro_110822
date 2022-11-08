@@ -7,6 +7,7 @@ class ListenForShortcuts():
     def __init__(self, addr: str, port: int)-> None:
         self.address = (addr, port)#5001
         self.listner = False
+        self._connect()
 
     def _on_activate(self, m):
         self.conn.send(m)
@@ -16,8 +17,6 @@ class ListenForShortcuts():
         self.conn = Client(self.address, authkey=b'pro110822')
 
     def define_shortcuts(self, *args):
-
-        self._connect()
 
         def _get_count_of_shortcuts():
             n = 0
@@ -45,8 +44,14 @@ class ListenForShortcuts():
             self.listner.start()
             print("started exit")
 
-test = ListenForShortcuts('localhost', 5001)
+# test = ListenForShortcuts('localhost', 5001)
 
-test.define_shortcuts('<ctrl>+m+1', '<ctrl>+m+2')
+# test.define_shortcuts('<ctrl>+m+1', '<ctrl>+m+2')
 
-time.sleep(30)
+# time.sleep(10)
+
+# print("333333333333333333333333333333333333")
+
+# test.define_shortcuts('<ctrl>+m+3')
+
+# time.sleep(20)
