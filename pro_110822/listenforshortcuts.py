@@ -6,38 +6,47 @@ import time
 class ListenForShortcuts():
     def __init__(self, addr: str, port: int)-> None:
         self.address = (addr, port)#5001
+        self.listner = False
 
-    def connect(self):
-        self.conn = Client(self.address, authkey=b'pro110822')
-
-    def on_activate(self, m):
+    def _on_activate(self, m):
         self.conn.send(m)
         print('sent -> ', m)
 
-    def terminate(self):
-        sys.exit()
+    def _connect(self):
+        self.conn = Client(self.address, authkey=b'pro110822')
 
-    def start_listning(self):
-        self.connect()
+    def define_shortcuts(self, *args):
 
-        msg = self.conn.recv()
-        print('received <-', msg)
+        self._connect()
 
-        argumentsList = []
-        numberOfShortcuts = int(msg.split('!')[1])
-        for i in range(0,numberOfShortcuts):
-            argumentsList.append("'" + msg.split('!')[i + 2] + "'")
+        def _get_count_of_shortcuts():
+            n = 0
+            for _ in args:
+                n = n + 1
+            return n
 
-        argg = '{'
-        for i in range(0,numberOfShortcuts):
-            argg = argg + argumentsList[i] + ':' + ' lambda: self.on_activate({})'.format(argumentsList[i]) + ', '
-        argg = argg[:-2] + '}'
-        print(argg)
+        count = _get_count_of_shortcuts()
 
-        shortcut =  keyboard.GlobalHotKeys(eval(argg))
-        shortcut.start()
+        self.argg = '{'
+        for _ in range(count):
+            self.argg = self.argg + "'" + args[_] + "'" + ':' + ' lambda self = self: self._on_activate({})'.format("'" + args[_] + "'") + ', '
+        self.argg = self.argg[:-2] + '}'
+        print(f'argg : {self.argg}')
 
-        while(1):
-            msg = self.conn.recv()
-            if msg == "TR":
-                self.terminate()
+        if self.listner:
+            print("stoped")
+            self.listner.stop()
+            self.listner =  keyboard.GlobalHotKeys(eval(self.argg))
+            self.listner.start()
+            print("stoped exit")
+        else:
+            print("started")
+            self.listner =  keyboard.GlobalHotKeys(eval(self.argg))
+            self.listner.start()
+            print("started exit")
+
+test = ListenForShortcuts('localhost', 5001)
+
+test.define_shortcuts('<ctrl>+m+1', '<ctrl>+m+2')
+
+time.sleep(30)
