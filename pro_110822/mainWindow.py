@@ -30,20 +30,23 @@ from PySide6.QtWidgets import (
 )
 
 from PySide6 import QtGui, QtCore, QtWidgets
+from pynput import keyboard
 
 from firstopenview import FirstOpenView
 from serverview import ServerView
 from listenforconnectionsworker import ListenForConnectionsWorker
-from listenforrequestsworker import ListningForRequstsWorker
 from searchforserversworker import SearchForServersWorker
 from progressbar import ProgressBar
 from devicewidget import Device
 from recivemousemovementworker import ReciveMouseMovementWorker
 from sendmousemovementworker import SendMouseMovementWorker
 
+
+
 import socket
 
 import sys
+import struct
 import os
 import logging
 import time
@@ -78,7 +81,6 @@ class MainWindow(QMainWindow):
         self.threabool = QThreadPool()
         self.threabool.setMaxThreadCount(12)
 
-
         #Start the main window with the firstOpenView view
         self.mainWindowView = FirstOpenView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
@@ -94,8 +96,39 @@ class MainWindow(QMainWindow):
 
         #This list is used to store XX 
         self.recivemouseMovementWorkers = []
-        self.sendmouseMovmentWorkers = []                                
+        self.sendmouseMovmentWorkers = []
 
+        #shortcuts listner  
+        self.listner = False
+        self._define_shortcuts('<ctrl>+m+1', '<ctrl>+m+2')                     
+
+
+    def _on_shortcut_activate(self, m):
+        print(f'shortcut detected >>> {m}')
+
+    def _define_shortcuts(self, *args):
+
+        def get_count_of_shortcuts():
+            n = 0
+            for _ in args:
+                n = n + 1
+            return n
+
+        count = get_count_of_shortcuts()
+
+        argg = '{'
+        for _ in range(count):
+            argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self._on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
+
+        argg = argg[:-2] + '}'
+
+        if self.listner:
+            self.listner.stop()
+            self.listner =  keyboard.GlobalHotKeys(eval(argg))
+            self.listner.start()
+        else:
+            self.listner =  keyboard.GlobalHotKeys(eval(argg))
+            self.listner.start()
 
 
 ##################################################################################################################################################################
@@ -120,17 +153,35 @@ class MainWindow(QMainWindow):
         self.serverWidget.connectToServer.clicked.connect(lambda: self.establish_connection_to_server(serverIP, serverPort))
 
     def establish_connection_to_server(self ,serverIP: str, serverPort: int):
-        clientSocket = socket.socket()
-        clientSocket.connect((serverIP, 12346))
-        print("waiting on data from server (which port to use)")
-        data = clientSocket.recv(1024).decode()  
-        print('Received from server: ' + data)
-        #Add a worker to the list recivemouseMovementWorkers.
-        self.recivemouseMovementWorkers.append(ReciveMouseMovementWorker(serverIP, data))
-        #Start the worker
+        self.reciveMouseMovement = ReciveMouseMovementWorker(serverIP, serverPort)
+        self.threabool.start(self.reciveMouseMovement)
+        # clientSocket = socket.socket()
+        # try:
+        #     clientSocket.connect((serverIP, 12345))
+        # except:
+        #     print("failed to connect to server", serverIP)
+        # print("waiting on data from server (which port to use)")
+        # data = clientSocket.recv(1024).decode()  
+        # print('Received from server: ' + data)
+        # #Add a worker to the list recivemouseMovementWorkers.
+        # self.recivemouseMovementWorkers.append(ReciveMouseMovementWorker(serverIP, data))
+        # #Start the worker
 
-        self.threabool.start(self.recivemouseMovementWorkers[-1])
-        clientSocket.close()
+        # self.threabool.start(self.recivemouseMovementWorkers[-1])
+        # clientSocket.close()
+        pass
+
+    def send_connection_info(self):
+        # screenRez = self.get_screen_resulotion()
+        # message = "C!{}!{}".format(screenRez[0], screenRez[1])
+        # message = message.encode()
+        # header = struct.pack('<L', len(message))
+        # try:
+        #     clientSocket.sendall(header + message)
+        # except Exception as e:
+        #     print("***3948pfkro57620***")
+        #     print(str(e))
+        pass
 
 ##################################################################################################################################################################
 
