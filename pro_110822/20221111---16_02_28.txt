@@ -1,0 +1,24 @@
+ERROR
+2022-11-11 16:02:29,584
+Unhandled exception in listener callback
+Traceback (most recent call last):
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\_util\win32.py", line 386, in _handler
+    converted = self._convert(code, msg, lpdata)
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\_util\win32.py", line 401, in _convert
+    raise NotImplementedError()
+NotImplementedError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\_util\__init__.py", line 228, in inner
+    return f(self, *args, **kwargs)
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\_util\win32.py", line 390, in _handler
+    self._handle(code, msg, lpdata)
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\mouse\_win32.py", line 208, in _handle
+    self.on_move(data.pt.x, data.pt.y)
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\_util\__init__.py", line 144, in inner
+    if f(*args) is False:
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822\sendmousemovement2.py", line 26, in _on_move
+    self.activeConnection.send()
+AttributeError: 'int' object has no attribute 'send'

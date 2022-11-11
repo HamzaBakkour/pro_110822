@@ -39,7 +39,7 @@ from searchforserversworker import SearchForServersWorker
 from progressbar import ProgressBar
 from devicewidget import Device
 from recivemousemovementworker import ReciveMouseMovementWorker
-from sendmousemovementworker import SendMouseMovementWorker
+from sendmousemovement2 import SendMouseKeyboard
 
 
 
@@ -94,17 +94,27 @@ class MainWindow(QMainWindow):
         self.mainWidget.layout.addWidget(self.pbarWidget)
         self.pbarValue = 0
 
-        #This list is used to store XX 
-        self.recivemouseMovementWorkers = []
-        self.sendmouseMovmentWorkers = []
+        #This list is used to store sending mouse movmement sockets
+        self.sendmouseMovmentSockets = []
+
+
+        #############################
+        self.sendMouseKeyboard = SendMouseKeyboard()
+        self.sendMouseKeyboard.start_listning()
+        
 
         #shortcuts listner  
         self.listner = False
-        self._define_shortcuts('<ctrl>+m+1', '<ctrl>+m+2')                     
+        self._define_shortcuts('<ctrl>+m+1')      
 
 
     def _on_shortcut_activate(self, m):
         print(f'shortcut detected >>> {m}')
+        print("111")
+        print("passed {}".format(self.sendmouseMovmentSockets[0]))
+        print("222")
+        self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[-1]['socket'])
+        
 
     def _define_shortcuts(self, *args):
 
@@ -155,33 +165,7 @@ class MainWindow(QMainWindow):
     def establish_connection_to_server(self ,serverIP: str, serverPort: int):
         self.reciveMouseMovement = ReciveMouseMovementWorker(serverIP, serverPort)
         self.threabool.start(self.reciveMouseMovement)
-        # clientSocket = socket.socket()
-        # try:
-        #     clientSocket.connect((serverIP, 12345))
-        # except:
-        #     print("failed to connect to server", serverIP)
-        # print("waiting on data from server (which port to use)")
-        # data = clientSocket.recv(1024).decode()  
-        # print('Received from server: ' + data)
-        # #Add a worker to the list recivemouseMovementWorkers.
-        # self.recivemouseMovementWorkers.append(ReciveMouseMovementWorker(serverIP, data))
-        # #Start the worker
 
-        # self.threabool.start(self.recivemouseMovementWorkers[-1])
-        # clientSocket.close()
-        pass
-
-    def send_connection_info(self):
-        # screenRez = self.get_screen_resulotion()
-        # message = "C!{}!{}".format(screenRez[0], screenRez[1])
-        # message = message.encode()
-        # header = struct.pack('<L', len(message))
-        # try:
-        #     clientSocket.sendall(header + message)
-        # except Exception as e:
-        #     print("***3948pfkro57620***")
-        #     print(str(e))
-        pass
 
 ##################################################################################################################################################################
 
@@ -259,10 +243,10 @@ class MainWindow(QMainWindow):
 
     def create_sending_socket(self, ReseiveRez : tuple, receiveIP : str, receivePort : str):
         receivePort = int(receivePort)
-        self.sendmouseMovmentWorkers.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
-        self.sendmouseMovmentWorkers[-1].connect((receiveIP, receivePort))
+        self.sendmouseMovmentSockets.append({'socket': socket.socket(socket.AF_INET, socket.SOCK_STREAM),
+                                            'shortcut' : '<ctrl>+m+1'})
+        self.sendmouseMovmentSockets[-1]['socket'].connect((receiveIP, receivePort))
         
-
 
 
     def update_p_bar(self, value, text):

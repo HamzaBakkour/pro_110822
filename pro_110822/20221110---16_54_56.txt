@@ -1,0 +1,25 @@
+DEBUG
+2022-11-10 17:06:08,263
+Using proactor: IocpProactor
+INFO
+2022-11-10 17:06:12,423
+ "c:\Users\alexa\Desktop\pro_110822\pro_110822\socketconnection.py"
+(<class 'OSError'>, OSError(10049, 'The requested address is not valid in its context', None, 10049, None), <traceback object at 0x0000022A0953E380>)
+Traceback (most recent call last):
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822\socketconnection.py", line 66, in connect_to_server
+    self.s.connect((serverIP, port))
+OSError: [WinError 10049] The requested address is not valid in its context
+
+serverIP: 192.168.0.255
+port: 12345
+INFO
+2022-11-10 17:06:14,443
+ "c:\Users\alexa\Desktop\pro_110822\pro_110822\socketconnection.py"
+(<class 'ConnectionRefusedError'>, ConnectionRefusedError(10061, 'No connection could be made because the target machine actively refused it', None, 10061, None), <traceback object at 0x0000022A0953D400>)
+Traceback (most recent call last):
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822\socketconnection.py", line 66, in connect_to_server
+    self.s.connect((serverIP, port))
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+serverIP: 192.168.0.1
+port: 12345
