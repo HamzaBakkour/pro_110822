@@ -11,9 +11,9 @@ from PySide6.QtWidgets import (
     QLabel
 )
 
-class Device(QtWidgets.QFrame):
+class ServerWidget(QtWidgets.QFrame):
     def __init__(self,device_name: str, device_IP: list):        
-        super(Device, self).__init__()
+        super(ServerWidget, self).__init__()
 
         #Set the class layout
         self.setObjectName("ParentWidget");

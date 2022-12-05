@@ -2,7 +2,7 @@ import sys
 from PySide6 import QtGui, QtCore, QtWidgets
 from PySide6.QtWidgets import QApplication, QFormLayout, QScrollArea, QGridLayout, QPushButton
 # import networkScanner
-from devicewidget import Device
+from serverwidget import ServerWidget
 
 class ScrollPanel(QScrollArea):
 

@@ -51,5 +51,11 @@ class ServerView(QtWidgets.QWidget):
 
         self.layout.addLayout(self.connectedDevicesAreaLayout)
 
+    def add_client(self, client):
+        self.connectedDevices.add_device(client)
+        pass
+
+
+
     def remove(self):
         self.deleteLater()

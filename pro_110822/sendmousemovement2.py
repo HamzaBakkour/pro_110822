@@ -3,6 +3,8 @@ from pynput import mouse, keyboard#.mouse import Listener, Controller
 import socket
 import struct
 
+import PySimpleGUI as sg
+
 import sys
 import os
 import traceback
@@ -27,7 +29,8 @@ class SendMouseKeyboard():
         try:
             self.activeConnection.sendall(header + message)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
+            pass
 
     def _on_click(self, x, y, button, pressed):
         if pressed:
@@ -39,7 +42,8 @@ class SendMouseKeyboard():
         try:
             self.activeConnection.sendall(header + message)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
+            pass
 
     def _on_scroll(self, x, y, dx, dy):
         if dy < 0:
@@ -51,7 +55,9 @@ class SendMouseKeyboard():
         try:
             self.activeConnection.sendall(header + message)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
+            pass
+
 
     def _on_press(self, key):
         try:
@@ -63,22 +69,28 @@ class SendMouseKeyboard():
         try:
             self.activeConnection.sendall(header + message)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
+            pass
 
-    def _on_release(self, key):
+
+    def _on_release(self, key):  
         message = f'R!{key}'
         message = message.encode()
         header = struct.pack('<L', len(message))
         try:
             self.activeConnection.sendall(header + message)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
+            pass
+
 
     def start_listning(self):
         self.mouseListner = mouse.Listener(on_move=self._on_move, on_click=self._on_click, on_scroll=self._on_scroll)
         self.keyboardListner = keyboard.Listener(on_press=self._on_press, on_release=self._on_release)
         self.mouseListner.start()
         self.keyboardListner.start()
+
+        
 
   
 

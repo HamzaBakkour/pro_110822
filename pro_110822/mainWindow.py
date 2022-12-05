@@ -37,10 +37,10 @@ from serverview import ServerView
 from listenforconnectionsworker import ListenForConnectionsWorker
 from searchforserversworker import SearchForServersWorker
 from progressbar import ProgressBar
-from devicewidget import Device
+from serverwidget import ServerWidget
 from recivemousemovementworker import ReciveMouseMovementWorker
 from sendmousemovement2 import SendMouseKeyboard
-
+from clientwidget import ClientWidget
 
 
 import socket
@@ -50,7 +50,7 @@ import struct
 import os
 import logging
 import time
-
+from ctypes import *
 # import pdb
 # pdb.post_mortem()
 # pdb.set_trace()
@@ -104,41 +104,58 @@ class MainWindow(QMainWindow):
         
 
         #shortcuts listner  
-        self.listner = False
-        self._define_shortcuts('<ctrl>+m+1')      
+        self.shortcutListner = False
+        self._define_shortcuts('<ctrl>+m+1','<ctrl>+m+2')   
 
 
     def _on_shortcut_activate(self, m):
         print(f'shortcut detected >>> {m}')
-        print("111")
+
         print("passed {}".format(self.sendmouseMovmentSockets[0]))
-        print("222")
-        self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[-1]['socket'])
         
+        if(m == '<ctrl>+m+1'):
+            self.sendMouseKeyboard.keyboardListner._suppress = True
+            self.sendMouseKeyboard.mouseListner._suppress = True
+            # hide_mouse_pointer("C:\\Users\\alexa\\Desktop\\pro_110822\\AutoHotkeyU64.exe", True)
+
+        elif(m == '<ctrl>+m+2'):
+            self.sendMouseKeyboard.keyboardListner._suppress = False
+            self.sendMouseKeyboard.mouseListner._suppress = False
+            # hide_mouse_pointer("C:\\Users\\alexa\\Desktop\\pro_110822\\AutoHotkeyU64.exe", False)
+
+
+        self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[-1]['socket'])
+
+        # ok = windll.user32.BlockInput(True) #enable block
+        # windll.user32.BlockInput(False) #disable block 
+
+
 
     def _define_shortcuts(self, *args):
 
-        def get_count_of_shortcuts():
-            n = 0
-            for _ in args:
-                n = n + 1
-            return n
-
-        count = get_count_of_shortcuts()
-
         argg = '{'
-        for _ in range(count):
+        for _ in range(len(args)):
             argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self._on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
 
         argg = argg[:-2] + '}'
 
-        if self.listner:
-            self.listner.stop()
-            self.listner =  keyboard.GlobalHotKeys(eval(argg))
-            self.listner.start()
+
+        # if (len(args) == 0):
+        #     if self.shortcutListner:
+        #         self.shortcutListner.stop()
+        #         return
+        #     else:
+        #         return
+
+
+
+        if self.shortcutListner:
+            self.shortcutListner.stop()
+            self.shortcutListner =  keyboard.GlobalHotKeys(eval(argg))
+            self.shortcutListner.start()
         else:
-            self.listner =  keyboard.GlobalHotKeys(eval(argg))
-            self.listner.start()
+            self.shortcutListner =  keyboard.GlobalHotKeys(eval(argg))
+            self.shortcutListner.start()
 
 
 ##################################################################################################################################################################
@@ -150,17 +167,17 @@ class MainWindow(QMainWindow):
         self.searchConntection = SearchForServersWorker(12345)
         #Connect the worker's connectionOkSignal signal to the function addServerToServersArea
         #The worker will send this signal to the main thread in case it manages to connect to a server on the local network
-        self.searchConntection.signal.foundServer.connect(self.add_server_to_servers_area)
+        self.searchConntection.signal.foundServer.connect(self.add_server)
         #The worker will send this signal to the main thread to update the progress bar when it manages to connect to a server on the local network
         self.searchConntection.signal.pbarSignal.connect(self.update_p_bar)
         #Start the woker
         self.threabool.start(self.searchConntection)
 
-    def add_server_to_servers_area(self, serverName : str, serverIP: str, serverPort: int)-> None:
+    def add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
         print("emited from searchForServers : ", serverName, serverIP)
-        self.serverWidget = Device(serverName, serverIP)
-        self.mainWindowView.add_deivce(self.serverWidget)
-        self.serverWidget.connectToServer.clicked.connect(lambda: self.establish_connection_to_server(serverIP, serverPort))
+        serverWidget = ServerWidget(serverName, serverIP)
+        self.mainWindowView.add_deivce(serverWidget)
+        serverWidget.connectToServer.clicked.connect(lambda: self.establish_connection_to_server(serverIP, serverPort))
 
     def establish_connection_to_server(self ,serverIP: str, serverPort: int):
         self.reciveMouseMovement = ReciveMouseMovementWorker(serverIP, serverPort)
@@ -193,7 +210,6 @@ class MainWindow(QMainWindow):
         self.listningConnection.signal.connectionFromClient.connect(self.data_from_listning_to_connections_worker)
 
         #Start the worker
-        
         self.threabool.start(self.listningConnection)
 
 
@@ -233,19 +249,24 @@ class MainWindow(QMainWindow):
             clientScreenRezW = data.split('!')[1]
             clientScreenRezH = data.split('!')[2]
             clientReceiveSocketPort = data.split('!')[3]
-            clientReceiveSocketIP = data.split('!')[4]
-            self.create_sending_socket((clientScreenRezW, clientScreenRezH), clientReceiveSocketIP, clientReceiveSocketPort)
-
-        # print("{} : {} : {} : {} : {}".format(dataType, clientScreenRezW, clientScreenRezH, clientReceiveSocketPort, clientReceiveSocketIP))
-
-
+            clientName = data.split('!')[4]
+            clientReceiveSocketIP = data.split('!')[5]
+            self.create_sending_socket((clientScreenRezW, clientScreenRezH), clientReceiveSocketIP, clientReceiveSocketPort, clientName)
+            # self.add_client(clientName, clientReceiveSocketIP, clientReceiveSocketPort)
 
 
-    def create_sending_socket(self, ReseiveRez : tuple, receiveIP : str, receivePort : str):
+    def add_client(self, clientName, clientIP, clientPort):
+        client = ClientWidget(clientName, clientIP, clientPort)
+        self.mainWindowView.add_client(client)
+
+
+    def create_sending_socket(self, ReseiveRez : tuple, receiveIP : str, receivePort : str, clientName : str):
         receivePort = int(receivePort)
         self.sendmouseMovmentSockets.append({'socket': socket.socket(socket.AF_INET, socket.SOCK_STREAM),
                                             'shortcut' : '<ctrl>+m+1'})
         self.sendmouseMovmentSockets[-1]['socket'].connect((receiveIP, receivePort))
+        self.add_client(clientName, receiveIP, self.sendmouseMovmentSockets[-1]['socket'].getsockname()[1])
+
         
 
 

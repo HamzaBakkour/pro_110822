@@ -1,8 +1,5 @@
 # from PySide6.QtCore import *
-from email import header
-from errno import WSAEWOULDBLOCK
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
-from socketconnection import MouseAndKeyboardConnection
 
 import sys
 import os
@@ -63,6 +60,7 @@ class ListenForConnectionsWorker(QRunnable):
 
                         if (data.split('!')[0] == 'C'):
                             data = data + '!' + self.conn.getpeername()[0]
+                            
 
                         self.signal.connectionFromClient.emit(data)
                     else:
