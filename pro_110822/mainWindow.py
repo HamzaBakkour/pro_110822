@@ -112,22 +112,22 @@ class MainWindow(QMainWindow):
         print(f'shortcut detected >>> {m}')
 
         print("passed {}".format(self.sendmouseMovmentSockets[0]))
+
+
         
         if(m == '<ctrl>+m+1'):
-            self.sendMouseKeyboard.keyboardListner._suppress = True
-            self.sendMouseKeyboard.mouseListner._suppress = True
-            # hide_mouse_pointer("C:\\Users\\alexa\\Desktop\\pro_110822\\AutoHotkeyU64.exe", True)
-
-        elif(m == '<ctrl>+m+2'):
             self.sendMouseKeyboard.keyboardListner._suppress = False
             self.sendMouseKeyboard.mouseListner._suppress = False
-            # hide_mouse_pointer("C:\\Users\\alexa\\Desktop\\pro_110822\\AutoHotkeyU64.exe", False)
+
+        elif(m == '<ctrl>+m+2'):
+            self.sendMouseKeyboard.keyboardListner._suppress = True
+            self.sendMouseKeyboard.mouseListner._suppress = True
+            self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[-1]['socket'])
 
 
-        self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[-1]['socket'])
 
-        # ok = windll.user32.BlockInput(True) #enable block
-        # windll.user32.BlockInput(False) #disable block 
+
+
 
 
 
@@ -158,7 +158,6 @@ class MainWindow(QMainWindow):
             self.shortcutListner.start()
 
 
-##################################################################################################################################################################
     def search_for_servers(self):
         self.reseat_p_bar()
         self.reseat_avaialble_servers_area()
@@ -184,7 +183,6 @@ class MainWindow(QMainWindow):
         self.threabool.start(self.reciveMouseMovement)
 
 
-##################################################################################################################################################################
 
     def create_server(self):
         #Remove the current view.
