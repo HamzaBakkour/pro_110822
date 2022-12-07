@@ -115,18 +115,14 @@ class MainWindow(QMainWindow):
     def _on_shortcut_activate(self, m):
         print(f'shortcut detected >>> {m}')
 
-        print("passed {}".format(self.sendmouseMovmentSockets[0]))
+        # print("passed {}".format(self.sendmouseMovmentSockets[0]))
 
-
-        
         if(m == '<ctrl>+m+1'):
-            self.sendMouseKeyboard.keyboardListner._suppress = False
-            self.sendMouseKeyboard.mouseListner._suppress = False
+            self.sendMouseKeyboard.supressMnK(False)
 
         elif(m == '<ctrl>+m+2'):
-            self.sendMouseKeyboard.keyboardListner._suppress = True
-            self.sendMouseKeyboard.mouseListner._suppress = True
-            self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[-1]['socket'])
+            self.sendMouseKeyboard.supressMnK(True)
+            # self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[-1]['socket'])
 
 
 
