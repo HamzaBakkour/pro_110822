@@ -51,6 +51,8 @@ import os
 import logging
 import time
 from ctypes import *
+import winput
+
 # import pdb
 # pdb.post_mortem()
 # pdb.set_trace()
@@ -106,6 +108,8 @@ class MainWindow(QMainWindow):
         #shortcuts listner  
         self.shortcutListner = False
         self._define_shortcuts('<ctrl>+m+1','<ctrl>+m+2')   
+
+
 
 
     def _on_shortcut_activate(self, m):

@@ -11,6 +11,9 @@ import traceback
 import logging
 import time
 import re
+import winput
+
+
 
 import pdb
 
@@ -84,12 +87,20 @@ class SendMouseKeyboard():
             pass
 
 
+
+
     def start_listning(self):
         self.mouseListner = mouse.Listener(on_move=self._on_move, on_click=self._on_click, on_scroll=self._on_scroll)
         self.keyboardListner = keyboard.Listener(on_press=self._on_press, on_release=self._on_release)
+
+
         self.mouseListner.start()
         self.keyboardListner.start()
 
+        
+        # winput.hook_mouse( self.mouse_callback )
+        # # winput.hook_keyboard( self.keyboard_callback )
+        # winput.wait_messages()
         
 
   
