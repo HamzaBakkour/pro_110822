@@ -116,8 +116,6 @@ class SendMouseKeyboard():
 
     def start_listning(self):
 
-
-
         self.mouseListner = mouse.Listener(on_move=self._on_move,
         on_click = self._on_click,
         on_scroll = self._on_scroll,
@@ -131,13 +129,11 @@ class SendMouseKeyboard():
          suppress=False            
          )
 
-        self.mouseListner.start()
-        self.keyboardListner.start()
-
-
-
-        
-
-  
-
-
+        try:
+            self.mouseListner.start()
+            self.keyboardListner.start()
+        finally:
+            self.mouseListner._suppress = False
+            self.keyboardListner._suppress = False
+            self.mouseListner.stop()
+            self.keyboardListner.stop()
