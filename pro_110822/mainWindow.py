@@ -46,12 +46,9 @@ from clientwidget import ClientWidget
 import socket
 
 import sys
-import struct
-import os
 import logging
 import time
 from ctypes import *
-import winput
 
 # import pdb
 # pdb.post_mortem()
@@ -98,6 +95,8 @@ class MainWindow(QMainWindow):
 
         #This list is used to store sending mouse movmement sockets
         self.sendmouseMovmentSockets = []
+        self.clientNumber = 1 #Starts from 1 because <ctrl>+m+1 is reserved for servers
+        self.onShortcutActivateArgument = []
 
 
         #############################
@@ -106,9 +105,8 @@ class MainWindow(QMainWindow):
         
 
         #shortcuts listner  
-        self.shortcutListner = False
-        self._define_shortcuts('<ctrl>+m+1','<ctrl>+m+2')   
-
+        self.shortcutListner = None
+        self._define_shortcuts('<ctrl>+m+1', addToExist=False)   
 
 
 
@@ -119,10 +117,42 @@ class MainWindow(QMainWindow):
 
         if(m == '<ctrl>+m+1'):
             self.sendMouseKeyboard.supressMnK(False)
-
-        elif(m == '<ctrl>+m+2'):
+        else:
             self.sendMouseKeyboard.supressMnK(True)
-            # self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[-1]['socket'])
+            self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[int(m[-1]) - 1]['socket'])
+
+
+    def _define_shortcuts(self,*args, addToExist = False):
+
+        if (len(args) == 0):
+            if self.shortcutListner:
+                self.onShortcutActivateArgument = []
+                self.shortcutListner.stop()
+            return
+
+        if (addToExist == False):
+            argg = '{'
+            for _ in range(len(args)):
+                argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self._on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
+
+            argg = argg[:-2] + '}'
+            self.onShortcutActivateArgument = []
+            # args[:] = (element for element in args if element != '<ctrl>+m+1')
+            self.onShortcutActivateArgument.extend(args)
+
+
+        elif (addToExist == True):
+            args = list(args)
+            args.extend(self.onShortcutActivateArgument)
+            argg = '{'
+            for _ in range(len(args)):
+                argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self._on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
+
+            argg = argg[:-2] + '}'
+            self.onShortcutActivateArgument = []
+            # args[:] = (element for element in args if element != '<ctrl>+m+1')
+            self.onShortcutActivateArgument.extend(args)
+        print('_define_shortcuts / args :', args)
 
 
 
@@ -131,21 +161,13 @@ class MainWindow(QMainWindow):
 
 
 
-    def _define_shortcuts(self, *args):
-
-        argg = '{'
-        for _ in range(len(args)):
-            argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self._on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
-
-        argg = argg[:-2] + '}'
 
 
-        # if (len(args) == 0):
-        #     if self.shortcutListner:
-        #         self.shortcutListner.stop()
-        #         return
-        #     else:
-        #         return
+
+
+
+
+
 
 
 
@@ -172,11 +194,13 @@ class MainWindow(QMainWindow):
         #Start the woker
         self.threabool.start(self.searchConntection)
 
+
     def add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
         print("emited from searchForServers : ", serverName, serverIP)
         serverWidget = ServerWidget(serverName, serverIP)
         self.mainWindowView.add_deivce(serverWidget)
         serverWidget.connectToServer.clicked.connect(lambda: self.establish_connection_to_server(serverIP, serverPort))
+
 
     def establish_connection_to_server(self ,serverIP: str, serverPort: int):
         self.reciveMouseMovement = ReciveMouseMovementWorker(serverIP, serverPort)
@@ -260,8 +284,10 @@ class MainWindow(QMainWindow):
 
     def create_sending_socket(self, ReseiveRez : tuple, receiveIP : str, receivePort : str, clientName : str):
         receivePort = int(receivePort)
+        self.clientNumber = self.clientNumber + 1
+        self._define_shortcuts('<ctrl>+m+' + str(self.clientNumber), addToExist=True) 
         self.sendmouseMovmentSockets.append({'socket': socket.socket(socket.AF_INET, socket.SOCK_STREAM),
-                                            'shortcut' : '<ctrl>+m+1'})
+                                            'shortcut' : '<ctrl>+m+' + str(self.clientNumber)})
         self.sendmouseMovmentSockets[-1]['socket'].connect((receiveIP, receivePort))
         self.add_client(clientName, receiveIP, self.sendmouseMovmentSockets[-1]['socket'].getsockname()[1])
 

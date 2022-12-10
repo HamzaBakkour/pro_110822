@@ -1,7 +1,7 @@
 from pynput import mouse, keyboard
 import subprocess
 import struct
-
+import atexit
 
 class SendMouseKeyboard():
     def __init__(self):
@@ -9,9 +9,9 @@ class SendMouseKeyboard():
         self.mouseListner = None
         self.keyboardListner = None
         self.activeWin32Filter = False
-        # self.alphaWin= Tk()
         self.screenCovered = False
         self.coverScreenProcess = None
+        atexit.register(self.stop_listning)
 
 
     def set_active_connection(self, active)-> None:
@@ -102,7 +102,7 @@ class SendMouseKeyboard():
 
 
     def supressMnK(self, supress : bool):
-        if (supress == True):
+        if (supress == True and self.screenCovered == False):
             self.coverScreenProcess = subprocess.Popen(["py","-m","coverscreenalpha.py"])
             self.screenCovered = True
             self.activeWin32Filter = True
@@ -129,11 +129,13 @@ class SendMouseKeyboard():
          suppress=False            
          )
 
-        try:
-            self.mouseListner.start()
-            self.keyboardListner.start()
-        finally:
+        self.mouseListner.start()
+        self.keyboardListner.start()
+
+
+    def stop_listning(self):
             self.mouseListner._suppress = False
             self.keyboardListner._suppress = False
             self.mouseListner.stop()
             self.keyboardListner.stop()
+            print("LISTNINGSTOPED")
