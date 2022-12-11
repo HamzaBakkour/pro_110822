@@ -113,13 +113,16 @@ class MainWindow(QMainWindow):
     def _on_shortcut_activate(self, m):
         print(f'shortcut detected >>> {m}')
 
-        # print("passed {}".format(self.sendmouseMovmentSockets[0]))
 
         if(m == '<ctrl>+m+1'):
             self.sendMouseKeyboard.supressMnK(False)
+            self.sendMouseKeyboard.set_active_connection(0)
         else:
             self.sendMouseKeyboard.supressMnK(True)
-            self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[int(m[-1]) - 1]['socket'])
+            try:
+                self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[int(m[-1]) - 2])
+            except Exception as ex:
+                print(ex)
 
 
     def _define_shortcuts(self,*args, addToExist = False):
@@ -153,23 +156,6 @@ class MainWindow(QMainWindow):
             # args[:] = (element for element in args if element != '<ctrl>+m+1')
             self.onShortcutActivateArgument.extend(args)
         print('_define_shortcuts / args :', args)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         if self.shortcutListner:
             self.shortcutListner.stop()
@@ -286,10 +272,9 @@ class MainWindow(QMainWindow):
         receivePort = int(receivePort)
         self.clientNumber = self.clientNumber + 1
         self._define_shortcuts('<ctrl>+m+' + str(self.clientNumber), addToExist=True) 
-        self.sendmouseMovmentSockets.append({'socket': socket.socket(socket.AF_INET, socket.SOCK_STREAM),
-                                            'shortcut' : '<ctrl>+m+' + str(self.clientNumber)})
-        self.sendmouseMovmentSockets[-1]['socket'].connect((receiveIP, receivePort))
-        self.add_client(clientName, receiveIP, self.sendmouseMovmentSockets[-1]['socket'].getsockname()[1])
+        self.sendmouseMovmentSockets.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+        self.sendmouseMovmentSockets[-1].connect((receiveIP, receivePort))
+        self.add_client(clientName, receiveIP, self.sendmouseMovmentSockets[-1].getsockname()[1])
 
         
 

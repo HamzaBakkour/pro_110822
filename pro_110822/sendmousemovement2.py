@@ -2,6 +2,7 @@ from pynput import mouse, keyboard
 import subprocess
 import struct
 import atexit
+import time
 
 class SendMouseKeyboard():
     def __init__(self):
@@ -58,11 +59,21 @@ class SendMouseKeyboard():
 
 
     def _on_press(self, key):
+
+        if (str(key)[0:3] == 'Key'):
+            pass
+        else:
+            key = self.keyboardListner.canonical(key)
+            # print('key after canonical : ', key)
+
+        # print('_on_press key', key)
         try:
             message = f'K!a!{key.char}'
         except AttributeError:
             message = f'K!s!{key}'
+        # print('_on_press : ', message)
         message = message.encode()
+        # print('_on_press encoded: ', message)
         header = struct.pack('<L', len(message))
         try:
             self.activeConnection.sendall(header + message)
@@ -71,15 +82,34 @@ class SendMouseKeyboard():
             pass
 
 
-    def _on_release(self, key):  
+    def _on_release(self, key):
+
+        if (str(key)[0:3] == 'Key'):
+            pass
+        else:
+            key = self.keyboardListner.canonical(key)
+            # print('key after canonical : ', key)
+
+
+        # print('_on_release key', key)
         message = f'R!{key}'
+        # print('_on_release : ', message)
         message = message.encode()
+        # print('_on_release encoded: ', message)
         header = struct.pack('<L', len(message))
         try:
             self.activeConnection.sendall(header + message)
         except Exception as e:
             # print(str(e))
             pass
+
+    def _keyboard_win32_event_filter(self, msg, data):
+        # print('kmsg: ', msg, ' data.vkCode: ', data.vkCode)
+        if(self.activeWin32Filter == True):
+            self.keyboardListner._suppress = True
+            # self.keyboardListner._suppress = False
+        else:
+            self.keyboardListner._suppress = False
 
 
     def _mouse_win32_event_filter(self, msg, data):
@@ -91,14 +121,6 @@ class SendMouseKeyboard():
                 self.mouseListner._suppress = False
         else:
             self.mouseListner._suppress = False
-
-
-    def _keyboard_win32_event_filter(self, msg, data):
-        # print('msg: ', msg, ' data.vkCode: ', data.vkCode)
-        if(self.activeWin32Filter == True):
-            self.keyboardListner._suppress = True
-        else:
-            self.keyboardListner._suppress = False
 
 
     def supressMnK(self, supress : bool):
