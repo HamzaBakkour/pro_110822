@@ -14,16 +14,17 @@ import datetime
 
 import pdb
 
-class ListningWorkerSignals(QObject):
-    connectionFromClient = Signal(object)
+class ServerWorkerSignals(QObject):
+    clientRequest = Signal(object)
 
-class ListenForConnectionsWorker(QRunnable):
+class ServerWorker(QRunnable):
     def __init__(self, listningSocket : socket.socket)-> None:
-        super(ListenForConnectionsWorker, self).__init__()
+        super(ServerWorker, self).__init__()
 
         self.workerSocket = listningSocket
-        self.signal = ListningWorkerSignals()
+        self.signal = ServerWorkerSignals()
         self.conn = socket.socket()
+        self.alive = True
 
     def receive_n_bytes(self, n):
         """ Convenience method for receiving exactly n bytes from
@@ -41,7 +42,7 @@ class ListenForConnectionsWorker(QRunnable):
     def run(self)-> int:
 
         print("Server is listning for connections at port 12345")
-        while (True):
+        while (self.alive):
             self.workerSocket.listen(5)
             try:
                 self.conn, address = self.workerSocket.accept()
@@ -62,7 +63,7 @@ class ListenForConnectionsWorker(QRunnable):
                             data = data + '!' + self.conn.getpeername()[0]
                             
 
-                        self.signal.connectionFromClient.emit(data)
+                        self.signal.clientRequest.emit(data)
                     else:
                         print("Header data value is not equal to received data length")
             except UnboundLocalError:
@@ -71,3 +72,4 @@ class ListenForConnectionsWorker(QRunnable):
                 pass
             except IOError:
                 pass
+        print("ServerWorker terminated")

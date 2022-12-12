@@ -24,9 +24,9 @@ from PySide6.QtWidgets import (
 
 from scrollarea import ScrollPanel
 
-class FirstOpenView(QtWidgets.QWidget):
+class ClientView(QtWidgets.QWidget):
     def __init__(self):
-        super(FirstOpenView, self).__init__()
+        super(ClientView, self).__init__()
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(10,30,10,0)
         self.layout.setSpacing(0)

@@ -29,22 +29,21 @@ from PySide6.QtWidgets import (
     QLabel
 )
 
-from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6 import QtWidgets
 from pynput import keyboard
 
-from firstopenview import FirstOpenView
+from clientview import ClientView
 from serverview import ServerView
-from listenforconnectionsworker import ListenForConnectionsWorker
+from serverworker import ServerWorker
 from searchforserversworker import SearchForServersWorker
 from progressbar import ProgressBar
 from serverwidget import ServerWidget
-from recivemousemovementworker import ReciveMouseMovementWorker
-from sendmousemovement2 import SendMouseKeyboard
+from reciveuserinput import ReciveUserInput
+from senduserinput import SendUserInput
 from clientwidget import ClientWidget
 
 
 import socket
-
 import sys
 import logging
 import time
@@ -63,12 +62,12 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None)-> None:
         super(MainWindow, self).__init__(parent)
 
-        #Main window title
+        #Program title
         self.setWindowTitle("pro_110822")
         #Main window resulotion
         self.setFixedSize(600, 800)
 
-        #Set the main window layout and widget
+        #Main window layout
         self.mainWidget = QtWidgets.QWidget()
         self.mainWidget.layout = QGridLayout()
         self.mainWidget.layout.setContentsMargins(0,0,0,0)
@@ -76,51 +75,42 @@ class MainWindow(QMainWindow):
         self.mainWidget.setLayout(self.mainWidget.layout)
         self.setCentralWidget(self.mainWidget)
 
-        #Craete a thread pool, will be used to spwan workers
+        #Thread pool
         self.threabool = QThreadPool()
-        self.threabool.setMaxThreadCount(12)
+        self.threabool.setMaxThreadCount(20)
 
-        #Start the main window with the firstOpenView view
-        self.mainWindowView = FirstOpenView()
+        #Start the program with ClientView
+        self.mainWindowView = ClientView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
-        #Connect the start server button to the funciton createServer
         self.mainWindowView.makeServerButton.clicked.connect(self.create_server)
-        #Connect the refresh button to the funciton searchForServers
         self.mainWindowView.refreshButton.clicked.connect(self.search_for_servers)
-
-        #Set the progress bar
-        self.pbarWidget = ProgressBar()
-        self.mainWidget.layout.addWidget(self.pbarWidget)
+        self.pBar = ProgressBar()
+        self.mainWidget.layout.addWidget(self.pBar)
         self.pbarValue = 0
 
-        #This list is used to store sending mouse movmement sockets
-        self.sendmouseMovmentSockets = []
-        self.clientNumber = 1 #Starts from 1 because <ctrl>+m+1 is reserved for servers
+        #Variables used to handle connections
+        self.clientsConnections = []
+ 
         self.onShortcutActivateArgument = []
-
-
-        #############################
-        self.sendMouseKeyboard = SendMouseKeyboard()
-        self.sendMouseKeyboard.start_listning()
+        self.sendUserInput = SendUserInput()
         
-
-        #shortcuts listner  
+        #Define server shortcut
+        self.connectionID = 1
+        self._define_shortcuts('<ctrl>+m+' + str(self.connectionID), addToExist=False)   
         self.shortcutListner = None
-        self._define_shortcuts('<ctrl>+m+1', addToExist=False)   
-
 
 
     def _on_shortcut_activate(self, m):
         print(f'shortcut detected >>> {m}')
 
-
+        #Server shortcut
         if(m == '<ctrl>+m+1'):
-            self.sendMouseKeyboard.supressMnK(False)
-            self.sendMouseKeyboard.set_active_connection(0)
-        else:
-            self.sendMouseKeyboard.supressMnK(True)
+            self.sendUserInput.supress_user_input(False)
+            self.sendUserInput.set_active_connection(None)
+        else:#Client shortcut
+            self.sendUserInput.supress_user_input(True)
             try:
-                self.sendMouseKeyboard.set_active_connection(self.sendmouseMovmentSockets[int(m[-1]) - 2])
+                self.sendUserInput.set_active_connection(self.clientsConnections[int(m[-1]) - 2])
             except Exception as ex:
                 print(ex)
 
@@ -142,7 +132,6 @@ class MainWindow(QMainWindow):
             self.onShortcutActivateArgument = []
             # args[:] = (element for element in args if element != '<ctrl>+m+1')
             self.onShortcutActivateArgument.extend(args)
-
 
         elif (addToExist == True):
             args = list(args)
@@ -167,16 +156,17 @@ class MainWindow(QMainWindow):
 
 
     def search_for_servers(self):
-        self.reseat_p_bar()
-        self.reseat_avaialble_servers_area()
-        self.update_p_bar(15, "Searching for servers.")
+        self._reseat_p_bar()
+        self.mainWindowView.availableServers.reseat()
+
+        self._update_p_bar(15, "Searching for servers.")
         #Set the search for servers worker
         self.searchConntection = SearchForServersWorker(12345)
         #Connect the worker's connectionOkSignal signal to the function addServerToServersArea
         #The worker will send this signal to the main thread in case it manages to connect to a server on the local network
         self.searchConntection.signal.foundServer.connect(self.add_server)
         #The worker will send this signal to the main thread to update the progress bar when it manages to connect to a server on the local network
-        self.searchConntection.signal.pbarSignal.connect(self.update_p_bar)
+        self.searchConntection.signal.pbarSignal.connect(self._update_p_bar)
         #Start the woker
         self.threabool.start(self.searchConntection)
 
@@ -189,109 +179,101 @@ class MainWindow(QMainWindow):
 
 
     def establish_connection_to_server(self ,serverIP: str, serverPort: int):
-        self.reciveMouseMovement = ReciveMouseMovementWorker(serverIP, serverPort)
+        self.reciveMouseMovement = ReciveUserInput(serverIP, serverPort)
         self.threabool.start(self.reciveMouseMovement)
 
 
-
     def create_server(self):
-        #Remove the current view.
+        #Remove ClientView.
         self.mainWindowView.remove()
-        self.pbarWidget.remove()
-        #Set the view to serverView.
+        self.pBar.remove()
+        #Start ServerView.
         self.mainWindowView = ServerView()
-        self.pbarWidget = ProgressBar()
+        self.pBar = ProgressBar()
         self.mainWidget.layout.addWidget(self.mainWindowView)
-        self.mainWidget.layout.addWidget(self.pbarWidget)
-        #Connect the server button to the fuction closeServer.
+        self.mainWidget.layout.addWidget(self.pBar)
         self.mainWindowView.stopServerButton.clicked.connect(self.close_server)
 
+        #Create the server socket
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.serverSocket.setblocking(False)
         self.serverSocket.bind(('', 12345))
 
-        #Set the server worker. This worker will listen for connection on the port 12345
-        self.listningConnection = ListenForConnectionsWorker(self.serverSocket)
+        #Pass the server socket to ServerWorker
+        self.serverWorker = ServerWorker(self.serverSocket)
+        #Send clients requests to  _handle_client_requests
+        self.serverWorker.signal.clientRequest.connect(self._handle_client_requests)
+        self.threabool.start(self.serverWorker)
+
+        #Start listning for user input
+        self.sendUserInput.start_listning()
 
 
-        #Connect the wroker's recivedConnection signal to the function  dataFromListningToConnectionsWorker
-        self.listningConnection.signal.connectionFromClient.connect(self.data_from_listning_to_connections_worker)
+    def _handle_client_requests(self, data : str):
+        print("Recived client request : ", data)
+        try:
+            if (data.split('!')[0] == 'C'):#'C' stands for Connection requst
+                                            #Connection requsts format "C!CLIENT_SCREEN_W!CLIENT_SCREEN_H!CLIENT_PORT!CLIENT_NAME!CLIENT_IP"
+                CLIENT_SCREEN_W = data.split('!')[1]
+                CLIENT_SCREEN_H = data.split('!')[2]
+                CLIENT_PORT = data.split('!')[3]
+                CLIENT_NAME = data.split('!')[4]
+                CLIENT_IP = data.split('!')[5]
+        except Exception as ex:
+            print("Exception raised while handling client requst.\nRequst data:\n{}\n\Exception:\n{}".format(data, ex))
+        
+        self._estaplish_connection_to_client((CLIENT_SCREEN_W, CLIENT_SCREEN_H), CLIENT_IP, CLIENT_PORT, CLIENT_NAME)
 
-        #Start the worker
-        self.threabool.start(self.listningConnection)
 
+    def _estaplish_connection_to_client(self, clientScreenResolution : tuple, clientIP : str, clientPort : str, clientName : str):
+        #Define client shortcut
+        self.connectionID = self.connectionID + 1
+        self._define_shortcuts('<ctrl>+m+' + str(self.connectionID), addToExist=True)
+        #Connect server to client
+        self.clientsConnections.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+        try:
+            self.clientsConnections[-1].connect((clientIP, int(clientPort)))
+        except Exception as ex:
+            print("Exception raised while server trying to connect to client.\nServer socket: {}\nCient IP: {}\nClient Port: {}\n\nException:\n{}".format(self.clientsConnections[-1], clientIP, clientPort, ex))
+        #Add client widget to the UI
+        self._add_client_widget(clientName, clientIP, self.clientsConnections[-1].getsockname()[1])
+
+    def _add_client_widget(self, clientName, clientIP, clientPort):
+        client = ClientWidget(clientName, clientIP, clientPort)
+        self.mainWindowView.add_client(client)
 
     def close_server(self):
-        self.listningConnection.terminate = True
-        try:
-            self.listningConnection.serverSocket.close()
-            self.listningConnection.serverInfoToClientSocket.close()
-            print("Connected Socket terminated")
-        except :#trying to close c before any connections are acepted
-                            # trying to close a connection that does not exist -> AttributeError
-                            # occures when try to close the server before any connections are accepted
-                            # part1 = str(sys.exc_info())
+        #Terminate serverWorker, serverSocket and user-input listner
+        self.serverWorker.alive = False
+        self.serverSocket.close()
+        print("Server Socket terminated")
+        self.sendUserInput.stop_listning()
+        print("Input listner terminated")
 
-            print("Not Connected Socket terminated")
+        #Remove ServerView and set the new view to ClientView
         self.mainWindowView.remove()
-        self.pbarWidget.remove()
-        self.mainWindowView = FirstOpenView()
-        self.pbarWidget = ProgressBar()
+        self.pBar.remove()
+        self.mainWindowView = ClientView()
+        self.pBar = ProgressBar()
         self.mainWidget.layout.addWidget(self.mainWindowView)
-        self.mainWidget.layout.addWidget(self.pbarWidget)
+        self.mainWidget.layout.addWidget(self.pBar)
         self.mainWindowView.makeServerButton.clicked.connect(self.create_server)
         self.mainWindowView.refreshButton.clicked.connect(self.search_for_servers)
 
 
-
-    def reseat_avaialble_servers_area(self):
-        self.mainWindowView.availableServers.reseat()
-
-
-
-    def data_from_listning_to_connections_worker(self, data : str):
-        print("Emited from ListenForConnectionsWorker -> MainWindow : ", data)
-        dataType = data.split('!')[0]
-
-        if (dataType == 'C'):
-            clientScreenRezW = data.split('!')[1]
-            clientScreenRezH = data.split('!')[2]
-            clientReceiveSocketPort = data.split('!')[3]
-            clientName = data.split('!')[4]
-            clientReceiveSocketIP = data.split('!')[5]
-            self.create_sending_socket((clientScreenRezW, clientScreenRezH), clientReceiveSocketIP, clientReceiveSocketPort, clientName)
-            # self.add_client(clientName, clientReceiveSocketIP, clientReceiveSocketPort)
-
-
-    def add_client(self, clientName, clientIP, clientPort):
-        client = ClientWidget(clientName, clientIP, clientPort)
-        self.mainWindowView.add_client(client)
-
-
-    def create_sending_socket(self, ReseiveRez : tuple, receiveIP : str, receivePort : str, clientName : str):
-        receivePort = int(receivePort)
-        self.clientNumber = self.clientNumber + 1
-        self._define_shortcuts('<ctrl>+m+' + str(self.clientNumber), addToExist=True) 
-        self.sendmouseMovmentSockets.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
-        self.sendmouseMovmentSockets[-1].connect((receiveIP, receivePort))
-        self.add_client(clientName, receiveIP, self.sendmouseMovmentSockets[-1].getsockname()[1])
-
-        
-
-
-    def update_p_bar(self, value, text):
+    def _update_p_bar(self, value, text):
         print(text)
         if (value == 999):
-            self.reseat_p_bar()
+            self._reseat_p_bar()
         else:
             self.pbarValue = self.pbarValue + value
-            self.pbarWidget.value(self.pbarValue)
-            self.pbarWidget.text(text)
+            self.pBar.value(self.pbarValue)
+            self.pBar.text(text)
 
 
-    def reseat_p_bar(self):
+    def _reseat_p_bar(self):
         self.pbarValue = 0
-        self.pbarWidget.reseat()
+        self.pBar.reseat()
 
 
 

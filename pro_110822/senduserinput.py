@@ -4,7 +4,7 @@ import struct
 import atexit
 import time
 
-class SendMouseKeyboard():
+class SendUserInput():
     def __init__(self):
         self.activeConnection = None
         self.mouseListner = None
@@ -64,16 +64,12 @@ class SendMouseKeyboard():
             pass
         else:
             key = self.keyboardListner.canonical(key)
-            # print('key after canonical : ', key)
 
-        # print('_on_press key', key)
         try:
             message = f'K!a!{key.char}'
         except AttributeError:
             message = f'K!s!{key}'
-        # print('_on_press : ', message)
         message = message.encode()
-        # print('_on_press encoded: ', message)
         header = struct.pack('<L', len(message))
         try:
             self.activeConnection.sendall(header + message)
@@ -83,19 +79,12 @@ class SendMouseKeyboard():
 
 
     def _on_release(self, key):
-
         if (str(key)[0:3] == 'Key'):
             pass
         else:
             key = self.keyboardListner.canonical(key)
-            # print('key after canonical : ', key)
-
-
-        # print('_on_release key', key)
         message = f'R!{key}'
-        # print('_on_release : ', message)
         message = message.encode()
-        # print('_on_release encoded: ', message)
         header = struct.pack('<L', len(message))
         try:
             self.activeConnection.sendall(header + message)
@@ -104,16 +93,13 @@ class SendMouseKeyboard():
             pass
 
     def _keyboard_win32_event_filter(self, msg, data):
-        # print('kmsg: ', msg, ' data.vkCode: ', data.vkCode)
         if(self.activeWin32Filter == True):
             self.keyboardListner._suppress = True
-            # self.keyboardListner._suppress = False
         else:
             self.keyboardListner._suppress = False
 
 
     def _mouse_win32_event_filter(self, msg, data):
-        # print('msg: ', msg, ' data: ', data)
         if(self.activeWin32Filter == True):
             if (msg == 513 or msg == 514 or msg == 516 or msg == 517 or msg == 519 or msg == 520 or msg == 522):#
                 self.mouseListner._suppress = True
@@ -123,7 +109,7 @@ class SendMouseKeyboard():
             self.mouseListner._suppress = False
 
 
-    def supressMnK(self, supress : bool):
+    def supress_user_input(self, supress : bool):
         if (supress == True and self.screenCovered == False):
             self.coverScreenProcess = subprocess.Popen(["py","-m","coverscreenalpha.py"])
             self.screenCovered = True
