@@ -96,8 +96,9 @@ class MainWindow(QMainWindow):
         
         #Define server shortcut
         self.connectionID = 1
+        self.shortcutListner = False
         self._define_shortcuts('<ctrl>+m+' + str(self.connectionID), addToExist=False)   
-        self.shortcutListner = None
+        
 
 
     def _on_shortcut_activate(self, m):
