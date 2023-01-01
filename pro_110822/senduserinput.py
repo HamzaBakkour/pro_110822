@@ -2,7 +2,8 @@ from pynput import mouse, keyboard
 import subprocess
 import struct
 import socket
-# import atexit
+import ctypes
+
 
 class SendUserInput():
     def __init__(self):
@@ -12,16 +13,21 @@ class SendUserInput():
         self.activeWin32Filter = False
         self.screenCovered = False
         self.coverScreenProcess = None
-        # atexit.register(self.stop_listning)
+        self.screenWidth = self.get_screen_resulotion()[0]
+        self.screenHight = self.get_screen_resulotion()[1]
 
 
     def set_active_connection(self, active)-> None:
             self.activeConnection = active
 
+    def get_screen_resulotion(self):
+        user32 = ctypes.windll.user32
+        screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+        return screensize
 
     def _on_move(self, x, y):
         if(self.mouseListner.is_alive() and self.activeConnection):
-            message = f'M!{x}!{y}'
+            message = f'M!{x/self.screenWidth}!{y/self.screenHight}'
             message = message.encode()
             header = struct.pack('<L', len(message))
             try:
