@@ -79,7 +79,7 @@ class ReciveUserInput(QRunnable):
                         data = data.decode()
                         # print(f'>{data}')
                         if (data.split('!')[0] == 'M'):
-                            mouse.position = (int((int(data.split('!')[1])*screenRez[0])/1920), int((int(data.split('!')[2])*screenRez[1])/1080))
+                            mouse.position = (int((int(data.split('!')[1])*screenRez[0])), int((int(data.split('!')[2])*screenRez[1])))
                         elif (data.split('!')[0] == 'P'):
                             if (data.split('!')[2] == '1'):
                                 mouse.press(eval(data.split('!')[1]))
