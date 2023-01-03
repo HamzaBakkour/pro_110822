@@ -1,147 +1,112 @@
 from pynput import mouse, keyboard
+import functools
 import subprocess
 import struct
 import socket
+import os
+import inspect
+import ctypes
 # import atexit
+
+
+def if_connected(func):
+    @functools.wraps(func)
+    def _wrapper(self, *args, **kwargs):
+        if ((self.mouseListner.is_alive() or self.keyboardListner.is_alive()) and self.clientSocket):
+            try:
+                func(self, *args, **kwargs)
+            except socket.error as error:
+                if (error.errno == 10054):#[WinError 10054] An existing connection was forcibly closed by the remote host
+                    self.stop_listning()
+                    return
+            except Exception as ex:
+                print(ex)
+    return _wrapper
+
 
 class SendUserInput():
     def __init__(self):
-        self.activeConnection = None
+        self.clientSocket = None
         self.mouseListner = None
         self.keyboardListner = None
         self.activeWin32Filter = False
         self.screenCovered = False
         self.coverScreenProcess = None
-        # atexit.register(self.stop_listning)
+        self.screenWidth = self.get_screen_resulotion()[0]
+        self.screenHight = self.get_screen_resulotion()[1]
+
+    def get_screen_resulotion(self):
+        user32 = ctypes.windll.user32
+        screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+        return screensize
 
 
-    def set_active_connection(self, active)-> None:
-            self.activeConnection = active
-
-
+    @if_connected
     def _on_move(self, x, y):
-        if(self.mouseListner.is_alive() and self.activeConnection):
-            message = f'M!{x}!{y}'
-            message = message.encode()
-            header = struct.pack('<L', len(message))
-            try:
-                self.activeConnection.sendall(header + message)
-            except socket.error as error:
-                if (error.errno == 10054):#[WinError 10054] An existing connection was forcibly closed by the remote host
-                    self.stop_listning()
-                    return
-            except Exception as ex:
-                print("Exception raised while sending mouse movement to client.",
-                f"Data header: {header}\n",
-                f"Data: {message}\n",
-                f"Sending socket: {self.activeConnection}\n\n",
-                f"Exception:\n{ex}")
+        message = f'M!{x/self.screenWidth}!{y/self.screenHight}'
+        message = message.encode()
+        header = struct.pack('<L', len(message))
+        self.clientSocket.sendall(header + message)
 
-
+    @if_connected
     def _on_click(self, x, y, button, pressed):
-        if(self.mouseListner.is_alive() and self.activeConnection):
-            if pressed:
-                message = f'P!{button}!1!{x}!{y}'
-            else:
-                message = f'P!{button}!0!{x}!{y}'
-            message = message.encode()
-            header = struct.pack('<L', len(message))
-            try:
-                self.activeConnection.sendall(header + message)
-            except socket.error as error:
-                if (error.errno == 10054):
-                    self.stop_listning()
-                    return
-            except Exception as ex:
-                print("Exception raised while sending mouse click to client.",
-                f"Data header: {header}\n",
-                f"Data: {message}\n",
-                f"Sending socket: {self.activeConnection}\n\n",
-                f"Exception:\n{ex}")
+        if pressed:
+            message = f'P!{button}!1!{x}!{y}'
+        else:
+            message = f'P!{button}!0!{x}!{y}'
+        message = message.encode()
+        header = struct.pack('<L', len(message))
+        self.clientSocket.sendall(header + message)
 
 
+    @if_connected
     def _on_scroll(self, x, y, dx, dy):
-        if(self.mouseListner.is_alive() and self.activeConnection):
-            if dy < 0:
-                message = f'S!d!{x}!{y}'
-            else:
-                message = f'S!u!{x}!{y}'
-            message = message.encode()
-            header = struct.pack('<L', len(message))
-            try:
-                self.activeConnection.sendall(header + message)
-            except socket.error as error:
-                if (error.errno == 10054):#[WinError 10054] An existing connection was forcibly closed by the remote host
-                    self.stop_listning()
-                    return
-            except Exception as ex:
-                print("Exception raised while sending mouse scroll to client.",
-                f"Data header: {header}\n",
-                f"Data: {message}\n",
-                f"Sending socket: {self.activeConnection}\n\n",
-                f"Exception:\n{ex}")
+        if dy < 0:
+            message = f'S!d!{x}!{y}'
+        else:
+            message = f'S!u!{x}!{y}'
+        message = message.encode()
+        header = struct.pack('<L', len(message))
+        self.clientSocket.sendall(header + message)
 
 
+    @if_connected
     def _on_press(self, key):
-        if(self.keyboardListner.is_alive() and self.activeConnection):
-            if (str(key)[0:3] == 'Key'):
-                pass
-            else:
-                key = self.keyboardListner.canonical(key)
-
-            try:
-                message = f'K!a!{key.char}'
-            except AttributeError:
-                message = f'K!s!{key}'
-            message = message.encode()
-            header = struct.pack('<L', len(message))
-            try:
-                self.activeConnection.sendall(header + message)
-            except socket.error as error:
-                if (error.errno == 10054):#[WinError 10054] An existing connection was forcibly closed by the remote host
-                    self.stop_listning()
-                    return
-            except Exception as ex:
-                print("Exception raised while sending key press to client.",
-                f"Data header: {header}\n",
-                f"Data: {message}\n",
-                f"Sending socket: {self.activeConnection}\n\n",
-                f"Exception:\n{ex}")
+        if (str(key)[0:3] == 'Key'):
+            pass
+        else:
+            key = self.keyboardListner.canonical(key)
+        try:
+            message = f'K!a!{key.char}'
+        except AttributeError:
+            message = f'K!s!{key}'
+        message = message.encode()
+        header = struct.pack('<L', len(message))
+        self.clientSocket.sendall(header + message)
 
 
+    @if_connected
     def _on_release(self, key):
-        if(self.keyboardListner.is_alive() and self.activeConnection):
-            if (str(key)[0:3] == 'Key'):
-                pass
-            else:
-                key = self.keyboardListner.canonical(key)
-            message = f'R!{key}'
-            message = message.encode()
-            header = struct.pack('<L', len(message))
-            try:
-                self.activeConnection.sendall(header + message)
-            except socket.error as error:
-                if (error.errno == 10054):#[WinError 10054] An existing connection was forcibly closed by the remote host
-                    self.stop_listning()
-                    return
-            except Exception as ex:
-                print("Exception raised while sending key release to client.",
-                f"Data header: {header}\n",
-                f"Data: {message}\n",
-                f"Sending socket: {self.activeConnection}\n\n",
-                f"Exception:\n{ex}")
+        if (str(key)[0:3] == 'Key'):
+            pass
+        else:
+            key = self.keyboardListner.canonical(key)
+        message = f'R!{key}'
+        message = message.encode()
+        header = struct.pack('<L', len(message))
+        self.clientSocket.sendall(header + message)
 
 
     def _keyboard_win32_event_filter(self, msg, data):
-        if(self.activeWin32Filter == True):
+        if(self.activeWin32Filter):
             self.keyboardListner._suppress = True
         else:
             self.keyboardListner._suppress = False
 
 
     def _mouse_win32_event_filter(self, msg, data):
-        if(self.activeWin32Filter == True):
-            if (msg == 513 or msg == 514 or msg == 516 or msg == 517 or msg == 519 or msg == 520 or msg == 522):#
+        if(self.activeWin32Filter):
+            if (msg == 513 or msg == 514 or msg == 516 or msg == 517 or msg == 519 or msg == 520 or msg == 522):
                 self.mouseListner._suppress = True
             else:
                 self.mouseListner._suppress = False
@@ -154,10 +119,9 @@ class SendUserInput():
             self.coverScreenProcess = subprocess.Popen(["py","-m","coverscreenalpha.py"])
             self.screenCovered = True
             self.activeWin32Filter = True
-
         elif (supress == False):
             self.activeWin32Filter = False
-            if(self.screenCovered == True):
+            if(self.screenCovered):
                 self.coverScreenProcess.terminate()
                 self.screenCovered = False
 
@@ -182,10 +146,12 @@ class SendUserInput():
 
 
     def stop_listning(self):
-            self.mouseListner._suppress = False
-            self.keyboardListner._suppress = False
-            self.mouseListner.stop()
-            self.keyboardListner.stop()
-            self.activeConnection = None
-            self.supress_user_input(False)
-            print("LISTNINGSTOPED")
+        self.supress_user_input(False)
+        self.mouseListner.stop()
+        self.keyboardListner.stop()
+        self.clientSocket = None
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "LISTNINGSTOPED")
+
+
+    def send_input_to_client(self, clientSocket)-> None:
+        self.clientSocket = clientSocket

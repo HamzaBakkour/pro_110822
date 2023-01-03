@@ -48,6 +48,8 @@ import sys
 import logging
 import time
 from ctypes import *
+import os
+import inspect
 
 # import pdb
 # pdb.post_mortem()
@@ -102,18 +104,18 @@ class MainWindow(QMainWindow):
 
 
     def _on_shortcut_activate(self, m):
-        print(f'shortcut detected >>> {m}')
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'shortcut detected >>> {m}')
 
         #Server shortcut
         if(m == '<ctrl>+m+1'):
             self.sendUserInput.supress_user_input(False)
-            self.sendUserInput.set_active_connection(None)
+            self.sendUserInput.send_input_to_client(None)
         else:#Client shortcut
             self.sendUserInput.supress_user_input(True)
             try:
-                self.sendUserInput.set_active_connection(self.clientsConnections[int(m[-1]) - 2])
+                self.sendUserInput.send_input_to_client(self.clientsConnections[int(m[-1]) - 2])
             except Exception as ex:
-                print(ex)
+                print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', ex)
 
 
     def _define_shortcuts(self,*args, addToExist = False):
@@ -145,7 +147,7 @@ class MainWindow(QMainWindow):
             self.onShortcutActivateArgument = []
             # args[:] = (element for element in args if element != '<ctrl>+m+1')
             self.onShortcutActivateArgument.extend(args)
-        print('_define_shortcuts / args :', args)
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '_define_shortcuts / args :', args)
 
         if self.shortcutListner:
             self.shortcutListner.stop()
@@ -173,7 +175,7 @@ class MainWindow(QMainWindow):
 
 
     def add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
-        print("emited from searchForServers : ", serverName, serverIP)
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "emited from searchForServers : ", serverName, serverIP)
         serverWidget = ServerWidget(serverName, serverIP)
         self.mainWindowView.add_deivce(serverWidget)
         serverWidget.connectToServer.clicked.connect(lambda: self.establish_connection_to_server(serverIP, serverPort))
@@ -211,7 +213,7 @@ class MainWindow(QMainWindow):
 
 
     def _handle_client_requests(self, data : str):
-        print("Recived client request : ", data)
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Recived client request : ", data)
         try:
             if (data.split('!')[0] == 'C'):#'C' stands for Connection requst
                                             #Connection requsts format "C!CLIENT_SCREEN_W!CLIENT_SCREEN_H!CLIENT_PORT!CLIENT_NAME!CLIENT_IP"
@@ -221,7 +223,7 @@ class MainWindow(QMainWindow):
                 CLIENT_NAME = data.split('!')[4]
                 CLIENT_IP = data.split('!')[5]
         except Exception as ex:
-            print("Exception raised while handling client requst.\nRequst data:\n{}\n\Exception:\n{}".format(data, ex))
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Exception raised while handling client requst.\nRequst data:\n{}\n\Exception:\n{}".format(data, ex))
         
         self._estaplish_connection_to_client((CLIENT_SCREEN_W, CLIENT_SCREEN_H), CLIENT_IP, CLIENT_PORT, CLIENT_NAME)
 
@@ -235,7 +237,7 @@ class MainWindow(QMainWindow):
         try:
             self.clientsConnections[-1].connect((clientIP, int(clientPort)))
         except Exception as ex:
-            print("Exception raised while server trying to connect to client.\nServer socket: {}\nCient IP: {}\nClient Port: {}\n\nException:\n{}".format(self.clientsConnections[-1], clientIP, clientPort, ex))
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Exception raised while server trying to connect to client.\nServer socket: {}\nCient IP: {}\nClient Port: {}\n\nException:\n{}".format(self.clientsConnections[-1], clientIP, clientPort, ex))
         #Add client widget to the UI
         self._add_client_widget(clientName, clientIP, self.clientsConnections[-1].getsockname()[1])
 
@@ -247,9 +249,9 @@ class MainWindow(QMainWindow):
         #Terminate serverWorker, serverSocket and user-input listner
         self.serverWorker.alive = False
         self.serverSocket.close()
-        print("Server Socket terminated")
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Server Socket terminated")
         self.sendUserInput.stop_listning()
-        print("Input listner terminated")
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Input listner terminated")
 
         #Remove ServerView and set the new view to ClientView
         self.mainWindowView.remove()
@@ -263,7 +265,7 @@ class MainWindow(QMainWindow):
 
 
     def _update_p_bar(self, value, text):
-        print(text)
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', text)
         if (value == 999):
             self._reseat_p_bar()
         else:
