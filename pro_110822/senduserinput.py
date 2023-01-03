@@ -57,7 +57,6 @@ class SendUserInput():
         message = f'M!{x/self.screenWidth}!{y/self.screenHight}'
         message = message.encode()
         header = struct.pack('<L', len(message))
-
         self.activeConnection.sendall(header + message)
 
 
