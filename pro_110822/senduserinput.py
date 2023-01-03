@@ -3,16 +3,12 @@ import functools
 import subprocess
 import struct
 import socket
-<<<<<<< HEAD
 import os
 import inspect
 import ctypes
 # import atexit
-=======
+
 import ctypes
-
->>>>>>> 43bdce52d15f5d21560d15852621038cbd08c8e3
-
 
 def if_connected(func):
     @functools.wraps(func)
@@ -40,16 +36,14 @@ class SendUserInput():
         self.screenWidth = self.get_screen_resulotion()[0]
         self.screenHight = self.get_screen_resulotion()[1]
 
-<<<<<<< HEAD
     def get_screen_resulotion(self):
         user32 = ctypes.windll.user32
         screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
         return screensize
-=======
+
 
     def set_active_connection(self, active)-> None:
             self.activeConnection = active
->>>>>>> 43bdce52d15f5d21560d15852621038cbd08c8e3
 
     def get_screen_resulotion(self):
         user32 = ctypes.windll.user32
@@ -58,12 +52,10 @@ class SendUserInput():
 
     @if_connected
     def _on_move(self, x, y):
-<<<<<<< HEAD
         message = f'M!{x/self.screenWidth}!{y/self.screenHight}'
         message = message.encode()
         header = struct.pack('<L', len(message))
         self.clientSocket.sendall(header + message)
-=======
         if(self.mouseListner.is_alive() and self.activeConnection):
             message = f'M!{x/self.screenWidth}!{y/self.screenHight}'
             message = message.encode()
@@ -80,8 +72,6 @@ class SendUserInput():
                 f"Data: {message}\n",
                 f"Sending socket: {self.activeConnection}\n\n",
                 f"Exception:\n{ex}")
-
->>>>>>> 43bdce52d15f5d21560d15852621038cbd08c8e3
 
     @if_connected
     def _on_click(self, x, y, button, pressed):
@@ -162,7 +152,6 @@ class SendUserInput():
 
 
     def start_listning(self):
-
         self.mouseListner = mouse.Listener(on_move=self._on_move,
         on_click = self._on_click,
         on_scroll = self._on_scroll,
