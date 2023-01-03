@@ -54,14 +54,12 @@ class SendUserInput():
 
     @if_connected
     def _on_move(self, x, y):
-        print('sent1')
         message = f'M!{x/self.screenWidth}!{y/self.screenHight}'
-        print('sent2')
         message = message.encode()
         header = struct.pack('<L', len(message))
-        print('sent3')
+
         self.activeConnection.sendall(header + message)
-        print('sent4')
+
 
 
     @if_connected
