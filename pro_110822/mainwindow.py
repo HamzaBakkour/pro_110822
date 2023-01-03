@@ -105,7 +105,6 @@ class MainWindow(QMainWindow):
 
     def _on_shortcut_activate(self, m):
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'shortcut detected >>> {m}')
-
         #Server shortcut
         if(m == '<ctrl>+m+1'):
             self.sendUserInput.supress_user_input(False)
@@ -119,7 +118,6 @@ class MainWindow(QMainWindow):
 
 
     def _define_shortcuts(self,*args, addToExist = False):
-
         if (len(args) == 0):
             if self.shortcutListner:
                 self.onShortcutActivateArgument = []
