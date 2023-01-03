@@ -3,10 +3,15 @@ import functools
 import subprocess
 import struct
 import socket
+<<<<<<< HEAD
 import os
 import inspect
 import ctypes
 # import atexit
+=======
+import ctypes
+
+>>>>>>> 43bdce52d15f5d21560d15852621038cbd08c8e3
 
 
 def if_connected(func):
@@ -35,18 +40,48 @@ class SendUserInput():
         self.screenWidth = self.get_screen_resulotion()[0]
         self.screenHight = self.get_screen_resulotion()[1]
 
+<<<<<<< HEAD
+    def get_screen_resulotion(self):
+        user32 = ctypes.windll.user32
+        screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+        return screensize
+=======
+
+    def set_active_connection(self, active)-> None:
+            self.activeConnection = active
+>>>>>>> 43bdce52d15f5d21560d15852621038cbd08c8e3
+
     def get_screen_resulotion(self):
         user32 = ctypes.windll.user32
         screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
         return screensize
 
-
     @if_connected
     def _on_move(self, x, y):
+<<<<<<< HEAD
         message = f'M!{x/self.screenWidth}!{y/self.screenHight}'
         message = message.encode()
         header = struct.pack('<L', len(message))
         self.clientSocket.sendall(header + message)
+=======
+        if(self.mouseListner.is_alive() and self.activeConnection):
+            message = f'M!{x/self.screenWidth}!{y/self.screenHight}'
+            message = message.encode()
+            header = struct.pack('<L', len(message))
+            try:
+                self.activeConnection.sendall(header + message)
+            except socket.error as error:
+                if (error.errno == 10054):#[WinError 10054] An existing connection was forcibly closed by the remote host
+                    self.stop_listning()
+                    return
+            except Exception as ex:
+                print("Exception raised while sending mouse movement to client.",
+                f"Data header: {header}\n",
+                f"Data: {message}\n",
+                f"Sending socket: {self.activeConnection}\n\n",
+                f"Exception:\n{ex}")
+
+>>>>>>> 43bdce52d15f5d21560d15852621038cbd08c8e3
 
     @if_connected
     def _on_click(self, x, y, button, pressed):
