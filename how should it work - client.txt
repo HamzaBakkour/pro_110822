@@ -1,8 +1,0 @@
-client search for servers on port 12345
-
-	if found -> add server widget with connect button
-
-		if the connect button is pressed ->
-			send a request to recive mouse and keyboard
-				get port numer 
-					-> create a socket and start reciving
