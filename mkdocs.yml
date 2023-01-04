@@ -2,7 +2,7 @@ site_name: Pro_110822
 
 use_directory_urls: false
 
-site_description: A framework for macros and automation for mkdocs
+site_description: Pro_110822 documentation
 docs_dir: docs # indispensable or readthedocs will fail
 theme: 
   name: material
@@ -23,22 +23,10 @@ nav:
     - Overview: index.md
     - 'Source Code': 
       - mainwindow.md
-      - firstOpenView.md
-      - serverView.md
-      - listenForConnectionsWorker.md
-      - searchForServersWorker.md
-      - socketConnection.md
-      - networkScannerCls.md
-      - reciveMouseMovementWorker.md
-      - sendMouseMovementWorker.md
-      - scrollArea.md
-      - deviceWidget.md
-      - progressBar.md
-    - Tests:
-      - "Tips and Tricks": tips.md
-      - "Troubleshooting": troubleshooting.md
-      - "Asking for help?": help.md
-    - Licence: contribute.md
+      - senduserinput.md
+      
+    - Tests: tests.md
+    - Licence: licence.md
 
 markdown_extensions:
   - pymdownx.highlight:

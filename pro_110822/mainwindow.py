@@ -4,7 +4,7 @@ The programs main window module
 
 CLASS MainWindow constins the following methods:
     - `__init__`
-    - `_on_shortcut_activate`
+    - `on_shortcut_activate`
     - `define_shortcuts`
     - `_search_for_servers`
     - `_add_server`
@@ -219,7 +219,6 @@ class MainWindow(QMainWindow):
                 CLIENT_IP = data.split('!')[5]
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Exception raised while handling client requst.\nRequst data:\n{}\n\Exception:\n{}".format(data, ex))
-        
         self._estaplish_connection_to_client((CLIENT_SCREEN_W, CLIENT_SCREEN_H), CLIENT_IP, CLIENT_PORT, CLIENT_NAME)
 
 
