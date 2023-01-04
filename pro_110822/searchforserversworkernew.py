@@ -21,7 +21,7 @@ class SearchForServersWorker(QRunnable):
         super(SearchForServersWorker, self).__init__()
         self.signal = SearchForServersWorkerSignals()
         self.searchForServerConnection = MouseAndKeyboardConnection()
-        self.searchForServerConnection.create_socket(5)
+        self.searchForServerConnection.create_socket(180)
         self.serverPort = port
         self.scan = NetWrokScanner()
 

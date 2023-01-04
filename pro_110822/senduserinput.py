@@ -13,10 +13,8 @@ import ctypes
 def if_connected(func):
     @functools.wraps(func)
     def _wrapper(self, *args, **kwargs):
-        print('sent x')
         if ((self.mouseListner.is_alive() or self.keyboardListner.is_alive()) and self.activeConnection):
             try:
-                print('sent y')
                 func(self, *args, **kwargs)
             except socket.error as error:
                 if (error.errno == 10054):#[WinError 10054] An existing connection was forcibly closed by the remote host
