@@ -21,7 +21,7 @@ repo_url: https://github.com/HamzaBakkour/pro_110822
 copyright: © Hamza Bakkour, 2023.
 nav:
     - Overview: index.md
-    - 'Source Code': 
+    - 'Public interface': 
       - mainwindow.md
       - senduserinput.md
       

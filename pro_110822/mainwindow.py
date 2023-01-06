@@ -92,6 +92,7 @@ class MainWindow(QMainWindow):
         self.pbarValue = 0
         #Variables used to handle connections
         self.clientsConnections = []
+        self.serverWidget = None
         self.onShortcutActivateArgument = []
         self.sendUserInput = SendUserInput()
         #Define server shortcut
@@ -100,9 +101,16 @@ class MainWindow(QMainWindow):
         self.define_shortcuts('<ctrl>+m+' + str(self.connectionID), addToExist=False)   
         
 
-    def on_shortcut_activate(self, m):
+    def on_shortcut_activate(self, m : str)-> None:
         """
-        This method is called when a shortcut is pressed by the user.
+        This method is called when a shortcut is pressed by the user.  
+        Shortcuts are defind by the method define_shortcuts(self,*args, addToExist = False)
+
+        Args:
+            m: The shortcut that has been pressed by the user.
+
+        Retursn:
+            None
         """
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'shortcut detected >>> {m}')
         #Server shortcut
@@ -117,11 +125,19 @@ class MainWindow(QMainWindow):
                 print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', ex)
 
 
-    def define_shortcuts(self,*args, addToExist = False):
+    def define_shortcuts(self,*args : str, addToExist: bool = False) -> None:
         """
-        Define the shortcuts that the listner should listen to.
+        Define shortcuts.  
         If a shortcut is pressed the method on_shortcut_activate is called and the
         shortcut is passed to it.
+
+        Args:
+            *args: Shortcuts that the listner will listen to.
+            addToExist: If True, the shortcuts defined by args will be added to the existing shortcuts.  
+                        If False,  any existing shortcuts will be removed and the shortcuts defined by args will be added.
+
+        Returns:
+            None
         """
         if (len(args) == 0):
             if self.shortcutListner:
@@ -174,14 +190,20 @@ class MainWindow(QMainWindow):
 
     def _add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "emited from searchForServers : ", serverName, serverIP)
-        serverWidget = ServerWidget(serverName, serverIP)
-        self.mainWindowView.add_deivce(serverWidget)
-        serverWidget.connectToServer.clicked.connect(lambda: self._establish_connection_to_server(serverIP, serverPort))
+        self.serverWidget = ServerWidget(serverName, serverIP)
+        self.mainWindowView.add_deivce(self.serverWidget)
+        self.serverWidget.connectToServer.clicked.connect(lambda: self._establish_connection_to_server(serverIP, serverPort))
 
 
     def _establish_connection_to_server(self ,serverIP: str, serverPort: int):
-        self.reciveMouseMovement = ReciveUserInput(serverIP, serverPort)
-        self.threabool.start(self.reciveMouseMovement)
+        if self.serverWidget.connectToServer.isChecked():
+            self.serverWidget.connectToServer.setText('Disconnect')
+            self.reciveMouseMovement = ReciveUserInput(serverIP, serverPort)
+            self.threabool.start(self.reciveMouseMovement)
+        else:
+            self.serverWidget.connectToServer.setText('Connect')
+            self.reciveMouseMovement.alive = False
+
 
 
     def _create_server(self):

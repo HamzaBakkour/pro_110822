@@ -17,6 +17,7 @@ class ReciveUserInput(QRunnable):
         super(ReciveUserInput, self).__init__()
         self.serverIP = serverIP
         self.serverPort = int(serverPort)
+        self.alive = True
 
     def get_screen_resulotion(self):
         user32 = ctypes.windll.user32
@@ -69,7 +70,7 @@ class ReciveUserInput(QRunnable):
         mouse = MC()
         keyboard = KC()
 
-        while(True):
+        while(self.alive):
             try:
                 headerData = self.receive_n_bytes(4)
                 if (len(headerData) == 4):

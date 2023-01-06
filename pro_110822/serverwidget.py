@@ -33,6 +33,7 @@ class ServerWidget(QtWidgets.QFrame):
 
         self.buttons_layout = QHBoxLayout()
         self.connectToServer = QPushButton("Connect")
+        self.connectToServer.setCheckable(True)
         self.buttons_layout.addWidget(self.connectToServer)
         self.layout.addLayout(self.buttons_layout)
 
