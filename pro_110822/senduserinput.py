@@ -43,6 +43,7 @@ def if_connected(func):
             except socket.error as error:
                 if (error.errno == 10054):#[WinError 10054] An existing connection was forcibly closed by the remote host
                     self.stop_listning()
+                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "An existing connection was forcibly closed by the remote host")
                     return
             except Exception as ex:
                 print(ex)

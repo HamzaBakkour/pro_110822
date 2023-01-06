@@ -10,6 +10,8 @@ import socket
 import platform
 import ctypes
 import struct
+import os
+import inspect
 
 
 class ReciveUserInput(QRunnable):
@@ -111,4 +113,5 @@ class ReciveUserInput(QRunnable):
             except BlockingIOError:
                 pass
             except IOError:
-                pass    
+                pass
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "ReciveUserInput QRunnable Terminated")    

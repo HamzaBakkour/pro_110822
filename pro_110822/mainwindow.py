@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
         if (addToExist == False):
             argg = '{'
             for _ in range(len(args)):
-                argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self._on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
+                argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
             argg = argg[:-2] + '}'
             self.onShortcutActivateArgument = []
             self.onShortcutActivateArgument.extend(args)
@@ -156,7 +156,7 @@ class MainWindow(QMainWindow):
             args.extend(self.onShortcutActivateArgument)
             argg = '{'
             for _ in range(len(args)):
-                argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self._on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
+                argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
             argg = argg[:-2] + '}'
             self.onShortcutActivateArgument = []
             self.onShortcutActivateArgument.extend(args)
