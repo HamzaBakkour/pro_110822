@@ -25,7 +25,7 @@ import socket
 import os
 import inspect
 import ctypes
-# import atexit
+
 
 import ctypes
 
@@ -41,10 +41,12 @@ def if_connected(func):
             try:
                 func(self, *args, **kwargs)
             except socket.error as error:
-                if (error.errno == 10054):#[WinError 10054] An existing connection was forcibly closed by the remote host
-                    self.stop_listning()
-                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "An existing connection was forcibly closed by the remote host")
+                if (error.errno == 10054 or error.errno == 10053):
+                    self._terminate_socket()
+                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'socket errno {error} [Handeled]')
                     return
+                else:
+                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'socket errno {error} [Unhandeled]')
             except Exception as ex:
                 print(ex)
     return _wrapper
@@ -58,6 +60,7 @@ class SendUserInput():
         self.activeWin32Filter = False
         self.screenCovered = False
         self.coverScreenProcess = None
+        self.keyBoard = keyboard.Controller()
         self.screenWidth = self.get_screen_resulotion()[0]
         self.screenHight = self.get_screen_resulotion()[1]
 
@@ -153,7 +156,18 @@ class SendUserInput():
         elif (supress == False):
             self.activeWin32Filter = False
             if(self.screenCovered):
-                self.coverScreenProcess.terminate()
+                self.coverScreenProcess.kill()
+                self.keyboardListner._suppress = False
+                try:
+                    self.keyBoard.press(keyboard.Key.ctrl_l)
+                    self.keyBoard.release(keyboard.Key.ctrl_l)
+                except Exception as ex:
+                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exceptions raisde, press ctrl_l\n{ex}')
+                try:
+                    self.keyBoard.press(keyboard.Key.ctrl_r)
+                    self.keyBoard.release(keyboard.Key.ctrl_r)
+                except:
+                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exceptions raisde, press ctrl_r\n{ex}')
                 self.screenCovered = False
 
 
@@ -178,6 +192,15 @@ class SendUserInput():
 
         self.mouseListner.start()
         self.keyboardListner.start()
+
+
+    def _terminate_socket(self):
+        try:
+            self.activeConnection.close()
+        except Exception as ex:
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisd while terminating socket\n{self.activeConnection}\n{ex}')
+        self.activeConnection = None
+        self.supress_user_input(False)
 
 
     def stop_listning(self):

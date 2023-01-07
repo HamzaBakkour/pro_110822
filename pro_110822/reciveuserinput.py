@@ -20,6 +20,8 @@ class ReciveUserInput(QRunnable):
         self.serverIP = serverIP
         self.serverPort = int(serverPort)
         self.alive = True
+        self.sendSocket = None
+        self.reciveSocket = None
 
     def get_screen_resulotion(self):
         user32 = ctypes.windll.user32
@@ -46,28 +48,36 @@ class ReciveUserInput(QRunnable):
 
     @Slot()
     def run(self)-> int:
-        sendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        reciveSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        reciveSocket.bind(('',0))
+        self.reciveSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.reciveSocket.bind(('',0))
+        self.reciveSocket.setblocking(0)
 
-        sendSocket.connect((self.serverIP, self.serverPort))
+
+        self.sendSocket.connect((self.serverIP, self.serverPort))
 
         screenRez = self.get_screen_resulotion()
-        receiveSocetPort = reciveSocket.getsockname()[1]
+        receiveSocetPort = self.reciveSocket.getsockname()[1]
 
         message = "C!{}!{}!{}!{}".format(screenRez[0], screenRez[1], receiveSocetPort, self.get_pc_name())
         message = message.encode()
         header = struct.pack('<L', len(message))
 
         try:
-            sendSocket.sendall(header + message)
+            self.sendSocket.sendall(header + message)
         except Exception as e:
             print(str(e))
 
-        reciveSocket.listen(5)
-        self.conn, address = reciveSocket.accept()
-        print("from receive worker accepted {} {}".format(self.conn, address))
+        
+        self.reciveSocket.listen(5)
+        while(True):
+            try:
+                self.conn, address = self.reciveSocket.accept()
+                print("from receive worker accepted {} {}".format(self.conn, address))
+                break
+            except BlockingIOError:
+                pass
 
         mouse = MC()
         keyboard = KC()
@@ -80,7 +90,6 @@ class ReciveUserInput(QRunnable):
                     data = self.receive_n_bytes(dataLen)
                     if len(data) == dataLen:
                         data = data.decode()
-                        # print(f'>{data}')
                         if (data.split('!')[0] == 'M'):
                             mouse.position = (int((float(data.split('!')[1])*screenRez[0])), int((float(data.split('!')[2])*screenRez[1])))
                         elif (data.split('!')[0] == 'P'):
@@ -89,18 +98,15 @@ class ReciveUserInput(QRunnable):
                             elif (data.split('!')[2] == '0'):
                                 mouse.release(eval(data.split('!')[1]))
                         elif (data.split('!')[0] == 'K'):
-                            # print('P data', data)
-                            # print('data 4:7', data[4:7])
+
                             try:
                                 if (data[4:7] == 'Key'):
-                                    # print('Key')
                                     keyboard.press(eval(data.split('!')[2]))
                                 else:
                                     keyboard.press(data.split('!')[2])
                             except Exception as ex:
                                 print(ex)
                         elif (data.split('!')[0] == 'R'):
-                            # print('R data', data)
                             try:
                                 keyboard.release(eval(data.split('!')[1]))
                             except Exception as ex:
@@ -114,4 +120,6 @@ class ReciveUserInput(QRunnable):
                 pass
             except IOError:
                 pass
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "ReciveUserInput QRunnable Terminated")    
+        self.sendSocket.close()
+        self.reciveSocket.close()
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', '---- | ' , "ReciveUserInput QRunnable terminated")

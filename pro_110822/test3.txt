@@ -1,0 +1,66 @@
+mainwindow.py |  _define_shortcuts |  __init__ ||  _define_shortcuts / args : ('<ctrl>+m+1',)
+Server is listning for connections at port 12345
+mainwindow.py |  close_server |  <module> ||  Server Socket terminated
+senduserinput.py |  stop_listning |  close_server ||  LISTNINGSTOPED
+mainwindow.py |  close_server |  <module> ||  Input listner terminated
+ServerWorker terminated
+
+functions called:
+filename: <string>, modulename: <string>, funcname: <lambda>
+filename: <string>, modulename: <string>, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\asyncioping.py, modulename: asyncioping, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\clientview.py, modulename: clientview, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\clientview.py, modulename: clientview, funcname: ClientView
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\clientview.py, modulename: clientview, funcname: ClientView.__init__
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\clientview.py, modulename: clientview, funcname: ClientView.remove
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\clientview.py, modulename: clientview, funcname: ClientView.set_available_servers_area
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\clientview.py, modulename: clientview, funcname: ClientView.set_upper_frame
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\clientwidget.py, modulename: clientwidget, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\clientwidget.py, modulename: clientwidget, funcname: ClientWidget
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\networkscannercls.py, modulename: networkscannercls, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\networkscannercls.py, modulename: networkscannercls, funcname: NetWrokScanner
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\progressbar.py, modulename: progressbar, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\progressbar.py, modulename: progressbar, funcname: ProgressBar
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\progressbar.py, modulename: progressbar, funcname: ProgressBar.__init__
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\progressbar.py, modulename: progressbar, funcname: ProgressBar.remove
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\reciveuserinput.py, modulename: reciveuserinput, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\reciveuserinput.py, modulename: reciveuserinput, funcname: ReciveUserInput
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\scrollarea.py, modulename: scrollarea, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\scrollarea.py, modulename: scrollarea, funcname: ScrollPanel
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\scrollarea.py, modulename: scrollarea, funcname: ScrollPanel.__init__
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\scrollarea.py, modulename: scrollarea, funcname: ScrollPanel.init_ui
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\searchforserversworker.py, modulename: searchforserversworker, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\searchforserversworker.py, modulename: searchforserversworker, funcname: SearchForServersWorker
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\searchforserversworker.py, modulename: searchforserversworker, funcname: SearchForServersWorkerSignals
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\senduserinput.py, modulename: senduserinput, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\senduserinput.py, modulename: senduserinput, funcname: SendUserInput
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\senduserinput.py, modulename: senduserinput, funcname: SendUserInput.__init__
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\senduserinput.py, modulename: senduserinput, funcname: SendUserInput._mouse_win32_event_filter
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\senduserinput.py, modulename: senduserinput, funcname: SendUserInput.start_listning
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\senduserinput.py, modulename: senduserinput, funcname: SendUserInput.stop_listning
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\senduserinput.py, modulename: senduserinput, funcname: SendUserInput.supress_user_input
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\senduserinput.py, modulename: senduserinput, funcname: _wrapper
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\senduserinput.py, modulename: senduserinput, funcname: if_connected
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverview.py, modulename: serverview, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverview.py, modulename: serverview, funcname: ServerView
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverview.py, modulename: serverview, funcname: ServerView.__init__
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverview.py, modulename: serverview, funcname: ServerView.connected_devices_area
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverview.py, modulename: serverview, funcname: ServerView.remove
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverview.py, modulename: serverview, funcname: ServerView.server_info_fram
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverview.py, modulename: serverview, funcname: ServerView.set_upper_frame
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverwidget.py, modulename: serverwidget, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverwidget.py, modulename: serverwidget, funcname: ServerWidget
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverworker.py, modulename: serverworker, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverworker.py, modulename: serverworker, funcname: ServerWorker
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverworker.py, modulename: serverworker, funcname: ServerWorker.__init__
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\serverworker.py, modulename: serverworker, funcname: ServerWorkerSignals
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\socketconnection.py, modulename: socketconnection, funcname: <module>
+filename: C:\Users\alexa\Desktop\pro_110822\pro_110822\socketconnection.py, modulename: socketconnection, funcname: MouseAndKeyboardConnection
+filename: mainwindow.py, modulename: mainwindow, funcname: <module>
+filename: mainwindow.py, modulename: mainwindow, funcname: MainWindow
+filename: mainwindow.py, modulename: mainwindow, funcname: MainWindow.__init__
+filename: mainwindow.py, modulename: mainwindow, funcname: MainWindow._define_shortcuts
+filename: mainwindow.py, modulename: mainwindow, funcname: MainWindow.close_server
+filename: mainwindow.py, modulename: mainwindow, funcname: MainWindow.create_server
+filename: pyscript, modulename: pyscript, funcname: <module>
+filename: pyscript, modulename: pyscript, funcname: _C
