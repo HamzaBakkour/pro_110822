@@ -17,6 +17,8 @@ CLASS SendUserInput constins the following methods:
     - `stop_listning`
     - `send_input_to_client`
 """
+
+from PySide6.QtCore import QRunnable, QObject, Signal, Slot
 from pynput import mouse, keyboard
 import functools
 import subprocess
@@ -43,13 +45,18 @@ def if_connected(func):
             except socket.error as error:
                 if (error.errno == 10054 or error.errno == 10053):
                     self._terminate_socket()
-                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'socket errno {error} [Handeled]')
+                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'socket error {error} [Handeled]')
                     return
                 else:
                     print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'socket errno {error} [Unhandeled]')
             except Exception as ex:
-                print(ex)
+                print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', ex)
+
     return _wrapper
+
+
+class SendUserInputSignals(QObject):
+    socketTerminated = Signal(object)
 
 
 class SendUserInput():
@@ -60,6 +67,7 @@ class SendUserInput():
         self.activeWin32Filter = False
         self.screenCovered = False
         self.coverScreenProcess = None
+        self.signal = SendUserInputSignals()
         self.keyBoard = keyboard.Controller()
         self.screenWidth = self.get_screen_resulotion()[0]
         self.screenHight = self.get_screen_resulotion()[1]
@@ -195,6 +203,7 @@ class SendUserInput():
 
 
     def _terminate_socket(self):
+        self.signal.socketTerminated.emit(self.activeConnection.getsockname()[1])
         try:
             self.activeConnection.close()
         except Exception as ex:

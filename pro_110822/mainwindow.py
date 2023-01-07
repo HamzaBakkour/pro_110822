@@ -70,8 +70,10 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent)
         #Program title
         self.setWindowTitle("pro_110822")
+
         #Main window resulotion
         self.setFixedSize(600, 800)
+
         #Main window layout
         self.mainWidget = QtWidgets.QWidget()
         self.mainWidget.layout = QGridLayout()
@@ -79,9 +81,11 @@ class MainWindow(QMainWindow):
         self.mainWidget.layout.setSpacing(0)
         self.mainWidget.setLayout(self.mainWidget.layout)
         self.setCentralWidget(self.mainWidget)
+
         #Thread pool
         self.threabool = QThreadPool()
         self.threabool.setMaxThreadCount(20)
+
         #Start the program with ClientView
         self.mainWindowView = ClientView()
         self.mainWidget.layout.addWidget(self.mainWindowView)
@@ -90,11 +94,20 @@ class MainWindow(QMainWindow):
         self.pBar = ProgressBar()
         self.mainWidget.layout.addWidget(self.pBar)
         self.pbarValue = 0
+
         #Variables used to handle connections
         self.clientsConnections = []
+        self.clientWidgets = []
         self.serverWidget = None
+
         self.onShortcutActivateArgument = []
         self.sendUserInput = SendUserInput()
+        self.sendUserInput.signal.socketTerminated.connect(self._remove_client_widget)
+
+
+        # self.sendUserInput.signal.clientRequest.connect(self._handle_client_requests)
+
+
         #Define server shortcut
         self.connectionID = 1
         self.shortcutListner = False
@@ -247,7 +260,8 @@ class MainWindow(QMainWindow):
     def _estaplish_connection_to_client(self, clientScreenResolution : tuple, clientIP : str, clientPort : str, clientName : str):
         #Define client shortcut
         self.connectionID = self.connectionID + 1
-        self.define_shortcuts('<ctrl>+m+' + str(self.connectionID), addToExist=True)
+        shortcut = '<ctrl>+m+' + str(self.connectionID)
+        self.define_shortcuts(shortcut, addToExist=True)
         #Connect server to client
         self.clientsConnections.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
         try:
@@ -255,12 +269,12 @@ class MainWindow(QMainWindow):
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Exception raised while server trying to connect to client.\nServer socket: {}\nCient IP: {}\nClient Port: {}\n\nException:\n{}".format(self.clientsConnections[-1], clientIP, clientPort, ex))
         #Add client widget to the UI
-        self._add_client_widget(clientName, clientIP, self.clientsConnections[-1].getsockname()[1])
+        self._add_client_widget(clientName, clientIP, self.clientsConnections[-1].getsockname()[1], shortcut)
 
 
-    def _add_client_widget(self, clientName, clientIP, clientPort):
-        client = ClientWidget(clientName, clientIP, clientPort)
-        self.mainWindowView.add_client(client)
+    def _add_client_widget(self, clientName, clientIP, clientPort, shortcut):
+        self.clientWidgets.append(ClientWidget(clientName, clientIP, clientPort, shortcut))
+        self.mainWindowView.add_client(self.clientWidgets[-1])
 
 
     def _close_server(self):
@@ -281,6 +295,18 @@ class MainWindow(QMainWindow):
         self.mainWindowView.refreshButton.clicked.connect(self._search_for_servers)
 
 
+    def _remove_client_widget(self, socketPort):
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Client socket terminated {socketPort}')
+        for widget in self.clientWidgets:
+            if (widget.port == socketPort):
+                self.onShortcutActivateArgument.remove(widget.shortcut)
+                self.define_shortcuts(str(', '.join(self.onShortcutActivateArgument)) , addToExist=False)
+                widget.deleteLater()
+         
+
+
+
+        
     def _update_p_bar(self, value, text):
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', text)
         if (value == 999):

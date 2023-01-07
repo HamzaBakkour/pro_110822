@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 )
 
 class ClientWidget(QtWidgets.QFrame):
-    def __init__(self,clientName: str, clientIP: list, clientPort):        
+    def __init__(self,clientName: str, clientIP: list, clientPort : int, shortcut : str):        
         super(ClientWidget, self).__init__()
 
         #Set the class layout
@@ -20,24 +20,30 @@ class ClientWidget(QtWidgets.QFrame):
         self.layout = QHBoxLayout(self)
         self.setStyleSheet("QWidget#ParentWidget {background-color: white; margin:5px; border:1px solid black;}")
         self.setLayout(self.layout)
+        self.port = clientPort
+        self.shortcut = shortcut
 
-        #Set a VBox layout for the name and the ip
-        clientInfoLayout = QVBoxLayout()
+        self._build_ui(clientName, clientIP, clientPort, shortcut)
 
-        clientName = QLabel("Client name : " + clientName)
-        ClientIP = QLabel("Client IP        : " + clientIP)
-        ClientPort = QLabel("Connected via port        : " + str(clientPort))
-        #Add the device name and IP to the VBox layout 
-        clientInfoLayout.addWidget(clientName)
-        clientInfoLayout.addWidget(ClientIP)
-        clientInfoLayout.addWidget(ClientPort)
+    def _build_ui(self, clientName, clientIP, clientPort, shortcut):
 
-        self.layout.addLayout(clientInfoLayout)
+            #Set a VBox layout for the name and the ip
+            clientInfoLayout = QVBoxLayout()
 
-        # self.buttons_layout = QHBoxLayout()
-        # self.connectToServer = QPushButton("Connect")
-        # self.buttons_layout.addWidget(self.connectToServer)
-        # self.layout.addLayout(self.buttons_layout)
+            name = QLabel("Client name : " + clientName)
+            ip = QLabel("Client IP        : " + clientIP)
+            port = QLabel("Connected via port        : " + str(clientPort))
+            shortcut = QLabel("Shortcut        : " + shortcut)
+
+            #Add the device name and IP to the VBox layout 
+            clientInfoLayout.addWidget(name)
+            clientInfoLayout.addWidget(ip)
+            clientInfoLayout.addWidget(port)
+            clientInfoLayout.addWidget(shortcut)
+
+
+            self.layout.addLayout(clientInfoLayout)
+
 
 
 
