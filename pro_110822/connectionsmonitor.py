@@ -46,5 +46,5 @@ class ConnectionsMonitor(QRunnable):
                     #     print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', 'Value error [OK]: {ve}')
                 time.sleep(1)
             time.sleep(1)
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'ConnectionsMonitor terminated')
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', 'ConnectionsMonitor terminated')
         

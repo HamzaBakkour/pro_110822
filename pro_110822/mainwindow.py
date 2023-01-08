@@ -297,6 +297,7 @@ class MainWindow(QMainWindow):
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Server Socket terminated")
         self.sendUserInput.stop_listning()
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Input listner terminated")
+        self.connectionsMonitor.alive = False
         #Remove ServerView and set the new view to ClientView
         self.mainWindowView.remove()
         self.pBar.remove()
@@ -306,6 +307,8 @@ class MainWindow(QMainWindow):
         self.mainWidget.layout.addWidget(self.pBar)
         self.mainWindowView.makeServerButton.clicked.connect(self._create_server)
         self.mainWindowView.refreshButton.clicked.connect(self._search_for_servers)
+
+
 
 
     def _remove_client_widget(self, socketPort):
