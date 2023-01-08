@@ -22,7 +22,6 @@ class ClientWidget(QtWidgets.QFrame):
         self.setLayout(self.layout)
         self.port = clientPort
         self.shortcut = shortcut
-
         self._build_ui(clientName, clientIP, clientPort, shortcut)
 
     def _build_ui(self, clientName, clientIP, clientPort, shortcut):

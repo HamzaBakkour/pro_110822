@@ -45,6 +45,7 @@ from serverwidget import ServerWidget
 from reciveuserinput import ReciveUserInput
 from senduserinput import SendUserInput
 from clientwidget import ClientWidget
+from connectionsmonitor import ConnectionsMonitor
 
 
 import socket
@@ -99,6 +100,8 @@ class MainWindow(QMainWindow):
         self.clientsConnections = []
         self.clientWidgets = []
         self.serverWidget = None
+        self.connectionsMonitor = ConnectionsMonitor(self.clientsConnections)
+        self.connectionsMonitor.signal.socketError.connect(self._remove_client_widget)
 
         self.onShortcutActivateArgument = []
         self.sendUserInput = SendUserInput()
@@ -135,7 +138,7 @@ class MainWindow(QMainWindow):
             try:
                 self.sendUserInput.send_input_to_client(self.clientsConnections[int(m[-1]) - 2])
             except Exception as ex:
-                print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', ex)
+                print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')
 
 
     def define_shortcuts(self,*args : str, addToExist: bool = False) -> None:
@@ -152,6 +155,7 @@ class MainWindow(QMainWindow):
         Returns:
             None
         """
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'args: {args}')
         if (len(args) == 0):
             if self.shortcutListner:
                 self.onShortcutActivateArgument = []
@@ -160,7 +164,13 @@ class MainWindow(QMainWindow):
         if (addToExist == False):
             argg = '{'
             for _ in range(len(args)):
+                # try:
                 argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
+                # except TypeError:
+                #     argg = argg , "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
+                # except Exception as ex:
+                #     print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exceptoin raised:\n{ex}')
+
             argg = argg[:-2] + '}'
             self.onShortcutActivateArgument = []
             self.onShortcutActivateArgument.extend(args)
@@ -238,6 +248,7 @@ class MainWindow(QMainWindow):
         #Send clients requests to  _handle_client_requests
         self.serverWorker.signal.clientRequest.connect(self._handle_client_requests)
         self.threabool.start(self.serverWorker)
+        self.threabool.start(self.connectionsMonitor)
         #Start listning for user input
         self.sendUserInput.start_listning()
 
@@ -268,6 +279,8 @@ class MainWindow(QMainWindow):
             self.clientsConnections[-1].connect((clientIP, int(clientPort)))
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Exception raised while server trying to connect to client.\nServer socket: {}\nCient IP: {}\nClient Port: {}\n\nException:\n{}".format(self.clientsConnections[-1], clientIP, clientPort, ex))
+        #Monitor the connection
+        self.connectionsMonitor.connectionsList = self.clientsConnections
         #Add client widget to the UI
         self._add_client_widget(clientName, clientIP, self.clientsConnections[-1].getsockname()[1], shortcut)
 
@@ -299,14 +312,15 @@ class MainWindow(QMainWindow):
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Client socket terminated {socketPort}')
         for widget in self.clientWidgets:
             if (widget.port == socketPort):
-                self.onShortcutActivateArgument.remove(widget.shortcut)
-                self.define_shortcuts(str(', '.join(self.onShortcutActivateArgument)) , addToExist=False)
+                try:
+                    self.onShortcutActivateArgument.remove(widget.shortcut)
+                except ValueError as ve:
+                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Value error exception [OK] {ve}')
+                    return
+                self.define_shortcuts(*self.onShortcutActivateArgument , addToExist=False)
                 widget.deleteLater()
          
 
-
-
-        
     def _update_p_bar(self, value, text):
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', text)
         if (value == 999):
