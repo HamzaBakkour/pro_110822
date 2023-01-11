@@ -35,11 +35,10 @@ class ConnectionsMonitor(QRunnable):
                     # print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'socket error, errno: {error}')
                     try:
                         self.signal.socketError.emit(connection.getsockname()[1])
+                        connection.close()
                     except Exception as ex:
                         # print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'Exception raside : {ex}')
                         pass
-                    connection.close()
-
                     # try:
                     #     self.connectionsList.remove(connection)
                     # except ValueError as ve:

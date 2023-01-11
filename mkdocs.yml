@@ -24,6 +24,7 @@ nav:
     - 'Public interface': 
       - mainwindow.md
       - senduserinput.md
+      - reciveuserinput.md
       
     - Tests: tests.md
     - Licence: licence.md

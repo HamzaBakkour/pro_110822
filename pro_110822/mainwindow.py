@@ -2,7 +2,7 @@
 """
 The programs main window module
 
-CLASS MainWindow constins the following methods:
+CLASS MainWindow contains the following methods:
     - `__init__`
     - `on_shortcut_activate`
     - `define_shortcuts`
@@ -14,23 +14,17 @@ CLASS MainWindow constins the following methods:
     - `_estaplish_connection_to_client`
     - `_add_client_widget`
     - `_close_server`
+    - `_remove_client_widget`
     - `_update_p_bar`
     - `_reseat_p_bar`
 
 """
-from PySide6 import QtCore, QtWidgets
-
+from PySide6 import QtWidgets
 from PySide6.QtCore import QThreadPool
-
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
-    QScrollArea,
-    QGridLayout,
-    QHBoxLayout,
-    QVBoxLayout,
-    QPushButton,
-    QLabel
+    QGridLayout
 )
 
 from PySide6 import QtWidgets
@@ -46,7 +40,6 @@ from reciveuserinput import ReciveUserInput
 from senduserinput import SendUserInput
 from clientwidget import ClientWidget
 from connectionsmonitor import ConnectionsMonitor
-
 
 import socket
 import sys
@@ -119,7 +112,7 @@ class MainWindow(QMainWindow):
 
     def on_shortcut_activate(self, m : str)-> None:
         """
-        This method is called when a shortcut is pressed by the user.  
+        This method is called when a shortcut is pressed.  
         Shortcuts are defind by the method define_shortcuts(self,*args, addToExist = False)
 
         Args:
@@ -144,11 +137,9 @@ class MainWindow(QMainWindow):
     def define_shortcuts(self,*args : str, addToExist: bool = False) -> None:
         """
         Define shortcuts.  
-        If a shortcut is pressed the method on_shortcut_activate is called and the
-        shortcut is passed to it.
 
         Args:
-            *args: Shortcuts that the listner will listen to.
+            *args[str]: Shortcuts that the listner will listen to.
             addToExist: If True, the shortcuts defined by args will be added to the existing shortcuts.  
                         If False,  any existing shortcuts will be removed and the shortcuts defined by args will be added.
 
@@ -166,10 +157,6 @@ class MainWindow(QMainWindow):
             for _ in range(len(args)):
                 # try:
                 argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
-                # except TypeError:
-                #     argg = argg , "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
-                # except Exception as ex:
-                #     print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exceptoin raised:\n{ex}')
 
             argg = argg[:-2] + '}'
             self.onShortcutActivateArgument = []

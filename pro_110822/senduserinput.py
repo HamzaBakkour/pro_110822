@@ -2,7 +2,7 @@
 """
 Send mouse and keyboard input over a socket connection.
 
-CLASS SendUserInput constins the following methods:
+CLASS SendUserInput contains the following methods:
     - `__init__`
     - `get_screen_resulotion`
     - `_on_move`
@@ -14,6 +14,7 @@ CLASS SendUserInput constins the following methods:
     - `_mouse_win32_event_filter`
     - `supress_user_input`
     - `start_listning`
+    - `_terminate_socket`
     - `stop_listning`
     - `send_input_to_client`
 """
@@ -22,6 +23,7 @@ from PySide6.QtCore import QRunnable, QObject, Signal, Slot
 from pynput import mouse, keyboard
 import functools
 import subprocess
+from subprocess import PIPE, STDOUT
 import struct
 import socket
 import os
@@ -153,12 +155,22 @@ class SendUserInput():
             self.mouseListner._suppress = False
 
 
-    def supress_user_input(self, supress : bool):
+    def supress_user_input(self, supress : bool)-> None:
         """
-        Calling this method will disable the mouse and keyboard input.
+        Calling this method will disable the mouse and keyboard input and
+        will hide the mouse pointer.
+
+        Args:
+            supress: True, input supressed.
+                     False, input unsupressed.
+
+        Returns:
+            None
         """
         if (supress == True and self.screenCovered == False):
-            self.coverScreenProcess = subprocess.Popen(["py","-m","coverscreenalpha.py"])
+            screenCoverScriptpath = os.path.dirname(os.path.realpath(__file__)) 
+            screenCoverScriptpath = screenCoverScriptpath + '\coverscreenalpha.py'
+            self.coverScreenProcess = subprocess.Popen(["py",screenCoverScriptpath], stdout=PIPE, stderr=STDOUT)
             self.screenCovered = True
             self.activeWin32Filter = True
         elif (supress == False):
@@ -181,9 +193,15 @@ class SendUserInput():
 
     def start_listning(self):
         """
-        Start listning to the mouse and keyboard input.
-        To send the input to a socket call the method send_input_to_client
+        Start the mouse and keyboard listner.
+        To send the input to a socket, call the method send_input_to_client
         and provide a valid socket connection as an argument.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         self.mouseListner = mouse.Listener(on_move=self._on_move,
         on_click = self._on_click,
@@ -202,7 +220,7 @@ class SendUserInput():
         self.keyboardListner.start()
 
 
-    def _terminate_socket(self):
+    def _terminate_socket(self)-> None:
         self.signal.socketTerminated.emit(self.activeConnection.getsockname()[1])
         try:
             self.activeConnection.close()
@@ -215,6 +233,12 @@ class SendUserInput():
     def stop_listning(self):
         """
         Stop listning to the mouse and keyboard input.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         self.supress_user_input(False)
         self.mouseListner.stop()
@@ -222,5 +246,16 @@ class SendUserInput():
         self.activeConnection = None
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "LISTNINGSTOPED")
 
-    def send_input_to_client(self, clientSocket)-> None:
+    def send_input_to_client(self, clientSocket: socket.socket)-> None:
+        """
+        Set the connection that the mouse and keyboard input 
+        will be sent to.
+
+        Args:
+            clientSocket: The connection that the mouse and keyboard input
+                            will be sent to
+
+        Returns:
+            None
+        """
         self.activeConnection = clientSocket

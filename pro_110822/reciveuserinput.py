@@ -1,10 +1,18 @@
+#pro_110822/reciveuserinput.py
+"""
+Recive mouse and keyboard input.
+
+CALSS ReciveUserInput contains the following methods:
+    - `__init__`
+    - `on_shortcut_activate`
+    - `get_screen_resulotion`
+    - `get_pc_name`
+    - `_receive_n_bytes`
+    - `run`
+"""
 from PySide6.QtCore import QRunnable, Slot
-
 from pynput.mouse import Controller as MC
-from pynput.mouse import Button
-
 from pynput.keyboard import Controller as KC
-from pynput.keyboard import Key
 
 import socket
 import platform
@@ -22,20 +30,41 @@ class ReciveUserInput(QRunnable):
         self.alive = True
         self.sendSocket = None
         self.reciveSocket = None
+        self.data = None
+        
+       
 
-    def get_screen_resulotion(self):
+    def get_screen_resulotion(self)-> tuple[int, int]:
+        """
+        Get the screen width and hight.
+
+        Args:
+            None
+
+        Returns:
+            tuple[secreen width, screen hight]
+        """
         user32 = ctypes.windll.user32
         screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
         return screensize
 
-    @staticmethod
-    def get_pc_name():
+
+    def get_pc_name(self)-> str:
+        """
+        Get the PC name.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         return platform.node()
 
 
-    def receive_n_bytes(self, n):
-        """ Convenience method for receiving exactly n bytes from
-            self.socket (assuming it's open and connected).
+    def _receive_n_bytes(self, n):
+        """
+        Receiving exactly n bytes from socket connection (assuming it's open and connected).
         """
         data = ''.encode()
         while len(data) < n:
@@ -47,29 +76,33 @@ class ReciveUserInput(QRunnable):
 
 
     @Slot()
-    def run(self)-> int:
-        self.sendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def run(self)-> None:
+        """
+        The QRunnable run method. This method will be called when the QRunnable is
+        started.
 
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        #sendSocket is used to send client info to the server.
+        self.sendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #reciveSocket is used to recive mouse and keyboard input.
         self.reciveSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.reciveSocket.bind(('',0))
         self.reciveSocket.setblocking(0)
-
-
         self.sendSocket.connect((self.serverIP, self.serverPort))
-
         screenRez = self.get_screen_resulotion()
         receiveSocetPort = self.reciveSocket.getsockname()[1]
-
         message = "C!{}!{}!{}!{}".format(screenRez[0], screenRez[1], receiveSocetPort, self.get_pc_name())
         message = message.encode()
         header = struct.pack('<L', len(message))
-
         try:
             self.sendSocket.sendall(header + message)
-        except Exception as e:
-            print(str(e))
-
-        
+        except Exception as ex:
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'Exception raisde {ex}')
         self.reciveSocket.listen(5)
         while(True):
             try:
@@ -84,34 +117,32 @@ class ReciveUserInput(QRunnable):
 
         while(self.alive):
             try:
-                headerData = self.receive_n_bytes(4)
+                headerData = self._receive_n_bytes(4)
                 if (len(headerData) == 4):
                     dataLen = struct.unpack('<L', headerData)[0]
-                    data = self.receive_n_bytes(dataLen)
-                    if len(data) == dataLen:
-                        data = data.decode()
-                        if (data.split('!')[0] == 'M'):
-                            mouse.position = (int((float(data.split('!')[1])*screenRez[0])), int((float(data.split('!')[2])*screenRez[1])))
-                        elif (data.split('!')[0] == 'P'):
-                            if (data.split('!')[2] == '1'):
-                                mouse.press(eval(data.split('!')[1]))
-                            elif (data.split('!')[2] == '0'):
-                                mouse.release(eval(data.split('!')[1]))
-                        elif (data.split('!')[0] == 'K'):
-
+                    self.data = self._receive_n_bytes(dataLen)
+                    if len(self.data) == dataLen:
+                        self.data = self.data.decode()
+                        if (self.data.split('!')[0] == 'M'):#Mouse position
+                            mouse.position = (int((float(self.data.split('!')[1])*screenRez[0])), int((float(self.data.split('!')[2])*screenRez[1])))
+                        elif (self.data.split('!')[0] == 'P'):#Mouse button
+                            if (self.data.split('!')[2] == '1'):#Mouse button pressed
+                                mouse.press(eval(self.data.split('!')[1]))
+                            elif (self.data.split('!')[2] == '0'):#Mouse button released
+                                mouse.release(eval(self.data.split('!')[1]))
+                        elif (self.data.split('!')[0] == 'K'):#Keyboard button
                             try:
-                                if (data[4:7] == 'Key'):
-                                    keyboard.press(eval(data.split('!')[2]))
+                                if (self.data[4:7] == 'Key'):#Keyboard button pressed
+                                    keyboard.press(eval(self.data.split('!')[2]))
                                 else:
-                                    keyboard.press(data.split('!')[2])
+                                    keyboard.press(self.data.split('!')[2])
                             except Exception as ex:
                                 print(ex)
-                        elif (data.split('!')[0] == 'R'):
+                        elif (self.data.split('!')[0] == 'R'):#Keyboard button released
                             try:
-                                keyboard.release(eval(data.split('!')[1]))
+                                keyboard.release(eval(self.data.split('!')[1]))
                             except Exception as ex:
                                 print(ex)
-
                     else:
                         print("Header data value is not equal to received data length")
             except UnboundLocalError:
@@ -120,6 +151,7 @@ class ReciveUserInput(QRunnable):
                 pass
             except IOError:
                 pass
+        self.conn.close()
         self.sendSocket.close()
         self.reciveSocket.close()
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', '---- | ' , "ReciveUserInput QRunnable terminated")
