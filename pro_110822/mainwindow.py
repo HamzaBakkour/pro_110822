@@ -110,14 +110,16 @@ class MainWindow(QMainWindow):
         # self.shortcutListner = Falsexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         # self.define_shortcuts('<ctrl>+m+' + str(self.connectionID), addToExist=False)xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         self.shortcutHandle = ShortcutsHandle(self)
-        self.shortcutHandle.define_shortcuts(('<ctrl>+m+1', '_return_to_server'), passShortcut = True)#addToExist passShortcut
+        self.shortcutHandle.define_shortcuts(('<ctrl>+m+1', '_return_to_server', 10), passShortcut=True)
 
-    def _return_to_server(self, m):
+
+    def _return_to_server(self, a, b):
         print('IN!!!!!!!!!!!!!!!!!')
         self.sendUserInput.supress_user_input(False)
         self.sendUserInput.send_input_to_client(None)        
         print('Done!!!!!!!!!!!!!!!')
-        print(m)
+        print(a)
+
 
 
     def _search_for_servers(self):
