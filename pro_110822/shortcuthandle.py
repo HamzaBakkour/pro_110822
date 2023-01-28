@@ -38,7 +38,7 @@ class ShortcutsHandle():
 
 
 
-    def define_shortcuts(self,*args : str,  addToExist: bool = False, passShortcut: bool = False, **kwargs) -> None:
+    def define_shortcuts(self,*args : str,  addToExist: bool = False, passShortcut = False) -> None:
 
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'args: {args}')
 
@@ -51,37 +51,54 @@ class ShortcutsHandle():
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[1]')
 
 
-
-
-
-
-
-
-
-
-
-        # self.calledObject._return_to_server(*args, **kwargs)
-
-
-
-
         if (addToExist == False):
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[2]')
+
+
             argg = '{'
             for _ in range(len(args)):
-                if (passShortcut):
+
+
+                if (len(args[_]) == 2 and (passShortcut)):
                     argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
-                else:
-                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', ' #*args, **kwargs
+                
+                
+                
+                
+                elif (len(args[_]) == 2):
+                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', '
+
+                
+                
+                
+                elif(len(args[_]) > 2) :
+
+
+                    if(passShortcut):
+                        calledObejectMethodArgs = args[_][0]
+                    else:
+                        calledObejectMethodArgs = ''
+
+                    for el in range(2, len(args[_])):
+                        calledObejectMethodArgs = calledObejectMethodArgs + f'{args[_][el]} ,'
+                    calledObejectMethodArgs = calledObejectMethodArgs[:-2]
+                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'calledObejectMethodArgs : {calledObejectMethodArgs}')
+
+
+                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}({calledObejectMethodArgs})' + ', '
+                    # print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'calledObejectMethodArgs : {calledObejectMethodArgs}')
+
             argg = argg[:-2] + '}'
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'argg : {argg}')
+
 
             self._onShortcutActivateArgument = []
             self._onShortcutActivateArgument.extend(args)
 
 
-
-
+# for el in range(2, len(args[_])): 
+#   calledObejectMethodArgs = calledObejectMethodArgs + f'{el} ,'
+# calledObejectMethodArgs = calledObejectMethodArgs[:-2]
+# argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
 
 
 
