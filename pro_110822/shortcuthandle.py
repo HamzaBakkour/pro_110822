@@ -14,10 +14,10 @@ import os
     
 class ShortcutsHandle():
 
-    def __init__(self, calledCls):
+    def __init__(self, calledObject):
         self._shortcutListner = False
         self._onShortcutActivateArgument = []
-        self.calledCls = calledCls
+        self.calledObject = calledObject
 
 
     def _start_shortcut_lister(self, argg):
@@ -38,7 +38,7 @@ class ShortcutsHandle():
 
 
 
-    def define_shortcuts(self,*args : str, addToExist: bool = False) -> None:
+    def define_shortcuts(self,*args : str,  addToExist: bool = False, passShortcut: bool = False, **kwargs) -> None:
 
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'args: {args}')
 
@@ -51,14 +51,28 @@ class ShortcutsHandle():
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[1]')
 
 
+
+
+
+
+
+
+
+
+
+        # self.calledObject._return_to_server(*args, **kwargs)
+
+
+
+
         if (addToExist == False):
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[2]')
             argg = '{'
             for _ in range(len(args)):
-                argg = argg + "'" + args[_][0] + "'" + ':' + ' lambda self = self : {}({})'.format('self.calledCls.' + args[_][1] ,"'" + args[_][0] + "'") + ', '
-
-            # self.calledCls._return_to_server('<ctrl>+m+1')                          
-
+                if (passShortcut):
+                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
+                else:
+                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', ' #*args, **kwargs
             argg = argg[:-2] + '}'
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'argg : {argg}')
 
