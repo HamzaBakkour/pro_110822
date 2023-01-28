@@ -40,6 +40,7 @@ from reciveuserinput import ReciveUserInput
 from senduserinput import SendUserInput
 from clientwidget import ClientWidget
 from connectionsmonitor import ConnectionsMonitor
+from shortcuthandle import ShortcutsHandle
 
 import socket
 import sys
@@ -108,8 +109,14 @@ class MainWindow(QMainWindow):
         # self.connectionID = 1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         # self.shortcutListner = Falsexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         # self.define_shortcuts('<ctrl>+m+' + str(self.connectionID), addToExist=False)xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-        
+        self.shortcutHandle = ShortcutsHandle(self)
+        self.shortcutHandle.define_shortcuts(('<ctrl>+m+1', '_return_to_server'))#addToExist=False
 
+    def _return_to_server(self, m):
+        print('IN!!!!!!!!!!!!!!!!!')
+        self.sendUserInput.supress_user_input(False)
+        self.sendUserInput.send_input_to_client(None)        
+        print('Done!!!!!!!!!!!!!!!')
 
 
     def _search_for_servers(self):

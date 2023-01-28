@@ -14,9 +14,10 @@ import os
     
 class ShortcutsHandle():
 
-    def __init__(self):
+    def __init__(self, calledCls):
         self._shortcutListner = False
         self._onShortcutActivateArgument = []
+        self.calledCls = calledCls
 
 
     def _start_shortcut_lister(self, argg):
@@ -47,99 +48,59 @@ class ShortcutsHandle():
                 self._stop_shortcut_listner()
             return
 
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[1]')
 
 
         if (addToExist == False):
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[2]')
             argg = '{'
             for _ in range(len(args)):
-                # argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
-                #      *------shortcut---------------*      *------------------------what to do-----------------------------------------------*
+                argg = argg + "'" + args[_][0] + "'" + ':' + ' lambda self = self : {}({})'.format('self.calledCls.' + args[_][1] ,"'" + args[_][0] + "'") + ', '
 
-                argg = argg + "'" + args[_][0] + "'" + ':' + ' lambda self = self : {}({})'.format(args[_][1] ,"'" + args[_][0] + "'") + ', '
+            # self.calledCls._return_to_server('<ctrl>+m+1')                          
+
             argg = argg[:-2] + '}'
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'argg : {argg}')
+
             self._onShortcutActivateArgument = []
             self._onShortcutActivateArgument.extend(args)
 
 
+
+
+
+
+
+
+
         elif (addToExist == True):
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[3]')
             args = list(args)
             args.extend(self._onShortcutActivateArgument)
             argg = '{'
             for _ in range(len(args)):
                 # argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
-                argg = argg + "'" + args[_][0] + "'" + ':' + ' lambda self = self : {}({})'.format(args[_][1] ,"'" + args[_][0] + "'") + ', '
+                argg = argg + "'" + args[_][0] + "'" + ':' + ' lambda self = self : {}({})'.format('self.calledCls.' + args[_][1] ,"'" + args[_][0] + "'") + ', '
             argg = argg[:-2] + '}'
             self._onShortcutActivateArgument = []
             self._onShortcutActivateArgument.extend(args)
 
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[4]')
 
 
-        if self.shortcutListner:
+        if self._shortcutListner:
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[5]')
             self._refresh_shortcut_lister(argg)
 
 
         else:
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[6]')
             self._start_shortcut_lister(argg)
 
 
 
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '_define_shortcuts / args :', args)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[7]')
 
 
 
