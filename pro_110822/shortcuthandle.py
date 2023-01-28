@@ -1,9 +1,6 @@
 from pynput import keyboard
-
 import inspect
 import os
-
-
 
 # in this module, 
 #   you define the shortcut and the function to be called 
@@ -11,7 +8,7 @@ import os
 #   Tihs is done in form of tuples,
 #       the first element in the tuple is the shortcut
 #       the second element in the tuple is the function    
-    
+
 class ShortcutsHandle():
 
     def __init__(self, calledObject):
@@ -20,7 +17,7 @@ class ShortcutsHandle():
         self.calledObject = calledObject
 
 
-    def _start_shortcut_lister(self, argg):
+    def _start_shortcut_listener(self, argg):
         if (len(argg) > 0):
             self._shortcutListner =  keyboard.GlobalHotKeys(eval(argg))
             self._shortcutListner.start()
@@ -28,110 +25,127 @@ class ShortcutsHandle():
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'Empty argument passed to _shortcutListner')
 
 
-    def _refresh_shortcut_lister(self, argg):
+    def _refresh_shortcut_listener(self, argg):
+        if (len(argg) > 0):
+            self._shortcutListner.stop()
+            self._shortcutListner =  keyboard.GlobalHotKeys(eval(argg))
+            self._shortcutListner.start()
+        else:
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'Empty argument passed to _refresh_shortcut_lister')
+    
+    
+    def _stop_shortcut_listener(self):
         self._shortcutListner.stop()
-        self._shortcutListner =  keyboard.GlobalHotKeys(eval(argg))
-        self._shortcutListner.start()
 
-    def _stop_shortcut_listner(self):
-        self._shortcutListner.stop()
-
-
-
-    def define_shortcuts(self,*args : str,  addToExist: bool = False, passShortcut = False) -> None:
-
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'args: {args}')
-
+    def define_shortcut(self,*args : str,  addToExist: bool = False, passShortcut = False) -> None:
 
         if (len(args) == 0):
             if self._shortcutListner:
                 self._stop_shortcut_listner()
             return
 
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[1]')
-
-
         if (addToExist == False):
-
-
             argg = '{'
             for _ in range(len(args)):
-
-
                 if (len(args[_]) == 2 and (passShortcut)):
                     argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
-                
-                
-                
-                
                 elif (len(args[_]) == 2):
                     argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', '
-
-                
-                
-                
                 elif(len(args[_]) > 2) :
-
-
                     if(passShortcut):
-                        calledObejectMethodArgs = args[_][0]
+                        calledObejectMethodArgs = f'\'{args[_][0]}\', '
                     else:
                         calledObejectMethodArgs = ''
 
                     for el in range(2, len(args[_])):
                         calledObejectMethodArgs = calledObejectMethodArgs + f'{args[_][el]} ,'
                     calledObejectMethodArgs = calledObejectMethodArgs[:-2]
-                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'calledObejectMethodArgs : {calledObejectMethodArgs}')
-
-
                     argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}({calledObejectMethodArgs})' + ', '
-                    # print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'calledObejectMethodArgs : {calledObejectMethodArgs}')
-
             argg = argg[:-2] + '}'
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'argg : {argg}')
-
-
             self._onShortcutActivateArgument = []
             self._onShortcutActivateArgument.extend(args)
 
 
-# for el in range(2, len(args[_])): 
-#   calledObejectMethodArgs = calledObejectMethodArgs + f'{el} ,'
-# calledObejectMethodArgs = calledObejectMethodArgs[:-2]
-# argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
-
-
-
-
-
         elif (addToExist == True):
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[3]')
             args = list(args)
             args.extend(self._onShortcutActivateArgument)
             argg = '{'
             for _ in range(len(args)):
-                # argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
-                argg = argg + "'" + args[_][0] + "'" + ':' + ' lambda self = self : {}({})'.format('self.calledCls.' + args[_][1] ,"'" + args[_][0] + "'") + ', '
+                if (len(args[_]) == 2 and (passShortcut)):
+                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
+                elif (len(args[_]) == 2):
+                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', '
+
+                elif(len(args[_]) > 2) :
+                    if(passShortcut):
+                        calledObejectMethodArgs = f'\'{args[_][0]}\', '
+                    else:
+                        calledObejectMethodArgs = ''
+                    for el in range(2, len(args[_])):
+                        calledObejectMethodArgs = calledObejectMethodArgs + f'{args[_][el]} ,'
+                    calledObejectMethodArgs = calledObejectMethodArgs[:-2]
+                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}({calledObejectMethodArgs})' + ', '
             argg = argg[:-2] + '}'
             self._onShortcutActivateArgument = []
             self._onShortcutActivateArgument.extend(args)
 
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[4]')
-
 
         if self._shortcutListner:
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[5]')
-            self._refresh_shortcut_lister(argg)
-
-
+            self._refresh_shortcut_listener(argg)
         else:
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[6]')
-            self._start_shortcut_lister(argg)
+            self._start_shortcut_listener(argg)
 
 
 
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '_define_shortcuts / args :', args)
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '[7]')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

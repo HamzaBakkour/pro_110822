@@ -104,16 +104,12 @@ class MainWindow(QMainWindow):
 
         # self.sendUserInput.signal.clientRequest.connect(self._handle_client_requests)
 
-
-        #Define server shortcut
-        # self.connectionID = 1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-        # self.shortcutListner = Falsexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-        # self.define_shortcuts('<ctrl>+m+' + str(self.connectionID), addToExist=False)xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         self.shortcutHandle = ShortcutsHandle(self)
-        self.shortcutHandle.define_shortcuts(('<ctrl>+m+1', '_return_to_server', 10), passShortcut=True)
+        self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_return_to_server'), ('<ctrl>+m+2', '_return_to_server'), passShortcut=True)
+        self.shortcutHandle.define_shortcut(('<ctrl>+m+3', '_return_to_server'), passShortcut=True, addToExist=False)
 
 
-    def _return_to_server(self, a, b):
+    def _return_to_server(self, a):
         print('IN!!!!!!!!!!!!!!!!!')
         self.sendUserInput.supress_user_input(False)
         self.sendUserInput.send_input_to_client(None)        

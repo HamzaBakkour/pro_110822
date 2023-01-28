@@ -1,0 +1,16 @@
+ERROR
+2023-01-28 18:42:11,982
+Unhandled exception in listener callback
+Traceback (most recent call last):
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\_util\__init__.py", line 228, in inner
+    return f(self, *args, **kwargs)
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\keyboard\_win32.py", line 287, in _process
+    self.on_press(key)
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\_util\__init__.py", line 144, in inner
+    if f(*args) is False:
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\keyboard\__init__.py", line 223, in _on_press
+    hotkey.press(self.canonical(key))
+  File "c:\Users\alexa\Desktop\pro_110822\pro_110822_venv\lib\site-packages\pynput\keyboard\__init__.py", line 182, in press
+    self._on_activate()
+  File "<string>", line 1, in <lambda>
+TypeError: MainWindow._return_to_server() missing 1 required positional argument: 'a'
