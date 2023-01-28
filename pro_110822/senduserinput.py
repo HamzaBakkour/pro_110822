@@ -1,5 +1,5 @@
 #pro_110822/senduserinput.py
-"""
+""" 
 Send mouse and keyboard input over a socket connection.
 
 CLASS SendUserInput contains the following methods:
