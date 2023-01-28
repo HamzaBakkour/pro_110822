@@ -89,11 +89,13 @@ class ShortcutsHandle():
             self._onShortcutActivateArgument = []
             self._onShortcutActivateArgument.extend(args)
 
-
         if self._shortcutListner:
             self._refresh_shortcut_listener(argg)
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Started shortcut listener with argument : {argg} [Refresh]')
         else:
             self._start_shortcut_listener(argg)
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Started shortcut listener with argument : {argg} [-]')
+
 
 
 

@@ -102,20 +102,20 @@ class MainWindow(QMainWindow):
         self.sendUserInput.signal.socketTerminated.connect(self._remove_client_widget)
 
 
-        # self.sendUserInput.signal.clientRequest.connect(self._handle_client_requests)
+        # self.sendUserInput.signal.clientRequest.connect(self._handle_client_requests)asd
 
         self.shortcutHandle = ShortcutsHandle(self)
+ 
         self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_return_to_server'), ('<ctrl>+m+2', '_return_to_server'), passShortcut=True)
-        self.shortcutHandle.define_shortcut(('<ctrl>+m+3', '_return_to_server'), passShortcut=True, addToExist=False)
+        self.shortcutHandle.define_shortcut(('<ctrl>+m+3', '_return_to_server'), passShortcut=True, addToExist=True)
 
 
-    def _return_to_server(self, a):
+    def _return_to_server(self, m):
         print('IN!!!!!!!!!!!!!!!!!')
         self.sendUserInput.supress_user_input(False)
         self.sendUserInput.send_input_to_client(None)        
         print('Done!!!!!!!!!!!!!!!')
-        print(a)
-
+        print(m)
 
 
     def _search_for_servers(self):
