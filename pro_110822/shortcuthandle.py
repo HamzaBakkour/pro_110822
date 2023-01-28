@@ -44,50 +44,36 @@ class ShortcutsHandle():
                 self._stop_shortcut_listner()
             return
 
-        if (addToExist == False):
-            argg = '{'
-            for _ in range(len(args)):
-                if (len(args[_]) == 2 and (passShortcut)):
-                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
-                elif (len(args[_]) == 2):
-                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', '
-                elif(len(args[_]) > 2) :
-                    if(passShortcut):
-                        calledObejectMethodArgs = f'\'{args[_][0]}\', '
-                    else:
-                        calledObejectMethodArgs = ''
-
-                    for el in range(2, len(args[_])):
-                        calledObejectMethodArgs = calledObejectMethodArgs + f'{args[_][el]} ,'
-                    calledObejectMethodArgs = calledObejectMethodArgs[:-2]
-                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}({calledObejectMethodArgs})' + ', '
-            argg = argg[:-2] + '}'
-            self._onShortcutActivateArgument = []
-            self._onShortcutActivateArgument.extend(args)
-
-
-        elif (addToExist == True):
+        if (addToExist == True):
             args = list(args)
             args.extend(self._onShortcutActivateArgument)
-            argg = '{'
-            for _ in range(len(args)):
-                if (len(args[_]) == 2 and (passShortcut)):
-                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
-                elif (len(args[_]) == 2):
-                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', '
 
-                elif(len(args[_]) > 2) :
-                    if(passShortcut):
-                        calledObejectMethodArgs = f'\'{args[_][0]}\', '
-                    else:
-                        calledObejectMethodArgs = ''
-                    for el in range(2, len(args[_])):
-                        calledObejectMethodArgs = calledObejectMethodArgs + f'{args[_][el]} ,'
-                    calledObejectMethodArgs = calledObejectMethodArgs[:-2]
-                    argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}({calledObejectMethodArgs})' + ', '
-            argg = argg[:-2] + '}'
-            self._onShortcutActivateArgument = []
-            self._onShortcutActivateArgument.extend(args)
+        argg = '{'
+        for _ in range(len(args)):
+            if (len(args[_]) == 2 and (passShortcut)):
+                argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
+            elif (len(args[_]) == 2):
+                argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', '
+            elif(len(args[_]) > 2) :
+                if(passShortcut):
+                    calledObejectMethodArgs = f'\'{args[_][0]}\', '
+                else:
+                    calledObejectMethodArgs = ''
+
+                for el in range(2, len(args[_])):
+                    calledObejectMethodArgs = calledObejectMethodArgs + f'{args[_][el]} ,'
+                calledObejectMethodArgs = calledObejectMethodArgs[:-2]
+                argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}({calledObejectMethodArgs})' + ', '
+            
+            else:
+                print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'{args} is invalied argument.')
+                return
+
+        
+        argg = argg[:-2] + '}'
+        self._onShortcutActivateArgument = []
+        self._onShortcutActivateArgument.extend(args)
+
 
         if self._shortcutListner:
             self._refresh_shortcut_listener(argg)
@@ -219,3 +205,7 @@ class ShortcutsHandle():
     #     else:
     #         self.shortcutListner =  keyboard.GlobalHotKeys(eval(argg))
     #         self.shortcutListner.start()
+
+
+
+
