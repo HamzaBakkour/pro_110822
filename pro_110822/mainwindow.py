@@ -17,7 +17,6 @@ CLASS MainWindow contains the following methods:
     - `_remove_client_widget`
     - `_update_p_bar`
     - `_reseat_p_bar`
-
 """
 from PySide6 import QtWidgets
 from PySide6.QtCore import QThreadPool
@@ -107,12 +106,10 @@ class MainWindow(QMainWindow):
 
         self.shortcutHandle = ShortcutsHandle(self)
  
-        self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'))
+        self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'), addToExist=False, passShortcut=False)
 
 
-    def _unsupress_user_input(self):
-        self.sendUserInput.supress_user_input(False)
-        self.sendUserInput.send_input_to_client(None)        
+   
 
 
     def _search_for_servers(self):
@@ -208,12 +205,24 @@ class MainWindow(QMainWindow):
         self._add_client_widget(clientName, clientIP, self.clientsConnections[-1][0].getsockname()[1], shortcut)
 
 
+
+    def _unsupress_user_input(self):
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '_unsupress_user_input')
+        self.sendUserInput.supress_user_input(False)
+        self.sendUserInput.send_input_to_client(None)     
+
+
+
     def _switch_input_to_client(self, shortcutPressed):
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '_switch_input_to_client')
         self.sendUserInput.supress_user_input(True)
         try:
             self.sendUserInput.send_input_to_client(self.clientsConnections[int(shortcutPressed[-1]) - 2][0])
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')
+
+
+
 
 
     def _add_client_widget(self, clientName, clientIP, clientPort, shortcut):

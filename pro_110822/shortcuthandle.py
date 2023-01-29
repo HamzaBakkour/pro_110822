@@ -45,6 +45,9 @@ class ShortcutsHandle():
             return
 
         if (addToExist == True):
+            print(f'addToExist==True, args = {args}')
+            print(f'self._onShortcutActivateArgument = {self._onShortcutActivateArgument}')
+
             args = list(args)
             args.extend(self._onShortcutActivateArgument)
 
@@ -72,8 +75,24 @@ class ShortcutsHandle():
         
         argg = argg[:-2] + '}'
         self._onShortcutActivateArgument = []
-        self._onShortcutActivateArgument.extend(args)
+        print(f'type(args) = {type(args)}')
+        print(f'type(args[0]) = {type(args[0])}')
 
+        #loop through a list of tuples and append a value
+        args = list(args)
+        for index, _ in enumerate(args):
+            if(passShortcut):
+                temp=list(args[index])
+                temp.append(1)
+                args[index]=tuple(temp)
+            else:
+                temp=list(args[index])
+                temp.append(0)
+                args[index]=tuple(temp)        
+
+
+        self._onShortcutActivateArgument.extend(args)
+        print(f'xxxself._onShortcutActivateArgument = {self._onShortcutActivateArgument}')
 
         if self._shortcutListner:
             self._refresh_shortcut_listener(argg)
