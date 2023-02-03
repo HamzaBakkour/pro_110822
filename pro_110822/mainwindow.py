@@ -17,7 +17,6 @@ CLASS MainWindow contains the following methods:
     - `_remove_client_widget`
     - `_update_p_bar`
     - `_reseat_p_bar`
-
 """
 from PySide6 import QtWidgets
 from PySide6.QtCore import QThreadPool
@@ -40,6 +39,7 @@ from reciveuserinput import ReciveUserInput
 from senduserinput import SendUserInput
 from clientwidget import ClientWidget
 from connectionsmonitor import ConnectionsMonitor
+from shortcuthandle import ShortcutsHandle
 
 import socket
 import sys
@@ -96,88 +96,19 @@ class MainWindow(QMainWindow):
         self.connectionsMonitor = ConnectionsMonitor(self.clientsConnections)
         self.connectionsMonitor.signal.socketError.connect(self._remove_client_widget)
 
-        self.onShortcutActivateArgument = []
+        # self.onShortcutActivateArgument = []
+        self.connectionID = 1
         self.sendUserInput = SendUserInput()
         self.sendUserInput.signal.socketTerminated.connect(self._remove_client_widget)
 
 
         # self.sendUserInput.signal.clientRequest.connect(self._handle_client_requests)
 
-
-        #Define server shortcut
-        self.connectionID = 1
-        self.shortcutListner = False
-        self.define_shortcuts('<ctrl>+m+' + str(self.connectionID), addToExist=False)   
-        
-
-    def on_shortcut_activate(self, m : str)-> None:
-        """
-        This method is called when a shortcut is pressed.  
-        Shortcuts are defind by the method define_shortcuts(self,*args, addToExist = False)
-
-        Args:
-            m: The shortcut that has been pressed by the user.
-
-        Retursn:
-            None
-        """
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'shortcut detected >>> {m}')
-        #Server shortcut
-        if(m == '<ctrl>+m+1'):
-            self.sendUserInput.supress_user_input(False)
-            self.sendUserInput.send_input_to_client(None)
-        else:#Client shortcut
-            self.sendUserInput.supress_user_input(True)
-            try:
-                self.sendUserInput.send_input_to_client(self.clientsConnections[int(m[-1]) - 2])
-            except Exception as ex:
-                print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')
+        self.shortcutHandle = ShortcutsHandle(self)
+        self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'), addToExist=False, passShortcut=False)
 
 
-    def define_shortcuts(self,*args : str, addToExist: bool = False) -> None:
-        """
-        Define shortcuts.  
-
-        Args:
-            *args[str]: Shortcuts that the listner will listen to.
-            addToExist: If True, the shortcuts defined by args will be added to the existing shortcuts.  
-                        If False,  any existing shortcuts will be removed and the shortcuts defined by args will be added.
-
-        Returns:
-            None
-        """
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'args: {args}')
-        if (len(args) == 0):
-            if self.shortcutListner:
-                self.onShortcutActivateArgument = []
-                self.shortcutListner.stop()
-            return
-        if (addToExist == False):
-            argg = '{'
-            for _ in range(len(args)):
-                # try:
-                argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
-
-            argg = argg[:-2] + '}'
-            self.onShortcutActivateArgument = []
-            self.onShortcutActivateArgument.extend(args)
-        elif (addToExist == True):
-            args = list(args)
-            args.extend(self.onShortcutActivateArgument)
-            argg = '{'
-            for _ in range(len(args)):
-                argg = argg + "'" + args[_] + "'" + ':' + ' lambda self = self : self.on_shortcut_activate({})'.format("'" + args[_] + "'") + ', '
-            argg = argg[:-2] + '}'
-            self.onShortcutActivateArgument = []
-            self.onShortcutActivateArgument.extend(args)
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '_define_shortcuts / args :', args)
-        if self.shortcutListner:
-            self.shortcutListner.stop()
-            self.shortcutListner =  keyboard.GlobalHotKeys(eval(argg))
-            self.shortcutListner.start()
-        else:
-            self.shortcutListner =  keyboard.GlobalHotKeys(eval(argg))
-            self.shortcutListner.start()
+   
 
 
     def _search_for_servers(self):
@@ -259,17 +190,37 @@ class MainWindow(QMainWindow):
         #Define client shortcut
         self.connectionID = self.connectionID + 1
         shortcut = '<ctrl>+m+' + str(self.connectionID)
-        self.define_shortcuts(shortcut, addToExist=True)
+        self.shortcutHandle.define_shortcut((shortcut, '_switch_input_to_client'), addToExist=True, passShortcut=True)
+        
         #Connect server to client
-        self.clientsConnections.append(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+        self.clientsConnections.append((socket.socket(socket.AF_INET, socket.SOCK_STREAM), self.connectionID))
         try:
-            self.clientsConnections[-1].connect((clientIP, int(clientPort)))
+            self.clientsConnections[-1][0].connect((clientIP, int(clientPort)))
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Exception raised while server trying to connect to client.\nServer socket: {}\nCient IP: {}\nClient Port: {}\n\nException:\n{}".format(self.clientsConnections[-1], clientIP, clientPort, ex))
         #Monitor the connection
         self.connectionsMonitor.connectionsList = self.clientsConnections
         #Add client widget to the UI
-        self._add_client_widget(clientName, clientIP, self.clientsConnections[-1].getsockname()[1], shortcut)
+        self._add_client_widget(clientName, clientIP, self.clientsConnections[-1][0].getsockname()[1], shortcut)
+
+
+
+    def _unsupress_user_input(self):
+        self.sendUserInput.supress_user_input(False)
+        self.sendUserInput.send_input_to_client(None)     
+
+
+
+    def _switch_input_to_client(self, shortcutPressed):
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '_switch_input_to_client')
+        self.sendUserInput.supress_user_input(True)
+        try:
+            self.sendUserInput.send_input_to_client(self.clientsConnections[int(shortcutPressed[-1]) - 2][0])
+        except Exception as ex:
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')
+
+
+
 
 
     def _add_client_widget(self, clientName, clientIP, clientPort, shortcut):
@@ -302,13 +253,11 @@ class MainWindow(QMainWindow):
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Client socket terminated {socketPort}')
         for widget in self.clientWidgets:
             if (widget.port == socketPort):
-                try:
-                    self.onShortcutActivateArgument.remove(widget.shortcut)
-                except ValueError as ve:
-                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Value error exception [OK] {ve}')
-                    return
-                self.define_shortcuts(*self.onShortcutActivateArgument , addToExist=False)
                 widget.deleteLater()
+                self.shortcutHandle.remove_shortcut(widget.shortcut)
+
+                
+                
          
 
     def _update_p_bar(self, value, text):
@@ -330,3 +279,8 @@ app = QApplication([])
 window = MainWindow()
 window.show()
 sys.exit(app.exec())
+
+
+
+
+
