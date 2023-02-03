@@ -105,7 +105,6 @@ class MainWindow(QMainWindow):
         # self.sendUserInput.signal.clientRequest.connect(self._handle_client_requests)
 
         self.shortcutHandle = ShortcutsHandle(self)
- 
         self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'), addToExist=False, passShortcut=False)
 
 
