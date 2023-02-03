@@ -1,22 +1,6 @@
 #pro_110822/mainWindow.py
 """
-The programs main window module
-
-CLASS MainWindow contains the following methods:
-    - `__init__`
-    - `on_shortcut_activate`
-    - `define_shortcuts`
-    - `_search_for_servers`
-    - `_add_server`
-    - `_establish_connection_to_server`
-    - `_create_server`
-    - `_handle_client_requests`
-    - `_estaplish_connection_to_client`
-    - `_add_client_widget`
-    - `_close_server`
-    - `_remove_client_widget`
-    - `_update_p_bar`
-    - `_reseat_p_bar`
+The program's main window module
 """
 from PySide6 import QtWidgets
 from PySide6.QtCore import QThreadPool
@@ -96,13 +80,11 @@ class MainWindow(QMainWindow):
         self.connectionsMonitor = ConnectionsMonitor(self.clientsConnections)
         self.connectionsMonitor.signal.socketError.connect(self._remove_client_widget)
 
-        # self.onShortcutActivateArgument = []
+
         self.connectionID = 1
         self.sendUserInput = SendUserInput()
         self.sendUserInput.signal.socketTerminated.connect(self._remove_client_widget)
 
-
-        # self.sendUserInput.signal.clientRequest.connect(self._handle_client_requests)
 
         self.shortcutHandle = ShortcutsHandle(self)
         self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'), addToExist=False, passShortcut=False)

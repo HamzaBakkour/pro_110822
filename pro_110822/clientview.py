@@ -1,13 +1,4 @@
 #pro_110822/firstOpenView.py
-"""
-The programs main window module
-
-CLASS firstOpenView constins the following methods:
-    - `__init__`
-    - `setUpperFrame`
-    - `setAvailableServersArea`
-    - `addDevice`
-"""
 
 from PySide6 import QtCore, QtWidgets
 

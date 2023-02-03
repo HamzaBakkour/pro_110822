@@ -22,7 +22,7 @@ copyright: © Hamza Bakkour, 2023.
 nav:
     - Overview: index.md
     - 'Public interface': 
-      - mainwindow.md
+      - shortcuthandle.md
       - senduserinput.md
       - reciveuserinput.md
       

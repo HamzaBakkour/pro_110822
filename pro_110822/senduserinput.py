@@ -1,22 +1,6 @@
 #pro_110822/senduserinput.py
 """ 
 Send mouse and keyboard input over a socket connection.
-
-CLASS SendUserInput contains the following methods:
-    - `__init__`
-    - `get_screen_resulotion`
-    - `_on_move`
-    - `_on_click`
-    - `_on_scroll`
-    - `_on_press`
-    - `_on_release`
-    - `_keyboard_win32_event_filter`
-    - `_mouse_win32_event_filter`
-    - `supress_user_input`
-    - `start_listning`
-    - `_terminate_socket`
-    - `stop_listning`
-    - `send_input_to_client`
 """
 
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot

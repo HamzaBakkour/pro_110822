@@ -1,14 +1,6 @@
 #pro_110822/reciveuserinput.py
 """
 Recive mouse and keyboard input.
-
-CALSS ReciveUserInput contains the following methods:
-    - `__init__`
-    - `on_shortcut_activate`
-    - `get_screen_resulotion`
-    - `get_pc_name`
-    - `_receive_n_bytes`
-    - `run`
 """
 from PySide6.QtCore import QRunnable, Slot
 from pynput.mouse import Controller as MC
