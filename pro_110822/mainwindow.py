@@ -207,7 +207,6 @@ class MainWindow(QMainWindow):
 
 
     def _unsupress_user_input(self):
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '_unsupress_user_input')
         self.sendUserInput.supress_user_input(False)
         self.sendUserInput.send_input_to_client(None)     
 
@@ -255,16 +254,11 @@ class MainWindow(QMainWindow):
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Client socket terminated {socketPort}')
         for widget in self.clientWidgets:
             if (widget.port == socketPort):
-                try:
-                    # print('self.shortcutHandle._onShortcutActivateArgument: ', self.shortcutHandle._onShortcutActivateArgument)
-                    for el in self.shortcutHandle._onShortcutActivateArgument:
-                        if (widget.shortcut in el):
-                            self.shortcutHandle._onShortcutActivateArgument.remove(el)
-                except ValueError as ve:
-                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Value error exception: {ve}')
-                    return                    
-                self.shortcutHandle.define_shortcut(self.shortcutHandle._onShortcutActivateArgument, '_switch_input_to_client', addToExist=False)
                 widget.deleteLater()
+                self.shortcutHandle.remove_shortcut(widget.shortcut)
+
+                
+                
          
 
     def _update_p_bar(self, value, text):
@@ -286,3 +280,8 @@ app = QApplication([])
 window = MainWindow()
 window.show()
 sys.exit(app.exec())
+
+
+
+
+
