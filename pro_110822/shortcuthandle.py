@@ -37,6 +37,7 @@ class ShortcutsHandle():
     def _stop_shortcut_listener(self):
         self._shortcutListner.stop()
 
+
     def define_shortcut(self,*args : str,  addToExist: bool = False, passShortcut = False) -> None:
 
         if (len(args) == 0):
@@ -44,50 +45,75 @@ class ShortcutsHandle():
                 self._stop_shortcut_listner()
             return
 
+        args = list(args)
         if (addToExist == True):
             print(f'addToExist==True, args = {args}')
             print(f'self._onShortcutActivateArgument = {self._onShortcutActivateArgument}')
-
-            args = list(args)
+            # args = list(args)
+            #args: list, is the arguemnt passed when the method is called.
+            #self._onShortcutActivateArgument: list, is the shortcuts that are currently in use.
             args.extend(self._onShortcutActivateArgument)
 
+        #
         argg = '{'
         for _ in range(len(args)):
-            if (len(args[_]) == 2 and (passShortcut)):
+            args[_] = tuple(args[_])
+            print(f'--------------------------\nHandeling arg : {args[_]}\nWhere args[_][0][-4:] is {args[_][0][-4:]}\nAnd args[_][0][-5:] is {args[_][0][-5:]}\nAnd len(args[_]) is {len(args[_])}\nAnd passShortcut is {passShortcut}\n--------------------------')
+            print(f'type(argg) : {type(argg)}\ntype(args[_]) : {type(args[_])} ')
+            
+            if (len(args[_]) == 2 and (args[_][0][-4:] == 'PASS')):
+                print('[1]')
+                argg = argg + "'" + args[_][0][:-4] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0][:-4]}\')' + ', '
+            elif (len(args[_]) == 2 and (args[_][0][-5:] == 'DONOT')):
+                print('[2]')
+                argg = argg + "'" + args[_][0][:-5] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', '
+            elif (len(args[_]) == 2 and (passShortcut)):
+                print('[3]')
                 argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}(\'{args[_][0]}\')' + ', '
-            elif (len(args[_]) == 2):
+            elif (len(args[_]) == 2 and (not passShortcut)):
+                print('[4]')
+                print(f'****type(argg) : {type(argg)}\ntype(args[_]) : {type(args[_])} ')
                 argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}()' + ', '
             elif(len(args[_]) > 2) :
+                print('[5]')
                 if(passShortcut):
                     calledObejectMethodArgs = f'\'{args[_][0]}\', '
                 else:
                     calledObejectMethodArgs = ''
-
                 for el in range(2, len(args[_])):
                     calledObejectMethodArgs = calledObejectMethodArgs + f'{args[_][el]} ,'
                 calledObejectMethodArgs = calledObejectMethodArgs[:-2]
                 argg = argg + "'" + args[_][0] + "'" + ':' + f' lambda self = self : self.calledObject.{args[_][1]}({calledObejectMethodArgs})' + ', '
-            
             else:
+                print('[6]')
                 print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'{args} is invalied argument.')
                 return
 
         
         argg = argg[:-2] + '}'
         self._onShortcutActivateArgument = []
-        print(f'type(args) = {type(args)}')
-        print(f'type(args[0]) = {type(args[0])}')
+
 
         #loop through a list of tuples and append a value
         args = list(args)
         for index, _ in enumerate(args):
             if(passShortcut):
                 temp=list(args[index])
-                temp.append(1)
+                if (temp[0][-4:] == 'PASS'):
+                    pass
+                elif (temp[0][-5:] == 'DONOT'):
+                    pass
+                else:
+                    temp[0] = temp[0] + 'PASS'
                 args[index]=tuple(temp)
             else:
                 temp=list(args[index])
-                temp.append(0)
+                if (temp[0][-5:] == 'DONOT'):
+                    pass
+                if (temp[0][-4:] == 'PASS'):
+                    pass       
+                else:
+                    temp[0] = temp[0] + 'DONOT'
                 args[index]=tuple(temp)        
 
 
@@ -101,13 +127,14 @@ class ShortcutsHandle():
             self._start_shortcut_listener(argg)
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Started shortcut listener with argument : {argg} [-]')
 
+        
 
-
-
-
-
-
-
+    def remove_shortcut(self, shortcut: str)->None:
+        try:
+            self._onShortcutActivateArgument.remove(shortcut)
+        except Exception as ex:
+            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raised : {ex}')
+            return
 
 
 

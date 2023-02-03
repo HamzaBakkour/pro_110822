@@ -262,8 +262,8 @@ class MainWindow(QMainWindow):
                             self.shortcutHandle._onShortcutActivateArgument.remove(el)
                 except ValueError as ve:
                     print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Value error exception: {ve}')
-                    return
-                self.shortcutHandle.define_shortcut(*(self.shortcutHandle._onShortcutActivateArgument, '_switch_input_to_client') , addToExist=False)
+                    return                    
+                self.shortcutHandle.define_shortcut(self.shortcutHandle._onShortcutActivateArgument, '_switch_input_to_client', addToExist=False)
                 widget.deleteLater()
          
 
