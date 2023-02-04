@@ -90,8 +90,6 @@ class MainWindow(QMainWindow):
         self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'), addToExist=False, passShortcut=False)
 
 
-   
-
 
     def _search_for_servers(self):
         """
