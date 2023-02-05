@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QLabel
 )
 
-from scrollarea import ScrollPanel
+# from scrollarea import ScrollPanel
 
 
 class ServerView(QtWidgets.QWidget):

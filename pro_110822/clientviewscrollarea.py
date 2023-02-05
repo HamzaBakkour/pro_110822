@@ -4,13 +4,19 @@ from PySide6.QtWidgets import QApplication, QFormLayout, QScrollArea, QGridLayou
 # import networkScanner
 from serverwidget import ServerWidget
 
-class ScrollPanel(QScrollArea):
+class ClientViewScrollArea(QScrollArea):
 
-    def __init__(self, parent= None):
-        super().__init__()
-        self.init_ui()
+    def __init__(self, *args, **kwargs):
+        super(ClientViewScrollArea, self).__init__(*args, **kwargs)
+        self._set_style()
+        self._init_ui()
+
+    def _set_style(self):
+        self.setStyleSheet(u"background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(184, 184, 184, 255),stop:1 rgba(209, 207, 207, 255));\n"
+                            "")
+        
     
-    def init_ui(self):
+    def _init_ui(self):
         self.scroll_panel = QtWidgets.QWidget()
         self.scroll_panel_layout = QFormLayout(self.scroll_panel)
 
@@ -25,5 +31,4 @@ class ScrollPanel(QScrollArea):
     def reseat(self):
         for i in reversed(range(self.scroll_panel_layout.count())): 
             self.scroll_panel_layout.itemAt(i).widget().deleteLater()
-        pass
 

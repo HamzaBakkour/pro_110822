@@ -3,18 +3,23 @@
 The program's main window module
 """
 from PySide6 import QtWidgets
-from PySide6.QtCore import QThreadPool
+from PySide6.QtCore import QThreadPool, QFile, QIODevice
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
-    QGridLayout
+    QGridLayout,
+    QStackedWidget,
+    QVBoxLayout
+    
 )
+from PySide6.QtUiTools import QUiLoader
 
 from PySide6 import QtWidgets
+# from qt_material import apply_stylesheet
 from pynput import keyboard
 
 from clientview import ClientView
-from serverview import ServerView
+# from serverview import ServerView
 from serverworker import ServerWorker
 from searchforserversworker import SearchForServersWorker
 from progressbar import ProgressBar
@@ -24,6 +29,7 @@ from senduserinput import SendUserInput
 from clientwidget import ClientWidget
 from connectionsmonitor import ConnectionsMonitor
 from shortcuthandle import ShortcutsHandle
+
 
 import socket
 import sys
@@ -49,29 +55,31 @@ class MainWindow(QMainWindow):
         #Program title
         self.setWindowTitle("pro_110822")
 
-        #Main window resulotion
-        self.setFixedSize(600, 800)
 
-        #Main window layout
-        self.mainWidget = QtWidgets.QWidget()
-        self.mainWidget.layout = QGridLayout()
-        self.mainWidget.layout.setContentsMargins(0,0,0,0)
-        self.mainWidget.layout.setSpacing(0)
-        self.mainWidget.setLayout(self.mainWidget.layout)
-        self.setCentralWidget(self.mainWidget)
+        self.clientView = ClientView()
+        # self.serverView = ServerView()
+
+
+        #Main window resulotion
+        self.setMinimumSize(500, 200)
+        self.setMaximumSize(600, 800)
+        self.resize(600, 800)
+        
+        self.Stack = QStackedWidget(self)
+
+        self.setCentralWidget(self.Stack)
+
+        self.Stack.addWidget(self.clientView)
+        # self.Stack.addWidget(self.serverView)
+        self.Stack.setCurrentIndex(0)
+
+
 
         #Thread pool
         self.threabool = QThreadPool()
         self.threabool.setMaxThreadCount(20)
 
-        #Start the program with ClientView
-        self.mainWindowView = ClientView()
-        self.mainWidget.layout.addWidget(self.mainWindowView)
-        self.mainWindowView.makeServerButton.clicked.connect(self._create_server)
-        self.mainWindowView.refreshButton.clicked.connect(self._search_for_servers)
-        self.pBar = ProgressBar()
-        self.mainWidget.layout.addWidget(self.pBar)
-        self.pbarValue = 0
+
 
         #Variables used to handle connections
         self.clientsConnections = []
@@ -131,14 +139,14 @@ class MainWindow(QMainWindow):
 
     def _create_server(self):
         #Remove ClientView.
-        self.mainWindowView.remove()
-        self.pBar.remove()
+        # self.mainWindowView.remove()
+        # self.pBar.remove()
         #Start ServerView.
-        self.mainWindowView = ServerView()
-        self.pBar = ProgressBar()
-        self.mainWidget.layout.addWidget(self.mainWindowView)
-        self.mainWidget.layout.addWidget(self.pBar)
-        self.mainWindowView.stopServerButton.clicked.connect(self._close_server)
+        # self.mainWindowView = ServerView()
+        # self.pBar = ProgressBar()
+        # self.mainWidget.layout.addWidget(self.mainWindowView)
+        # self.mainWidget.layout.addWidget(self.pBar)
+        # self.mainWindowView.stopServerButton.clicked.connect(self._close_server)
         #Create the server socket
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.serverSocket.setblocking(False)
@@ -259,6 +267,7 @@ class MainWindow(QMainWindow):
 
 app = QApplication([])
 window = MainWindow()
+# apply_stylesheet(app, theme='light_amber.xml')
 window.show()
 sys.exit(app.exec())
 
@@ -266,3 +275,20 @@ sys.exit(app.exec())
 
 
 
+        # #Main window layout
+        # self.mainWidget = QtWidgets.QWidget()
+        # self.mainWidget.layout = QGridLayout()
+        # self.mainWidget.layout.setContentsMargins(0,0,0,0)
+        # self.mainWidget.layout.setSpacing(0)
+        # self.mainWidget.setLayout(self.mainWidget.layout)
+        # self.setCentralWidget(self.mainWidget)
+
+
+        # #Start the program with ClientView
+        # self.mainWindowView = ClientView()
+        # self.mainWidget.layout.addWidget(self.mainWindowView)
+        # # self.mainWindowView.makeServerButton.clicked.connect(self._create_server)
+        # # self.mainWindowView.refreshButton.clicked.connect(self._search_for_servers)
+        # self.pBar = ProgressBar()
+        # # self.mainWidget.layout.addWidget(self.pBar)
+        # self.pbarValue = 0

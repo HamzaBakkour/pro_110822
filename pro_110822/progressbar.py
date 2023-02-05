@@ -30,7 +30,6 @@ class ProgressBar(QtWidgets.QWidget):
         self.pbar.setGeometry(0,0,20,30)
 
 
-        # self.txt = QLabel("asdasdasd asasdasdasdasdasddasdas asda sdasd asd asd as d")
         self.txt = QLabel("")
         self.txt.setGeometry(0,0,400,20)
 
