@@ -10,8 +10,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
-    QLabel,
-    QWidgete
+    QLabel
 )
 
 

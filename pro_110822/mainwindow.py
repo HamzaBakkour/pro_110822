@@ -18,11 +18,10 @@ from PySide6 import QtWidgets
 # from qt_material import apply_stylesheet
 from pynput import keyboard
 
-from clientview import ClientView
+from client_view import clientview
 # from serverview import ServerView
 from serverworker import ServerWorker
 from searchforserversworker import SearchForServersWorker
-from progressbar import ProgressBar
 from serverwidget import ServerWidget
 from reciveuserinput import ReciveUserInput
 from senduserinput import SendUserInput
@@ -44,8 +43,8 @@ import inspect
 # pdb.set_trace()
 
 #Creating and setting the format of the log file. 
-logging.basicConfig(filename=(time.strftime("%Y%m%d---%H_%M_%S") + '.txt'), level=logging.DEBUG,
-format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
+# logging.basicConfig(filename=(time.strftime("%Y%m%d---%H_%M_%S") + '.txt'), level=logging.DEBUG,
+# format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
 
 
 
@@ -56,7 +55,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("pro_110822")
 
 
-        self.clientView = ClientView()
+        self.clientView = clientview.ClientView()
         # self.serverView = ServerView()
 
 
