@@ -28,6 +28,7 @@ class ClientViewUpperFrame(QtWidgets.QFrame):
         self._set_style()
         self._init_ui()
 
+
     def _set_style(self):
         self.setStyleSheet(u"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));\n"
                             "    border: 1px solid #222;\n"

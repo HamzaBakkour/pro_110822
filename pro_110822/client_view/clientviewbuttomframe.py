@@ -24,20 +24,13 @@ from . import clientviewbuttomframeprogressbar
 class ClientViewButtomFrame(QtWidgets.QFrame):
     def __init__(self, *args, **kwargs):
         super(ClientViewButtomFrame, self).__init__(*args, **kwargs)
+
+        self.layout = QGridLayout(self)
+        self.brogressBar : QtWidgets.QProgressBar
         
         self._set_style()
-        self.layout = QGridLayout(self)
-        self.layout.setContentsMargins(0,0,0,0)
-        self.layout.setHorizontalSpacing(0)
-        self.layout.setVerticalSpacing(0)
-        self.layout.setColumnStretch(0,1)
-        self.layout.setColumnStretch(1,3)
+        self._init_ui()
 
-
-        self.brogressBar = clientviewbuttomframeprogressbar.ClientViewButtomFrameBrogressBar()
-        self.layout.addWidget(self.brogressBar,0,0)
-
-        
 
     def _set_style(self):
         self.setStyleSheet(u"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));\n"
@@ -46,3 +39,17 @@ class ClientViewButtomFrame(QtWidgets.QFrame):
                             "    color: #fff;")
         self.setFrameShape(QFrame.StyledPanel)
         self.setFrameShadow(QFrame.Raised)
+
+    def _init_ui(self):
+        self.brogressBar = clientviewbuttomframeprogressbar.ClientViewButtomFrameBrogressBar()
+        self.brogressBar.setValue(25)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setVerticalSpacing(0)
+        self.layout.setHorizontalSpacing(0)
+        self.layout.setColumnStretch(0,1)
+        self.layout.setColumnStretch(1,2)
+        self.layout.setColumnStretch(2,1)
+
+        self.layout.addWidget(self.brogressBar,0,0)
+
+

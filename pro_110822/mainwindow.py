@@ -60,9 +60,9 @@ class MainWindow(QMainWindow):
 
 
         #Main window resulotion
-        self.setMinimumSize(500, 200)
+        self.setMinimumSize(200, 200)
         self.setMaximumSize(600, 800)
-        self.resize(600, 800)
+        self.resize(600, 500)
         
         self.Stack = QStackedWidget(self)
 

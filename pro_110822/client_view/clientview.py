@@ -31,14 +31,15 @@ class ClientView(QtWidgets.QWidget):
         self.layout.setHorizontalSpacing(0)
         self.layout.setVerticalSpacing(0)
 
+        self.layout.setRowStretch(0,5)
+        self.layout.setRowStretch(1,30)
+        self.layout.setRowStretch(2,1)
 
         self.layout.addWidget(self.upperFrame, 0, 0)
         self.layout.addWidget(self.scrollArea, 1, 0)
         self.layout.addWidget(self.buttomFrame, 2, 0)
 
-        self.layout.setRowStretch(0,5)
-        self.layout.setRowStretch(1,30)
-        self.layout.setRowStretch(2,1)
+
 
 
 
