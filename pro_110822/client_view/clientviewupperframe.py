@@ -15,15 +15,18 @@ from PySide6.QtWidgets import (
     QSizePolicy
 )
 from . import clientviewupperframebtn1
-
+from . import clientviewupperframebtn2
 
 class ClientViewUpperFrame(QtWidgets.QFrame):
     def __init__(self, *args, **kwargs):
         super(ClientViewUpperFrame, self).__init__(*args, **kwargs)
-        self.searchBtton : QtWidgets.QPushButton
 
+        self.layout = QGridLayout(self)
+        self.searchBtton : QtWidgets.QPushButton
+        self.createBtton : QtWidgets.QPushButton
+        
         self._set_style()
-        self._initUi()
+        self._init_ui()
 
     def _set_style(self):
         self.setStyleSheet(u"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));\n"
@@ -35,45 +38,31 @@ class ClientViewUpperFrame(QtWidgets.QFrame):
 
 
 
-    def _initUi(self):
-        self.searchBtton = clientviewupperframebtn1.ClientViewUpperFrameBtn1(self)
-        self.searchBtton.set_size(100, 199)
+    def _init_ui(self):
+
+        self.searchBtton = clientviewupperframebtn1.ClientViewUpperFrameBtn1()
         self.searchBtton.set_text('Search for servers')
-        # self.searchBtton.setText('Search for servers')
-        # self.searchBtton.set_geometry(450, 70, 131, 131)
 
+        self.createBtton = clientviewupperframebtn2.ClientViewUpperFrameBtn2()
+        self.createBtton.set_text('Create a server')
 
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
+        self.layout.setColumnStretch(0, 1)
+        self.layout.setColumnStretch(1, 1)
+        self.layout.setRowStretch(0, 1)
+        self.layout.setRowStretch(1, 1)
+        self.layout.setRowStretch(2, 1)
 
-        # , 450, 70, 131, 131, 'Search for servers'
+        searchCreateButtonLayout = QGridLayout()
+        searchCreateButtonLayout.setContentsMargins(0, 0, 0, 0)
+        searchCreateButtonLayout.setSpacing(0)
+        searchCreateButtonLayout.setColumnStretch(0, 12)
+        searchCreateButtonLayout.setColumnStretch(1, 1)
+        searchCreateButtonLayout.setColumnStretch(2, 12)
+        searchCreateButtonLayout.setColumnStretch(3, 1)
 
+        searchCreateButtonLayout.addWidget(self.searchBtton, 0, 0)
+        searchCreateButtonLayout.addWidget(self.createBtton, 0, 2)
 
-        # #Create a server button
-        # self.createButton = QPushButton(self)
-        # self.createButton.setObjectName(u"pushButton_2")
-        # self.createButton.setGeometry(QRect(300, 70, 131, 31))
-        # sizePolicy.setHeightForWidth(self.createButton.sizePolicy().hasHeightForWidth())
-        # self.createButton.setSizePolicy(sizePolicy)
-        # self.createButton.setFont(font)
-        # self.createButton.setStyleSheet(u"QPushButton::flat\n"
-        #                                 "{\n"
-        #                                 "       background-color: transparent;\n"
-        #                                 "       border: none;\n"
-        #                                 "       color: #fff;\n"
-        #                                 "}\n"
-        #                                 "\n"
-        #                                 "QPushButton::hover\n"
-        #                                 "{\n"
-        #                                 "       background-color: #0279f0;\n"
-        #                                 "       border: 1px solid #0279f0;\n"
-        #                                 "}\n"
-        #                                 "\n"
-        #                                 "QPushButton::pressed\n"
-        #                                 "{\n"
-        #                                 "       background-color: #2590fa;\n"
-        #                                 "       border: 1px solid #2590fa;\n"
-        #                                 "}\n"
-        #                                 "")
-        
-        # self.searchButton.setText('Search for servers')
-        # self.createButton.setText('Create a server')
-        pass
+        self.layout.addLayout(searchCreateButtonLayout, 2,1)

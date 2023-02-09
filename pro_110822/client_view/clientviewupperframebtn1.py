@@ -21,10 +21,9 @@ class ClientViewUpperFrameBtn1(QtWidgets.QPushButton):
         super(ClientViewUpperFrameBtn1, self).__init__(*args, **kwargs)
         self._width : int
         self._hight : int
-        self.text : str
         
         self._set_style()
-        self._set_font()
+        self._set_font_style()
 
 
     def _set_style(self):
@@ -56,7 +55,7 @@ class ClientViewUpperFrameBtn1(QtWidgets.QPushButton):
         self.setFlat(False)
 
 
-    def _set_font(self):
+    def _set_font_style(self):
         font = QFont()
         font.setBold(True)
         self.setFont(font)
@@ -69,10 +68,10 @@ class ClientViewUpperFrameBtn1(QtWidgets.QPushButton):
         self.setText(text)
 
     def sizeHint(self):
-        if self._width and self._hight:
+        try:
             return QtCore.QSize(self._width, self._hight)
-        else:
-            pass
+        except AttributeError:
+            return QtCore.QSize()
 
 
 
