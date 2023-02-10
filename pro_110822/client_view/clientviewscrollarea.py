@@ -12,8 +12,8 @@ class ClientViewScrollArea(QScrollArea):
     def init_ui(self):
         self.scroll_panel = QtWidgets.QWidget()
         self.scroll_panel_layout = QFormLayout(self.scroll_panel)
-        self.scroll_panel_layout.setContentsMargins(0,0,0,0)
-        self.scroll_panel_layout.setVerticalSpacing(0)
+        # self.scroll_panel_layout.setContentsMargins(0,0,0,0)
+        # self.scroll_panel_layout.setVerticalSpacing(0)
         self.scroll_panel_layout.setHorizontalSpacing(0)
         # self.scroll_panel_layout.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.scroll_panel_layout.setAlignment(QtCore.Qt.AlignTop)

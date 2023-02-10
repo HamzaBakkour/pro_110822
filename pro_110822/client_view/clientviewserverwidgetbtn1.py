@@ -24,14 +24,14 @@ class ClientViewServerWidgetBtn1(QtWidgets.QPushButton):
         self._width : int
         self._hight : int
         
-        self._set_style()
         self._set_font_style()
+        self._set_style()
 
 
-    def _set_style(self):
+    def _set_style(self):#transparent
         self.setStyleSheet(u"QPushButton::flat\n"
                                         "{\n"
-                                        "       background-color: transparent;\n"
+                                        "       background-color: black;\n"
                                         "       border: none;\n"
                                         "       color: #fff;\n"
                                         "}\n"
@@ -50,11 +50,12 @@ class ClientViewServerWidgetBtn1(QtWidgets.QPushButton):
                                         "")
 
         sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
-        self.setFlat(False)
+        self.setFlat(True)
+        self.autoFillBackground()
 
     def _set_font_style(self):
         font = QFont()

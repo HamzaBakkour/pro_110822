@@ -8,7 +8,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
-    QLabel
+    QLabel,
+    QGraphicsDropShadowEffect
 )
 
 from . import clientviewserverwidgetbtn1
@@ -23,16 +24,21 @@ class ServerWidget(QtWidgets.QFrame):
         self.serverIP = server_IP
         self._set_style()
         self._init_ui()
-        # self.setFixedHeight(100)
+        self.setFixedHeight(75)
 
 
 
     def _set_style(self):
-        self.setStyleSheet(u"background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.100559 rgba(216, 216, 216, 255), stop:0.849162 rgba(226, 226, 226, 255));\n"
+        self.setStyleSheet(u"background-color: #c9c9c9;\n"
+                            "border : 1px #c9c9c9;"
                             "border-radius: 2px;\n"
                             "\n"
                             "")
+        
 
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(30)
+        self.setGraphicsEffect(shadow)
 
     def _init_ui(self):
         leftGrid = QGridLayout()
