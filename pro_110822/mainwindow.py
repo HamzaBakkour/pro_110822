@@ -22,7 +22,7 @@ from client_view import clientview
 # from serverview import ServerView
 from serverworker import ServerWorker
 from searchforserversworker import SearchForServersWorker
-from serverwidget import ServerWidget
+# from serverwidget import ServerWidget
 from reciveuserinput import ReciveUserInput
 from senduserinput import SendUserInput
 from clientwidget import ClientWidget
@@ -61,8 +61,8 @@ class MainWindow(QMainWindow):
 
         #Main window resulotion
         self.setMinimumSize(200, 200)
-        self.setMaximumSize(600, 800)
-        self.resize(600, 500)
+        self.setMaximumSize(500, 800)
+        self.resize(500, 500)
         
         self.Stack = QStackedWidget(self)
 
@@ -71,7 +71,6 @@ class MainWindow(QMainWindow):
         self.Stack.addWidget(self.clientView)
         # self.Stack.addWidget(self.serverView)
         self.Stack.setCurrentIndex(0)
-
 
 
         #Thread pool

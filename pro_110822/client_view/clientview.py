@@ -17,6 +17,8 @@ from PySide6.QtWidgets import (
 from . import clientviewupperframe
 from . import clientviewscrollarea
 from . import clientviewbuttomframe
+from . import serverwidget
+from . import serverwidget_old
 
 
 
@@ -38,6 +40,13 @@ class ClientView(QtWidgets.QWidget):
         self.layout.addWidget(self.upperFrame, 0, 0)
         self.layout.addWidget(self.scrollArea, 1, 0)
         self.layout.addWidget(self.buttomFrame, 2, 0)
+        self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST1-1001_PRO110822', ('255.255.255.255')))
+        self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST2-1001_PRO110822', ('255.255.255.255')))
+        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST3-1001_PRO110822', ('255.255.255.255')))
+        # self.scrollArea.add_device(serverwidget_old.ServerWidget('QT-TEST1-1001_PRO110822', ('255.255.255.255')))
+        # self.scrollArea.add_device(serverwidget_old.ServerWidget('QT-TEST2-1001_PRO110822', ('255.255.255.255')))
+
+        
 
 
 

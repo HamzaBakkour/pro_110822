@@ -18,9 +18,9 @@ from PySide6.QtWidgets import (
 
 
 
-class ClientViewUpperFrameBtn2(QtWidgets.QPushButton):
+class ClientViewServerWidgetBtn1(QtWidgets.QPushButton):
     def __init__(self, *args,**kwargs):
-        super(ClientViewUpperFrameBtn2, self).__init__(*args, **kwargs)
+        super(ClientViewServerWidgetBtn1, self).__init__(*args, **kwargs)
         self._width : int
         self._hight : int
         
@@ -49,10 +49,10 @@ class ClientViewUpperFrameBtn2(QtWidgets.QPushButton):
                                         "}\n"
                                         "")
 
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
         self.setFlat(False)
 

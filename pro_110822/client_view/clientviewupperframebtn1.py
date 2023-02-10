@@ -53,6 +53,7 @@ class ClientViewUpperFrameBtn1(QtWidgets.QPushButton):
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
         self.setFlat(False)
+        pass
 
 
     def _set_font_style(self):
@@ -74,6 +75,3 @@ class ClientViewUpperFrameBtn1(QtWidgets.QPushButton):
             return QtCore.QSize()
 
 
-
-    # def __init__(self, *args, width, hight, **kwargs):
-    #     super(ClientViewUpperFrameBtn1, self).__init__(*args, width, hight, **kwargs)

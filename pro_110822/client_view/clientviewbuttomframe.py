@@ -19,7 +19,6 @@ from PySide6.QtWidgets import (
     QSizePolicy
 )
 from . import clientviewbuttomframeprogressbar
-#  import ClientViewButtomFrameBrogressBar
 
 class ClientViewButtomFrame(QtWidgets.QFrame):
     def __init__(self, *args, **kwargs):
