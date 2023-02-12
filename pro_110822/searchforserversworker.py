@@ -13,59 +13,61 @@ import pdb
 # pdb.set_trace()
 class SearchForServersWorkerSignals(QObject):
     foundServer = Signal(object, object, object)
-    pbarSignal = Signal(object, object)
+    infoSignal = Signal(object, object)
 
 class SearchForServersWorker(QRunnable):
     def __init__(self, port: int)-> None:
-        
-        super(SearchForServersWorker, self).__init__()
+        super().__init__()
         self.signal = SearchForServersWorkerSignals()
-        self.searchForServerConnection = MouseAndKeyboardConnection()
-        self.searchForServerConnection.create_socket(180)
         self.serverPort = port
-        self.scan = NetWrokScanner()
+
 
     @Slot()
     def run(self)-> int:
-        # pdb.set_trace()
-        devicesList = self.scan.get_local_addresses_from_arp()
-        devicesName = self.scan.get_connected_devices_name()
+        searchForServerConnection = MouseAndKeyboardConnection()
+        searchForServerConnection.create_socket(180)
+        scan = NetWrokScanner()
 
-        try:
-            self.signal.pbarSignal.emit(0, ('Found ' + str(len(devicesList)) + ' device/s'))
-            self.progressValue = 85/len(devicesList)
-        except ZeroDivisionError:
-            part1 = str(sys.exc_info())
-            part2 = traceback.format_exc()
-            origin = re.search(r'File(.*?)\,', part2).group(1) 
-            loggMessage = origin + '\n' + part1  + '\n' + part2
-            logging.info(loggMessage)
-            exit(-1)
+        self.signal.infoSignal.emit(10, 'Searching for servers...')
+        devicesList = scan.get_local_addresses_from_arp()
+        devicesName = scan.get_connected_devices_name()
+
+
+        self.signal.infoSignal.emit(15, ('Found ' + str(len(devicesList)) + ' device/s'))
+        time.sleep(1)
+        if (len(devicesList) == 0):
+            self.signal.infoSignal.emit(15, 'No servers found!')
+            time.sleep(2)
+            self.signal.infoSignal.emit(0, ' ')
+            return
+        else:
+            initProgressValue = 85/len(devicesList)
+            progressValue = initProgressValue
+
 
         for device_IP in devicesList:
-            try:
-                self.signal.pbarSignal.emit(self.progressValue, ('Trying ' + device_IP + ':' + str(self.serverPort)))
-                if(self.searchForServerConnection.connect_to_server(device_IP, self.serverPort)):
-                    self.signal.pbarSignal.emit(0, (device_IP + ':' + str(self.serverPort) +' connection OK!.'))
-                    found = False
-                    for name in devicesName:
-                        if device_IP in name[2]:
-                            self.signal.foundServer.emit(name[0], device_IP, self.serverPort)
-                            found = True
-                    if (not found):
-                        self.signal.foundServer.emit("Unknown", device_IP, self.serverPort)
 
-                else:
-                    self.signal.pbarSignal.emit(0, (device_IP + ':' + str(self.serverPort) +' connection refused!.'))
-            except :
-                part1 = str(sys.exc_info())
-                part2 = traceback.format_exc()
-                origin = re.search(r'File(.*?)\,', part2).group(1) 
-                loggMessage = origin + '\n' + part1  + '\n' + part2
-                logging.info(loggMessage)
+            self.signal.infoSignal.emit(progressValue, ('Trying ' + device_IP + ':' + str(self.serverPort)))
+            if(searchForServerConnection.connect_to_server(device_IP, self.serverPort)):
+                self.signal.infoSignal.emit(999, (device_IP + ':' + str(self.serverPort) +' connection OK!.'))
+                found = False
+                for name in devicesName:
+                    if device_IP in name[2]:
+                        self.signal.foundServer.emit(name[0], device_IP, self.serverPort)
+                        found = True
+                if (not found):
+                    self.signal.foundServer.emit("Unknown", device_IP, self.serverPort)
 
-        self.searchForServerConnection.terminate_socket()
-        self.signal.pbarSignal.emit(999, ' ')
+            else:
+                self.signal.infoSignal.emit(999, (device_IP + ':' + str(self.serverPort) +' connection refused!.'))
+            progressValue = progressValue + initProgressValue
+
+
+        searchForServerConnection.terminate_socket()
+        self.signal.infoSignal.emit(100, 'No servers found!')
+        time.sleep(2)
+        self.signal.infoSignal.emit(0, ' ')
+
 
 
         return(1)

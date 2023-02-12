@@ -3,27 +3,24 @@
 The program's main window module
 """
 from PySide6 import QtWidgets
-from PySide6.QtCore import QThreadPool, QFile, QIODevice
+from PySide6.QtCore import QThreadPool, SIGNAL
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
     QGridLayout,
     QStackedWidget,
     QVBoxLayout
-    
 )
-from PySide6.QtUiTools import QUiLoader
+
 
 from PySide6 import QtWidgets
 # from qt_material import apply_stylesheet
 from pynput import keyboard
 
-from clientview import ClientView
-# from serverview import ServerView
+from client_view import clientview
+from server_view import serverview
 from serverworker import ServerWorker
 from searchforserversworker import SearchForServersWorker
-from progressbar import ProgressBar
-from serverwidget import ServerWidget
 from reciveuserinput import ReciveUserInput
 from senduserinput import SendUserInput
 from clientwidget import ClientWidget
@@ -39,40 +36,35 @@ from ctypes import *
 import os
 import inspect
 
-# import pdb
-# pdb.post_mortem()
-# pdb.set_trace()
 
 #Creating and setting the format of the log file. 
-logging.basicConfig(filename=(time.strftime("%Y%m%d---%H_%M_%S") + '.txt'), level=logging.DEBUG,
-format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
-
+# logging.basicConfig(filename=(time.strftime("%Y%m%d---%H_%M_%S") + '.txt'), level=logging.DEBUG,
+# format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, parent=None)-> None:
-        super(MainWindow, self).__init__(parent)
+    def __init__(self, *args, **kwargs)-> None:
+        super().__init__(*args, **kwargs)
         #Program title
         self.setWindowTitle("pro_110822")
 
 
-        self.clientView = ClientView()
-        # self.serverView = ServerView()
+        self.clientView = clientview.ClientView()
+        self.serverView = serverview.ServerView()
 
 
         #Main window resulotion
-        self.setMinimumSize(500, 200)
-        self.setMaximumSize(600, 800)
-        self.resize(600, 800)
+        self.setMinimumSize(200, 200)
+        self.setMaximumSize(500, 800)
+        self.resize(600, 600)
         
         self.Stack = QStackedWidget(self)
 
         self.setCentralWidget(self.Stack)
 
         self.Stack.addWidget(self.clientView)
-        # self.Stack.addWidget(self.serverView)
+        self.Stack.addWidget(self.serverView)
         self.Stack.setCurrentIndex(0)
-
 
 
         #Thread pool
@@ -98,25 +90,27 @@ class MainWindow(QMainWindow):
         self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'), addToExist=False, passShortcut=False)
 
 
-   
+        self.clientView.upperFrame.searchButton.clicked.connect(self.clientView.scrollArea.reseat)
+
+        self.clientView.upperFrame.createButton.clicked.connect(lambda port = 12345 : self._create_server(port))
+        self.clientView.upperFrame.searchButton.clicked.connect(lambda port = 12345 : self._search_for_servers(port))
 
 
-    def _search_for_servers(self):
-        """
-        Starts the "search for servers worker"
-        """
-        self._reseat_p_bar()
-        self.mainWindowView.availableServers.reseat()
-        self._update_p_bar(15, "Searching for servers.")
-        #Set the "search for servers worker"
-        self.searchConntection = SearchForServersWorker(12345)
-        #Connect the worker's connectionOkSignal signal to the function addServerToServersArea
-        #The worker will send this signal to the main thread in case it manages to connect to a server on the local network
-        self.searchConntection.signal.foundServer.connect(self._add_server)
-        #The worker will send this signal to the main thread to update the progress bar when it manages to connect to a server on the local network
-        self.searchConntection.signal.pbarSignal.connect(self._update_p_bar)
-        #Start the woker
-        self.threabool.start(self.searchConntection)
+
+    def _search_for_servers(self, serverPort):
+        searchForServersWorker = SearchForServersWorker(serverPort)
+        searchForServersWorker.signal.infoSignal.connect(self._update_client_view_progress_bar)
+        searchForServersWorker.signal.foundServer.connect(self._add_server)
+        self.threabool.start(searchForServersWorker)
+
+    def _update_client_view_progress_bar(self, progressBarValue, progressBarMessage):
+        if (progressBarValue == 999):
+            pass
+        elif (progressBarValue < 101):
+            self.clientView.bottomFrame.brogressBar.setValue(progressBarValue)
+        else:
+            print(f'Search for servers worker reported a progress value of {progressBarValue}!!!')
+        self.clientView.bottomFrame.info_text(progressBarMessage)
 
 
     def _add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
@@ -137,20 +131,12 @@ class MainWindow(QMainWindow):
 
 
 
-    def _create_server(self):
-        #Remove ClientView.
-        # self.mainWindowView.remove()
-        # self.pBar.remove()
-        #Start ServerView.
-        # self.mainWindowView = ServerView()
-        # self.pBar = ProgressBar()
-        # self.mainWidget.layout.addWidget(self.mainWindowView)
-        # self.mainWidget.layout.addWidget(self.pBar)
-        # self.mainWindowView.stopServerButton.clicked.connect(self._close_server)
+    def _create_server(self, serverPort):
+        self.Stack.setCurrentIndex(1)
         #Create the server socket
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.serverSocket.setblocking(False)
-        self.serverSocket.bind(('', 12345))
+        self.serverSocket.bind(('', serverPort))
         #Pass the server socket to ServerWorker
         self.serverWorker = ServerWorker(self.serverSocket)
         #Send clients requests to  _handle_client_requests
@@ -247,48 +233,8 @@ class MainWindow(QMainWindow):
                 self.shortcutHandle.remove_shortcut(widget.shortcut)
 
                 
-                
-         
-
-    def _update_p_bar(self, value, text):
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', text)
-        if (value == 999):
-            self._reseat_p_bar()
-        else:
-            self.pbarValue = self.pbarValue + value
-            self.pBar.value(self.pbarValue)
-            self.pBar.text(text)
-
-
-    def _reseat_p_bar(self):
-        self.pbarValue = 0
-        self.pBar.reseat()
-
 
 app = QApplication([])
 window = MainWindow()
-# apply_stylesheet(app, theme='light_amber.xml')
 window.show()
 sys.exit(app.exec())
-
-
-
-
-
-        # #Main window layout
-        # self.mainWidget = QtWidgets.QWidget()
-        # self.mainWidget.layout = QGridLayout()
-        # self.mainWidget.layout.setContentsMargins(0,0,0,0)
-        # self.mainWidget.layout.setSpacing(0)
-        # self.mainWidget.setLayout(self.mainWidget.layout)
-        # self.setCentralWidget(self.mainWidget)
-
-
-        # #Start the program with ClientView
-        # self.mainWindowView = ClientView()
-        # self.mainWidget.layout.addWidget(self.mainWindowView)
-        # # self.mainWindowView.makeServerButton.clicked.connect(self._create_server)
-        # # self.mainWindowView.refreshButton.clicked.connect(self._search_for_servers)
-        # self.pBar = ProgressBar()
-        # # self.mainWidget.layout.addWidget(self.pBar)
-        # self.pbarValue = 0
