@@ -18,7 +18,11 @@ from PySide6.QtWidgets import (
 
 class ClientViewUpperFrameBtn1(QtWidgets.QPushButton):
     def __init__(self, *args,**kwargs):
+<<<<<<< HEAD
         super().__init__(*args, **kwargs)
+=======
+        super(ClientViewUpperFrameBtn1, self).__init__(*args, **kwargs)
+>>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
         self._width : int
         self._hight : int
         
@@ -53,6 +57,10 @@ class ClientViewUpperFrameBtn1(QtWidgets.QPushButton):
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
         self.setFlat(False)
+<<<<<<< HEAD
+=======
+        pass
+>>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
 
 
     def _set_font_style(self):

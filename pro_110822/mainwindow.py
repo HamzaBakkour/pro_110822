@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
         self.mainWindowView.add_deivce(self.serverWidget)
         self.serverWidget.connectToServer.clicked.connect(lambda: self._establish_connection_to_server(serverIP, serverPort))
 
-
+#asd
     def _establish_connection_to_server(self ,serverIP: str, serverPort: int):
         if self.serverWidget.connectToServer.isChecked():
             self.serverWidget.connectToServer.setText('Disconnect')
