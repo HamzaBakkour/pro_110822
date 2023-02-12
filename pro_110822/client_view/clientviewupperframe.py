@@ -19,19 +19,11 @@ from . import clientviewupperframebtn2
 
 class ClientViewUpperFrame(QtWidgets.QFrame):
     def __init__(self, *args, **kwargs):
-<<<<<<< HEAD
         super().__init__(*args, **kwargs)
 
         self.layout = QGridLayout(self)
         self.searchButton : QtWidgets.QPushButton
         self.createButton : QtWidgets.QPushButton
-=======
-        super(ClientViewUpperFrame, self).__init__(*args, **kwargs)
-
-        self.layout = QGridLayout(self)
-        self.searchBtton : QtWidgets.QPushButton
-        self.createBtton : QtWidgets.QPushButton
->>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
         
         self._set_style()
         self._init_ui()
@@ -49,19 +41,11 @@ class ClientViewUpperFrame(QtWidgets.QFrame):
 
     def _init_ui(self):
 
-<<<<<<< HEAD
         self.searchButton = clientviewupperframebtn1.ClientViewUpperFrameBtn1()
         self.searchButton.set_text('Search for servers')
 
         self.createButton = clientviewupperframebtn2.ClientViewUpperFrameBtn2()
         self.createButton.set_text('Create a server')
-=======
-        self.searchBtton = clientviewupperframebtn1.ClientViewUpperFrameBtn1()
-        self.searchBtton.set_text('Search for servers')
-
-        self.createBtton = clientviewupperframebtn2.ClientViewUpperFrameBtn2()
-        self.createBtton.set_text('Create a server')
->>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
 
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
@@ -69,11 +53,7 @@ class ClientViewUpperFrame(QtWidgets.QFrame):
         self.layout.setColumnStretch(1, 1)
         self.layout.setRowStretch(0, 1)
         self.layout.setRowStretch(1, 1)
-<<<<<<< HEAD
         self.layout.setRowStretch(2, 2)
-=======
-        self.layout.setRowStretch(2, 1)
->>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
 
         searchCreateButtonLayout = QGridLayout()
         searchCreateButtonLayout.setContentsMargins(0, 0, 0, 0)
@@ -83,12 +63,7 @@ class ClientViewUpperFrame(QtWidgets.QFrame):
         searchCreateButtonLayout.setColumnStretch(2, 12)
         searchCreateButtonLayout.setColumnStretch(3, 1)
 
-<<<<<<< HEAD
         searchCreateButtonLayout.addWidget(self.searchButton, 0, 0)
         searchCreateButtonLayout.addWidget(self.createButton, 0, 2)
-=======
-        searchCreateButtonLayout.addWidget(self.searchBtton, 0, 0)
-        searchCreateButtonLayout.addWidget(self.createBtton, 0, 2)
->>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
 
         self.layout.addLayout(searchCreateButtonLayout, 2,1)

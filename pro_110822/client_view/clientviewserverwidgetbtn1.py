@@ -1,37 +1,14 @@
 from PySide6 import QtCore, QtWidgets
-<<<<<<< HEAD
 from PySide6.QtGui import QFont
 
 from PySide6.QtWidgets import QSizePolicy
 
-=======
-from PySide6.QtCore import QRect
-from PySide6.QtGui import QFont
-
-from PySide6.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QScrollArea,
-    QGridLayout,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QLabel,
-    QWidget,
-    QFrame,
-    QSizePolicy
-)
->>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
 
 
 
 class ClientViewServerWidgetBtn1(QtWidgets.QPushButton):
     def __init__(self, *args,**kwargs):
-<<<<<<< HEAD
         super().__init__(*args, **kwargs)
-=======
-        super(ClientViewServerWidgetBtn1, self).__init__(*args, **kwargs)
->>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
         self._width : int
         self._hight : int
         
@@ -39,20 +16,12 @@ class ClientViewServerWidgetBtn1(QtWidgets.QPushButton):
         self._set_style()
 
 
-<<<<<<< HEAD
 
     def _set_style(self):
         self.setStyleSheet(u"QPushButton::flat\n"
                                         "{\n"
                                         "       background-color: #8c8b8b;\n"
                                         "       border: 1px solid black;\n"
-=======
-    def _set_style(self):#transparent
-        self.setStyleSheet(u"QPushButton::flat\n"
-                                        "{\n"
-                                        "       background-color: black;\n"
-                                        "       border: none;\n"
->>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
                                         "       color: #fff;\n"
                                         "}\n"
                                         "\n"
@@ -75,10 +44,6 @@ class ClientViewServerWidgetBtn1(QtWidgets.QPushButton):
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
         self.setFlat(True)
-<<<<<<< HEAD
-=======
-        self.autoFillBackground()
->>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
 
     def _set_font_style(self):
         font = QFont()

@@ -20,11 +20,7 @@ from PySide6.QtWidgets import (
 
 class ClientViewUpperFrameBtn2(QtWidgets.QPushButton):
     def __init__(self, *args,**kwargs):
-<<<<<<< HEAD
         super().__init__(*args, **kwargs)
-=======
-        super(ClientViewUpperFrameBtn2, self).__init__(*args, **kwargs)
->>>>>>> b04d7d4cc4a07e99918ac70c6b9d380a9e62ae72
         self._width : int
         self._hight : int
         
