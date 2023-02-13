@@ -45,8 +45,8 @@ class ClientView(QtWidgets.QWidget):
 
 
 
-        self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST1-1001_PRO110822', ('255.255.255.255')))
-        self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST2-1001_PRO110822', ('255.255.255.255')))
+        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST1-1001_PRO110822', ('255.255.255.255')))
+        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST2-1001_PRO110822', ('255.255.255.255')))
         # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST3-1001_PRO110822', ('255.255.255.255')))
         # self.scrollArea.add_device(serverwidget_old.ServerWidget('QT-TEST1-1001_PRO110822', ('255.255.255.255')))
         # self.scrollArea.add_device(serverwidget_old.ServerWidget('QT-TEST2-1001_PRO110822', ('255.255.255.255')))

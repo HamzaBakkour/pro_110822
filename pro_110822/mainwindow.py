@@ -17,7 +17,7 @@ from PySide6 import QtWidgets
 # from qt_material import apply_stylesheet
 from pynput import keyboard
 
-from client_view import clientview
+from client_view import clientview, serverwidget
 from server_view import serverview
 from serverworker import ServerWorker
 from searchforserversworker import SearchForServersWorker
@@ -74,9 +74,9 @@ class MainWindow(QMainWindow):
 
 
         #Variables used to handle connections
+        self.clientWidgets : list
+        self.serverWidget : QtWidgets.QFrame
         self.clientsConnections = []
-        self.clientWidgets = []
-        self.serverWidget = None
         self.connectionsMonitor = ConnectionsMonitor(self.clientsConnections)
         self.connectionsMonitor.signal.socketError.connect(self._remove_client_widget)
 
@@ -91,9 +91,15 @@ class MainWindow(QMainWindow):
 
 
         self.clientView.upperFrame.searchButton.clicked.connect(self.clientView.scrollArea.reseat)
+        self.clientView.upperFrame.createButton.clicked.connect(lambda : self._create_server(12345))
+        self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345))
 
-        self.clientView.upperFrame.createButton.clicked.connect(lambda port = 12345 : self._create_server(port))
-        self.clientView.upperFrame.searchButton.clicked.connect(lambda port = 12345 : self._search_for_servers(port))
+        # self._add_server('TEST-SERVER1', '111.999.999.999', 10000)
+        # self._add_server('TEST-SERVER2', '222.999.999.999', 10000)
+        # self._add_server('TEST-SERVER3', '333.999.999.999', 10000)
+        # self._add_server('TEST-SERVER4', '444.999.999.999', 10000)
+
+
 
 
 
@@ -102,6 +108,7 @@ class MainWindow(QMainWindow):
         searchForServersWorker.signal.infoSignal.connect(self._update_client_view_progress_bar)
         searchForServersWorker.signal.foundServer.connect(self._add_server)
         self.threabool.start(searchForServersWorker)
+
 
     def _update_client_view_progress_bar(self, progressBarValue, progressBarMessage):
         if (progressBarValue == 999):
@@ -114,20 +121,17 @@ class MainWindow(QMainWindow):
 
 
     def _add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "emited from searchForServers : ", serverName, serverIP)
-        self.serverWidget = ServerWidget(serverName, serverIP)
-        self.mainWindowView.add_deivce(self.serverWidget)
-        self.serverWidget.connectToServer.clicked.connect(lambda: self._establish_connection_to_server(serverIP, serverPort))
+        serverWidget = serverwidget.ServerWidget(serverName, serverIP)
+        self.clientView.scrollArea.add_device(serverWidget)
+        serverWidget.connectButton.clicked.connect(lambda: self._establish_connection_to_server(serverIP, serverPort, True) if (serverWidget.connectButton.isChecked()) else (self._establish_connection_to_server(serverIP, serverPort, False)))
 
 
-    def _establish_connection_to_server(self ,serverIP: str, serverPort: int):
-        if self.serverWidget.connectToServer.isChecked():
-            self.serverWidget.connectToServer.setText('Disconnect')
-            self.reciveMouseMovement = ReciveUserInput(serverIP, serverPort)
-            self.threabool.start(self.reciveMouseMovement)
+    def _establish_connection_to_server(self ,serverIP: str, serverPort: int, isChecked : bool):
+        if isChecked:
+            reciveMouseMovementWorker = ReciveUserInput(serverIP, serverPort)
+            self.threabool.start(reciveMouseMovementWorker)
         else:
-            self.serverWidget.connectToServer.setText('Connect')
-            self.reciveMouseMovement.alive = False
+            reciveMouseMovementWorker.alive = False
 
 
 

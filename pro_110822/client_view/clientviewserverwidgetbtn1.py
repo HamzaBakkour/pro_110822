@@ -44,6 +44,7 @@ class ClientViewServerWidgetBtn1(QtWidgets.QPushButton):
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
         self.setFlat(True)
+        self.setCheckable(True)
 
     def _set_font_style(self):
         font = QFont()
