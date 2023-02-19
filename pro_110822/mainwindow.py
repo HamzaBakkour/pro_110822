@@ -48,6 +48,7 @@ class MainWindow(QMainWindow):
         #Program title
         self.setWindowTitle("pro_110822")
 
+        self.searchOngoning = False
 
         self.clientView = clientview.ClientView()
         self.serverView = serverview.ServerView()
@@ -90,18 +91,15 @@ class MainWindow(QMainWindow):
         self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'), addToExist=False, passShortcut=False)
 
 
-        self.clientView.upperFrame.searchButton.clicked.connect(self.clientView.scrollArea.reseat)
-        self.clientView.upperFrame.createButton.clicked.connect(lambda : self._create_server(12345))
-        self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345))
+        self.clientView.upperFrame.createButton.clicked.connect(lambda : self._create_server(12345) if (not self.searchOngoning) else ())
+        self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self.clientView.scrollArea.reseat() if (not self.searchOngoning) else ())
+        self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345) if (not self.searchOngoning) else ())
+
 
         # self._add_server('TEST-SERVER1', '111.999.999.999', 10000)
         # self._add_server('TEST-SERVER2', '222.999.999.999', 10000)
         # self._add_server('TEST-SERVER3', '333.999.999.999', 10000)
         # self._add_server('TEST-SERVER4', '444.999.999.999', 10000)
-
-
-
-
 
     def _search_for_servers(self, serverPort):
         searchForServersWorker = SearchForServersWorker(serverPort)
@@ -111,12 +109,15 @@ class MainWindow(QMainWindow):
 
 
     def _update_client_view_progress_bar(self, progressBarValue, progressBarMessage):
-        if (progressBarValue == 999):
-            pass
-        elif (progressBarValue < 101):
-            self.clientView.bottomFrame.brogressBar.setValue(progressBarValue)
-        else:
-            print(f'Search for servers worker reported a progress value of {progressBarValue}!!!')
+        print(f'progressBarValue: {progressBarValue}')
+        if (progressBarValue > 0):
+            self.searchOngoning = True
+            print(f'self.searchOngoning: {self.searchOngoning}')
+        if(progressBarValue == 999):
+            self.searchOngoning = False
+            print(f'self.searchOngoning: {self.searchOngoning}')
+
+        self.clientView.bottomFrame.brogressBar.setValue(progressBarValue)
         self.clientView.bottomFrame.info_text(progressBarMessage)
 
 

@@ -8,8 +8,9 @@ import traceback
 import logging
 import time
 import re
-
+import portscanner
 import pdb
+import inspect
 # pdb.set_trace()
 class SearchForServersWorkerSignals(QObject):
     foundServer = Signal(object, object, object)
@@ -24,50 +25,19 @@ class SearchForServersWorker(QRunnable):
 
     @Slot()
     def run(self)-> int:
-        searchForServerConnection = MouseAndKeyboardConnection()
-        searchForServerConnection.create_socket(180)
-        scan = NetWrokScanner()
-
-        self.signal.infoSignal.emit(10, 'Searching for servers...')
-        devicesList = scan.get_local_addresses_from_arp()
-        devicesName = scan.get_connected_devices_name()
-
-
-        self.signal.infoSignal.emit(15, ('Found ' + str(len(devicesList)) + ' device/s'))
-        time.sleep(1)
-        if (len(devicesList) == 0):
-            self.signal.infoSignal.emit(15, 'No servers found!')
-            time.sleep(2)
-            self.signal.infoSignal.emit(0, ' ')
-            return
-        else:
-            initProgressValue = 85/len(devicesList)
-            progressValue = initProgressValue
+        self.signal.infoSignal.emit(1 , 'Searching for servers...')
+        scan = portscanner.port_scanner(self.serverPort, 50, 0.5)
+        for entry in scan:
+            self.signal.infoSignal.emit(int(float(entry['percentage'][:-1])) , entry['percentage'][:-4] + '%')
+            if (len(entry['port_ok'])> 0):
+                for address in entry['port_ok']:
+                    self.signal.foundServer.emit('Unknown', address, self.serverPort)
+            if int(float(entry['percentage'][:-1])) >= 100:
+                self.signal.infoSignal.emit(100 , 'Search completed!')
+                time.sleep(2)
+                self.signal.infoSignal.emit(999 , ' ')
+                self.signal.infoSignal.emit(0 , ' ')
+        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} || ', "Search for server worker exiting!")
+        return 1
 
 
-        for device_IP in devicesList:
-
-            self.signal.infoSignal.emit(progressValue, ('Trying ' + device_IP + ':' + str(self.serverPort)))
-            if(searchForServerConnection.connect_to_server(device_IP, self.serverPort)):
-                self.signal.infoSignal.emit(999, (device_IP + ':' + str(self.serverPort) +' connection OK!.'))
-                found = False
-                for name in devicesName:
-                    if device_IP in name[2]:
-                        self.signal.foundServer.emit(name[0], device_IP, self.serverPort)
-                        found = True
-                if (not found):
-                    self.signal.foundServer.emit("Unknown", device_IP, self.serverPort)
-
-            else:
-                self.signal.infoSignal.emit(999, (device_IP + ':' + str(self.serverPort) +' connection refused!.'))
-            progressValue = progressValue + initProgressValue
-
-
-        searchForServerConnection.terminate_socket()
-        self.signal.infoSignal.emit(100, 'No servers found!')
-        time.sleep(2)
-        self.signal.infoSignal.emit(0, ' ')
-
-
-
-        return(1)
