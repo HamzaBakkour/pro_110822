@@ -109,13 +109,10 @@ class MainWindow(QMainWindow):
 
 
     def _update_client_view_progress_bar(self, progressBarValue, progressBarMessage):
-        print(f'progressBarValue: {progressBarValue}')
         if (progressBarValue > 0):
             self.searchOngoning = True
-            print(f'self.searchOngoning: {self.searchOngoning}')
         if(progressBarValue == 999):
             self.searchOngoning = False
-            print(f'self.searchOngoning: {self.searchOngoning}')
 
         self.clientView.bottomFrame.brogressBar.setValue(progressBarValue)
         self.clientView.bottomFrame.info_text(progressBarMessage)

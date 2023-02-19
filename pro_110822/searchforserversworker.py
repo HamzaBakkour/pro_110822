@@ -1,6 +1,4 @@
 from PySide6.QtCore import QRunnable, QObject, Signal, Slot
-from socketconnection import MouseAndKeyboardConnection
-from networkscannercls import NetWrokScanner
 
 import sys
 import os
