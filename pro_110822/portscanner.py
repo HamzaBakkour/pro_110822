@@ -147,11 +147,8 @@ async def _chain_ip_and_port_ping(address : tuple[str, int]) -> tuple[str, int, 
 
 
 async def _main_chain_ip_and_port_ping(args : list[tuple[str, int]]) -> list[tuple[str, int, int] | tuple[str, int, int, int]] :
-    try:
-        result = await asyncio.gather(*(_chain_ip_and_port_ping(n) for n in args))
-        return(result)
-    except Exception as ex:
-        print(f'44444444444 {ex}')
+    result = await asyncio.gather(*(_chain_ip_and_port_ping(n) for n in args))
+    return(result)
 
 
 def wrapper_to_main_chain_ip_and_port_ping(ip_addresses : list[tuple[str, int]] , groupMax : int, rest : int) -> dict[int, str, str, str, list[str], list [str], float, str]:
@@ -177,28 +174,23 @@ def wrapper_to_main_chain_ip_and_port_ping(ip_addresses : list[tuple[str, int]] 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     for group in groups:
-        try:
-            start = time.perf_counter()
-            grouResult = loop.run_until_complete(_main_chain_ip_and_port_ping(group))
-            end = time.perf_counter() - start
+        start = time.perf_counter()
+        grouResult = loop.run_until_complete(_main_chain_ip_and_port_ping(group))
+        end = time.perf_counter() - start
 
-            groupScanned = groupScanned + 1
-            percentage = (100* int(len(group))/(len(group) * len(groups)))
+        groupScanned = groupScanned + 1
+        percentage = (100* int(len(group))/(len(group) * len(groups)))
 
-            yield {'pinged' : len(group), 
-                'start_address' : group[0][0],
-                'end_address' : group[-1][0],
-                'time' : f'{end:0.2f}', 
-                'ping_ok' : [i[0] for i in grouResult if(i[2] == 1)],
-                'port_ok' : [i[0] for i in grouResult if((len(i) == 4) and (i[3] == 1))], 
-                'est' : round(end * (len(groups) - groupScanned), 2),
-                'percentage' : f'{(percentage * groupScanned):0.2f}%'
-                }
-            time.sleep(rest)
-        except RuntimeError:
-            print(f'Exception raised1111111111111: {RuntimeError}')
-        except Exception as ex:
-            print(f'Exception raised1111111111111: {type(ex)}\n{ex}')
+        yield {'pinged' : len(group), 
+            'start_address' : group[0][0],
+            'end_address' : group[-1][0],
+            'time' : f'{end:0.2f}', 
+            'ping_ok' : [i[0] for i in grouResult if(i[2] == 1)],
+            'port_ok' : [i[0] for i in grouResult if((len(i) == 4) and (i[3] == 1))], 
+            'est' : round(end * (len(groups) - groupScanned), 2),
+            'percentage' : f'{(percentage * groupScanned):0.2f}%'
+            }
+        time.sleep(rest)
 
 
 def get_active_interfaces(duplicates : bool = False)->list[dict[str, str, str, ipaddress.IPv4Network]]:
@@ -227,7 +219,7 @@ def get_active_interfaces(duplicates : bool = False)->list[dict[str, str, str, i
                 continue
 
         except Exception as ex:
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raised: {ex}')
+            print(f'{os.path.basename(__file__)} || ', f'{inspect.stack()[0][3]} || ', f'Exception raised: {ex}')
 
     #Remove duplicates.i.e, interfaces that have the same network address and netmask
     seen = set()
@@ -253,16 +245,13 @@ def get_hosts_list(ipAddress : str, netmask : str)-> list[str]:
 def port_scanner(port : int, groupSize : int, rest : int | float) -> dict[int, str, str, str, list[str], list [str], float, str]:
     interfaces = get_active_interfaces()
     allHosts = []
-    try:
-        for interface in interfaces:
-            hosts = get_hosts_list(interface['addr'], interface['netmask'])
-            for host in hosts:
-                allHosts.append((str(host), port))
-        scanResult = wrapper_to_main_chain_ip_and_port_ping(allHosts, groupSize, rest)
+    for interface in interfaces:
+        hosts = get_hosts_list(interface['addr'], interface['netmask'])
+        for host in hosts:
+            allHosts.append((str(host), port))
+    scanResult = wrapper_to_main_chain_ip_and_port_ping(allHosts, groupSize, rest)
 
-        return scanResult
-    except Exception as ex:
-        print(f'asdasdasd {ex}')
+    return scanResult
 
 
 
