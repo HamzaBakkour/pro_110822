@@ -28,8 +28,10 @@ class SearchForServersWorker(QRunnable):
         for entry in scan:
             self.signal.infoSignal.emit(int(float(entry['percentage'][:-1])) , entry['percentage'][:-4] + '%')
             if (len(entry['port_ok'])> 0):
-                for address in entry['port_ok']:
-                    self.signal.foundServer.emit('Unknown', address, self.serverPort)
+                for address, peerName in zip(entry['port_ok'], entry['peer_name']):
+                    self.signal.foundServer.emit(peerName, address, self.serverPort)
+
+
             if int(float(entry['percentage'][:-1])) >= 100:
                 self.signal.infoSignal.emit(100 , 'Search completed!')
                 time.sleep(2)

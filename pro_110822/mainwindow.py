@@ -79,7 +79,9 @@ class MainWindow(QMainWindow):
         self.serverWidget : QtWidgets.QFrame
         self.clientsConnections = []
         self.connectionsMonitor = ConnectionsMonitor(self.clientsConnections)
+        self.connectionsMonitor.connectionsList = self.clientsConnections
         self.connectionsMonitor.signal.socketError.connect(self._remove_client_widget)
+        self.threabool.start(self.connectionsMonitor)
 
 
         self.connectionID = 1
@@ -94,6 +96,7 @@ class MainWindow(QMainWindow):
         self.clientView.upperFrame.createButton.clicked.connect(lambda : self._create_server(12345) if (not self.searchOngoning) else ())
         self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self.clientView.scrollArea.reseat() if (not self.searchOngoning) else ())
         self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345) if (not self.searchOngoning) else ())
+        self.serverView.upperFrame.stopButton.clicked.connect(lambda: self._close_server())
 
 
         # self._add_server('TEST-SERVER1', '111.999.999.999', 10000)
@@ -144,7 +147,6 @@ class MainWindow(QMainWindow):
         #Send clients requests to  _handle_client_requests
         self.serverWorker.signal.clientRequest.connect(self._handle_client_requests)
         self.threabool.start(self.serverWorker)
-        self.threabool.start(self.connectionsMonitor)
         #Start listning for user input
         self.sendUserInput.start_listning()
 
@@ -177,7 +179,6 @@ class MainWindow(QMainWindow):
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Exception raised while server trying to connect to client.\nServer socket: {}\nCient IP: {}\nClient Port: {}\n\nException:\n{}".format(self.clientsConnections[-1], clientIP, clientPort, ex))
         #Monitor the connection
-        self.connectionsMonitor.connectionsList = self.clientsConnections
         #Add client widget to the UI
         self._add_client_widget(clientName, clientIP, self.clientsConnections[-1][0].getsockname()[1], shortcut)
 
@@ -213,16 +214,8 @@ class MainWindow(QMainWindow):
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Server Socket terminated")
         self.sendUserInput.stop_listning()
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Input listner terminated")
-        self.connectionsMonitor.alive = False
-        #Remove ServerView and set the new view to ClientView
-        self.mainWindowView.remove()
-        self.pBar.remove()
-        self.mainWindowView = ClientView()
-        self.pBar = ProgressBar()
-        self.mainWidget.layout.addWidget(self.mainWindowView)
-        self.mainWidget.layout.addWidget(self.pBar)
-        self.mainWindowView.makeServerButton.clicked.connect(self._create_server)
-        self.mainWindowView.refreshButton.clicked.connect(self._search_for_servers)
+        self.Stack.setCurrentIndex(0)
+
 
 
 
