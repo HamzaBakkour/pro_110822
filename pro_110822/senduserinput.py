@@ -29,7 +29,7 @@ def if_connected(func):
             try:
                 func(self, *args, **kwargs)
             except socket.error as error:
-                if (error.errno == 10054 or error.errno == 10053):
+                if (error.errno == 10054 or error.errno == 10053 or error.errno == 10038):
                     self._terminate_socket()
                     print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'socket error {error} [Handeled]')
                     return

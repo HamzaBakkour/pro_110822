@@ -2,14 +2,15 @@
 """
 The program's main window module
 """
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import QThreadPool, SIGNAL
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
     QGridLayout,
     QStackedWidget,
-    QVBoxLayout
+    QVBoxLayout,
+    QLabel
 )
 
 
@@ -39,21 +40,6 @@ import inspect
 #Creating and setting the format of the log file. 
 # logging.basicConfig(filename=(time.strftime("%Y%m%d---%H_%M_%S") + '.txt'), level=logging.DEBUG,
 # format="%(levelname)s\n%(asctime)s\n%(message)s", filemode="w")
-
-"""
-Problem is:
-
-      SERVER                               CLIENT
-*connection monitor*                      [connect]
-
-when the client connect the first tinme and then disconnect
-the connection monitor detect that the connection was closed
-and it removes the client widget.
-after the first connection. if the client connect and disconnect,
-connection monitor is not detecting that the connection is closed.
-
-so, the problem is in the client -> starts at the connect/disconnect button.
-"""
 
 
 
@@ -85,13 +71,14 @@ class MainWindow(QMainWindow):
 
         #Thread pool
         self.threabool = QThreadPool()
-        self.threabool.setMaxThreadCount(20)
+        self.threabool.setMaxThreadCount(25)
 
 
 
         #Variables used to handle connections
         self.clientWidgets = []
         self.serverWidgets = []
+        self.connectionsID = []
         self.reciveMouseMovementWorkers = []
         self.serverWidgetID = 0
         self.serverWidget : QtWidgets.QFrame
@@ -102,7 +89,6 @@ class MainWindow(QMainWindow):
         self.threabool.start(self.connectionsMonitor)
 
 
-        self.connectionID = 1
         self.sendUserInput = SendUserInput()
         self.sendUserInput.signal.socketTerminated.connect(self._remove_client_widget)
 
@@ -138,7 +124,6 @@ class MainWindow(QMainWindow):
         self.clientView.bottomFrame.brogressBar.setValue(progressBarValue)
         self.clientView.bottomFrame.info_text(progressBarMessage)
 
-################################################################################################################################################
     def _add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
         self.serverWidgets.append(serverwidget.ServerWidget(serverName, serverIP))
         self.clientView.scrollArea.add_device(self.serverWidgets[-1])
@@ -150,19 +135,16 @@ class MainWindow(QMainWindow):
 
 
     def _connect__disconnect_to_server(self ,serverIP: str, serverPort: int, id):
-        print(f'[X][X][X][X]From _connect__disconnect_to_server. serverIP : {serverIP}, serverPort : {serverPort}, id : {id}, self.serverWidgets[id-1].connectButton.isChecked() : {self.serverWidgets[id-1].connectButton.isChecked()}')
         if(self.serverWidgets[id-1].connectButton.isChecked()):
             self.serverWidgets[id-1].connectButton.change_style_on_checked(True)
             self.reciveMouseMovementWorkers.append(ReciveUserInput(serverIP, serverPort, id))
             self.threabool.start(self.reciveMouseMovementWorkers[-1])
         else:
-            print(f'[X] Removing reciveMouseMovementWorkers with id : {id}, id-1 : {id-1}')
             self.serverWidgets[id-1].connectButton.change_style_on_checked(False)
             for worker in self.reciveMouseMovementWorkers:
                 if (worker.id == id):
                     worker.alive = False
-            # self.reciveMouseMovementWorkers[id-1].alive = False
-################################################################################################################################################
+
 
     def _create_server(self, serverPort):
         self.Stack.setCurrentIndex(1)
@@ -185,10 +167,11 @@ class MainWindow(QMainWindow):
         self.sendUserInput.send_input_to_client(None)     
 
     def _switch_input_to_client(self, shortcutPressed):
-        print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', '_switch_input_to_client')
         self.sendUserInput.supress_user_input(True)
         try:
-            self.sendUserInput.send_input_to_client(self.clientsConnections[int(shortcutPressed[-1]) - 2][0])
+            for connection in self.clientsConnections:
+                if connection['shortcut'] == shortcutPressed:
+                    self.sendUserInput.send_input_to_client(connection['connection'])
         except Exception as ex:
             print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')
 
@@ -207,40 +190,59 @@ class MainWindow(QMainWindow):
                 CLIENT_NAME = data.split('!')[4]
                 CLIENT_IP = data.split('!')[5]
         except Exception as ex:
-            print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Exception raised while handling client requst.\nRequst data:\n{}\n\Exception:\n{}".format(data, ex))
+            print(f'[*]{os.path.basename(__file__)} || ', f'{inspect.stack()[0][3]} || ', "Exception raised while handling client requst.\nRequst data:\n{}\n\Exception:\n{}".format(data, ex))
         self._estaplish_connection_to_client((CLIENT_SCREEN_W, CLIENT_SCREEN_H), CLIENT_IP, CLIENT_PORT, CLIENT_NAME)
 
+
+
     def _estaplish_connection_to_client(self, clientScreenResolution : tuple, clientIP : str, clientPort : str, clientName : str):
-        #Define client shortcut
-        self.connectionID = self.connectionID + 1
-        shortcut = '<ctrl>+m+' + str(self.connectionID)
+        
+        okNumber = False
+        for n in range (2, 9):
+            if (n not in self.connectionsID):
+                self.connectionsID.append(n)
+                okNumber = True
+                break
+
+        if (not okNumber):
+            tempLable = QLabel('Maximun number of clients (8) has been reached!')
+            tempLable.setStyleSheet("background-color: #f07269")
+            tempLable.setAlignment(QtCore.Qt.AlignCenter)
+            self.serverView.scrollArea.add_device(tempLable)
+            return
+
+        
+        shortcut = '<ctrl>+m+' + str(self.connectionsID[-1])
         self.shortcutHandle.define_shortcut((shortcut, '_switch_input_to_client'), addToExist=True, passShortcut=True)
         
-        #Connect server to client
-        self.clientsConnections.append((socket.socket(socket.AF_INET, socket.SOCK_STREAM), self.connectionID))
-        try:
-            self.clientsConnections[-1][0].connect((clientIP, int(clientPort)))
-        except Exception as ex:
-            print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Exception raised while server trying to connect to client.\nServer socket: {}\nCient IP: {}\nClient Port: {}\n\nException:\n{}".format(self.clientsConnections[-1], clientIP, clientPort, ex))
-        #Monitor the connection
-        #Add client widget to the UI
-        self._add_client_widget(clientName, clientIP, self.clientsConnections[-1][0].getsockname()[1], shortcut)
+        # self.clientsConnections.append(((socket.socket(socket.AF_INET, socket.SOCK_STREAM), shortcut), self.connectionID))
+        self.clientsConnections.append({'connection' : socket.socket(socket.AF_INET, socket.SOCK_STREAM), 'shortcut' : shortcut})
 
-    def _add_client_widget(self, clientName, clientIP, clientPort, shortcut):
-        self.clientWidgets.append(clientwidget.ClientWidget(clientName, clientIP, clientPort, shortcut))
-        # self.mainWindowView.add_client(self.clientWidgets[-1])
+        try:
+            self.clientsConnections[-1]['connection'].connect((clientIP, int(clientPort)))
+        except Exception as ex:
+            print(f'[*]{os.path.basename(__file__)} || ', f'{inspect.stack()[0][3]} || ', f'{inspect.stack()[1][3]} || ', f"Exception raised while server trying to connect to client.\nCient IP: {clientIP}\nClient Port: {clientPort}\n\nException:\n{ex}")
+        try:
+            self._add_client_widget(clientName, clientIP, self.clientsConnections[-1]['connection'].getsockname()[1], shortcut, self.connectionsID[-1])
+        except IndexError as ie:
+            print(f'[*]{os.path.basename(__file__)} || ', f'{inspect.stack()[0][3]} || ', f'{inspect.stack()[1][3]} || ', f"Endex error while trying to add client : {clientName}, with ip : {clientIP} and shortcut : {shortcut}\n{ie}")
+
+
+    def _add_client_widget(self, clientName, clientIP, clientPort, shortcut, connectionID):
+        self.clientWidgets.append(clientwidget.ClientWidget(clientName, clientIP, clientPort, shortcut, connectionID))
         self.serverView.scrollArea.add_device(self.clientWidgets[-1])
 
+
     def _remove_client_widget(self, socketPort):
-        print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Client socket terminated {socketPort}')
         for widget in self.clientWidgets:
             if (widget.port == socketPort):
+                print(f'removed widgt with the id {widget.id}')
+                self.connectionsID.remove(widget.id)
                 widget.deleteLater()
                 self.shortcutHandle.remove_shortcut(widget.shortcut)
 
 
     def _close_server(self):
-        #Terminate serverWorker, serverSocket and user-input listner
         self.serverWorker.alive = False
         self.serverSocket.close()
         print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Server Socket terminated")

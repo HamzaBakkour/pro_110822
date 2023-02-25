@@ -12,11 +12,12 @@ from PySide6.QtWidgets import (
 )
 
 class ClientWidget(QtWidgets.QFrame):
-    def __init__(self, clientName: str, clientIP: list, clientPort : int, shortcut : str, *args, **kwargs):        
+    def __init__(self, clientName: str, clientIP: list, clientPort : int, shortcut : str, connectionID,*args, **kwargs):        
         super(ClientWidget, self).__init__(*args, **kwargs)
 
         self.port = clientPort
         self.shortcut = shortcut
+        self.id = connectionID
         self.layout = QGridLayout(self)
         self.setFixedHeight(75)
         self._init_ui(clientName, clientIP, clientPort, shortcut)
