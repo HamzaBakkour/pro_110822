@@ -98,7 +98,9 @@ class MainWindow(QMainWindow):
         self.clientsConnections = []
         self.connectionsMonitor = ConnectionsMonitor(self.clientsConnections)
         self.connectionsMonitor.connectionsList = self.clientsConnections
+        self.connectionsMonitor.connectionsList = self.clientsConnections
         self.connectionsMonitor.signal.socketError.connect(self._remove_client_widget)
+        self.threabool.start(self.connectionsMonitor)
         self.threabool.start(self.connectionsMonitor)
 
 
@@ -114,6 +116,7 @@ class MainWindow(QMainWindow):
         self.clientView.upperFrame.createButton.clicked.connect(lambda : self._create_server(12345) if (not self.searchOngoning) else ())
         self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self.clientView.scrollArea.reseat() if (not self.searchOngoning) else ())
         self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345) if (not self.searchOngoning) else ())
+        self.serverView.upperFrame.stopButton.clicked.connect(lambda: self._close_server())
         self.serverView.upperFrame.stopButton.clicked.connect(lambda: self._close_server())
 
 
