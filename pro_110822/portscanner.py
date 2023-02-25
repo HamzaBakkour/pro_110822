@@ -131,7 +131,6 @@ async def _chain_ip_and_port_ping(address : tuple[str, int]) -> tuple[str, int, 
         address = address + (1,)
         try:
             _ , writer = await asyncio.wait_for(asyncio.open_connection(address[0], address[1]), timeout=5)
-
         except socket.error:
             address = pingResult + (0,)
         except asyncio.exceptions.TimeoutError:
@@ -140,11 +139,6 @@ async def _chain_ip_and_port_ping(address : tuple[str, int]) -> tuple[str, int, 
             raise SystemExit(f'{ex}')
         else:
             address = pingResult + (1,)
-            peerName = socket.gethostbyaddr(address[0])[0]
-            if (len(peerName) > 0):
-                address = address + (peerName,)
-            else:
-                address = address + ('Unknown',)
             writer.close()
             await writer.wait_closed()
             try:
@@ -199,16 +193,11 @@ def wrapper_to_main_chain_ip_and_port_ping(ip_addresses : list[tuple[str, int]] 
         # for el in grouResult:
         #     print(el)
 
-        # for el in grouResult:
-        #     print(el)
-
         yield {'pinged' : len(group), 
             'start_address' : group[0][0],
             'end_address' : group[-1][0],
             'time' : f'{end:0.2f}', 
             'ping_ok' : [i[0] for i in grouResult if(i[2] == 1)],
-            'port_ok' : [i[0] for i in grouResult if((len(i) == 5) and (i[3] == 1))],
-            'peer_name': [i[4] for i in grouResult if((len(i) == 5) and (i[3] == 1))],
             'port_ok' : [i[0] for i in grouResult if((len(i) == 5) and (i[3] == 1))],
             'peer_name': [i[4] for i in grouResult if((len(i) == 5) and (i[3] == 1))],
             'est' : round(end * (len(groups) - groupScanned), 2),
