@@ -14,10 +14,10 @@ class ClientViewScrollArea(QScrollArea):
         self.scrollPanelLayout = QFormLayout(self.scrollPanel)
         self.scrollPanelLayout.setHorizontalSpacing(0)
         self.scrollPanelLayout.setAlignment(QtCore.Qt.AlignTop)
-        
+        self.scrollPanelLayout.setContentsMargins(0,7,0,0)
 
         self.setWidgetResizable(True)
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        # self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setWidget(self.scrollPanel)
 

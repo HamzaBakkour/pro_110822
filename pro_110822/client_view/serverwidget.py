@@ -16,26 +16,20 @@ class ServerWidget(QtWidgets.QFrame):
         self.connectButton : QtWidgets.QPushButton
         self.serverName = server_name
         self.serverIP = server_IP
+
         self.setFixedHeight(75)
 
         self._init_ui()
         self._set_style()
 
 
-
-
-
     def _set_style(self):
         self.setStyleSheet("QFrame {background-color: #c9c9c9;"
                             "border-width: 1px;"
-                            "border-radius: 10px;"
-                            "border-top-right-radius: 0px;"
-                            "border-style: inset;"
+                            "border-style: outset;"
                             "border-color: #787777;}"
-
                             "QLabel {background-color: #c9c9c9;"
                             "border: none;}"
-
                            )
     def _init_ui(self):
         leftGrid = QGridLayout()
@@ -45,8 +39,6 @@ class ServerWidget(QtWidgets.QFrame):
         self.layout.setColumnStretch(0,3)
         self.layout.setColumnStretch(1,1)
 
-
-
         self.connectButton = clientviewserverwidgetbtn1.ClientViewServerWidgetBtn1()
         self.connectButton.set_text('Connect')
         
@@ -54,9 +46,6 @@ class ServerWidget(QtWidgets.QFrame):
         rightGrid.addWidget(self.connectButton, 1, 0)
         leftGrid.addWidget(QLabel('Server name: ' + self.serverName))
         leftGrid.addWidget(QLabel('Server IP: ' + self.serverIP))
-
-
-
 
         self.layout.addLayout(leftGrid, 0, 0)
         self.layout.addLayout(rightGrid, 0, 1)

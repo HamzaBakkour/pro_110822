@@ -140,7 +140,16 @@ async def _chain_ip_and_port_ping(address : tuple[str, int]) -> tuple[str, int, 
         else:
             address = pingResult + (1,)
             writer.close()
-
+            await writer.wait_closed()
+            try:
+                peerName = socket.gethostbyaddr(address[0])[0]
+            except socket.error:
+                address = address + ('Unknown',)
+            else:
+                if (len(peerName) > 0):
+                    address = address + (peerName,)
+                else:
+                    address = address + ('Unknown',)
     else:
         address = pingResult
     return address  
@@ -181,12 +190,16 @@ def wrapper_to_main_chain_ip_and_port_ping(ip_addresses : list[tuple[str, int]] 
         groupScanned = groupScanned + 1
         percentage = (100* int(len(group))/(len(group) * len(groups)))
 
+        # for el in grouResult:
+        #     print(el)
+
         yield {'pinged' : len(group), 
             'start_address' : group[0][0],
             'end_address' : group[-1][0],
             'time' : f'{end:0.2f}', 
             'ping_ok' : [i[0] for i in grouResult if(i[2] == 1)],
-            'port_ok' : [i[0] for i in grouResult if((len(i) == 4) and (i[3] == 1))], 
+            'port_ok' : [i[0] for i in grouResult if((len(i) == 5) and (i[3] == 1))],
+            'peer_name': [i[4] for i in grouResult if((len(i) == 5) and (i[3] == 1))],
             'est' : round(end * (len(groups) - groupScanned), 2),
             'percentage' : f'{(percentage * groupScanned):0.2f}%'
             }

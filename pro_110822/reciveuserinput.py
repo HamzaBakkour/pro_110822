@@ -4,7 +4,11 @@ Recive mouse and keyboard input.
 """
 from PySide6.QtCore import QRunnable, Slot
 from pynput.mouse import Controller as MC
+from pynput.mouse import Button
+
 from pynput.keyboard import Controller as KC
+from pynput.keyboard import Key
+
 
 import socket
 import platform
@@ -15,11 +19,12 @@ import inspect
 
 
 class ReciveUserInput(QRunnable):
-    def __init__(self, serverIP: str, serverPort: str)-> None:
+    def __init__(self, serverIP: str, serverPort: str, id : int)-> None:
         super(ReciveUserInput, self).__init__()
         self.serverIP = serverIP
         self.serverPort = int(serverPort)
         self.alive = True
+        self.id = id
         self.sendSocket = None
         self.reciveSocket = None
         self.data = None
