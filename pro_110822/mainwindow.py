@@ -98,10 +98,12 @@ class MainWindow(QMainWindow):
         self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'), addToExist=False, passShortcut=False)
 
 
+
         self.clientView.upperFrame.createButton.clicked.connect(lambda : self._create_server(12345) if (not self.searchOngoning) else ())
         self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self.clientView.scrollArea.reseat() if (not self.searchOngoning) else ())
         self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345) if (not self.searchOngoning) else ())
         self.serverView.upperFrame.stopButton.clicked.connect(lambda: self._close_server())
+
 
 
         # self._add_server('TEST-SERVER1', '111.999.999.999', 10000)
