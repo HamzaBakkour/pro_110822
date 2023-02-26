@@ -9,13 +9,14 @@ from PySide6.QtWidgets import (
 from . import clientviewserverwidgetbtn1
 
 class ServerWidget(QtWidgets.QFrame):
-    def __init__(self, server_name: str, server_IP: list, *args, **kwargs):        
+    def __init__(self, server_name: str, server_IP: list , server_Port,*args, **kwargs):        
         super().__init__(*args, **kwargs)
 
         self.layout = QGridLayout(self)
         self.connectButton : QtWidgets.QPushButton
         self.serverName = server_name
         self.serverIP = server_IP
+        self.port = server_Port
 
         self.setFixedHeight(75)
 

@@ -35,6 +35,7 @@ import time
 from ctypes import *
 import os
 import inspect
+import struct
 
 
 #Creating and setting the format of the log file. 
@@ -82,9 +83,9 @@ class MainWindow(QMainWindow):
         self.reciveMouseMovementWorkers = []
         self.serverWidgetID = 0
         self.serverWidget : QtWidgets.QFrame
-        self.clientsConnections = []
-        self.connectionsMonitor = ConnectionsMonitor(self.clientsConnections)
-        self.connectionsMonitor.connectionsList = self.clientsConnections
+        self.connections = []
+        self.connectionsMonitor = ConnectionsMonitor(self.connections)
+        self.connectionsMonitor.connectionsList = self.connections
         self.connectionsMonitor.signal.socketError.connect(self._remove_client_widget)
         self.threabool.start(self.connectionsMonitor)
 
@@ -125,12 +126,10 @@ class MainWindow(QMainWindow):
         self.clientView.bottomFrame.info_text(progressBarMessage)
 
     def _add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
-        self.serverWidgets.append(serverwidget.ServerWidget(serverName, serverIP))
+        self.serverWidgets.append(serverwidget.ServerWidget(serverName, serverIP, serverPort))
         self.clientView.scrollArea.add_device(self.serverWidgets[-1])
         self.serverWidgetID = self.serverWidgetID + 1
         localID = self.serverWidgetID
-        print(f'self.serverWidgetID : {self.serverWidgetID}')
-        print(f'localID : {localID}')
         self.serverWidgets[-1].connectButton.clicked.connect(lambda: self._connect__disconnect_to_server(serverIP, serverPort, localID))
 
 
@@ -138,6 +137,7 @@ class MainWindow(QMainWindow):
         if(self.serverWidgets[id-1].connectButton.isChecked()):
             self.serverWidgets[id-1].connectButton.change_style_on_checked(True)
             self.reciveMouseMovementWorkers.append(ReciveUserInput(serverIP, serverPort, id))
+            self.reciveMouseMovementWorkers[-1].signal.serverStoped.connect(self._remove_server_widget)
             self.threabool.start(self.reciveMouseMovementWorkers[-1])
         else:
             self.serverWidgets[id-1].connectButton.change_style_on_checked(False)
@@ -145,20 +145,40 @@ class MainWindow(QMainWindow):
                 if (worker.id == id):
                     worker.alive = False
 
+    def _remove_server_widget(self, serverConnection, id, port):
+        for widget in self.serverWidgets:
+            if (widget.port == port):
+                try:
+                    widget.deleteLater()
+                    serverConnection.close()
+                except RuntimeError:#Delete a widget that already has been deleted
+                    print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'RuntimeError (widget already deleted) -> passed')
+                    pass
+                except Exception as ex:
+                    print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')
+
 
     def _create_server(self, serverPort):
-        self.Stack.setCurrentIndex(1)
-        #Create the server socket
+        for connection in self.connections:
+            connection.close()
+        for widget in self.serverWidgets:
+            try:
+                widget.deleteLater()
+            except RuntimeError:#Delete a widget that already has been deleted
+                print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'RuntimeError (widget already deleted) -> passed')
+                pass
+            except Exception as ex:
+                print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')    
+
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.serverSocket.setblocking(False)
         self.serverSocket.bind(('', serverPort))
-        #Pass the server socket to ServerWorker
         self.serverWorker = ServerWorker(self.serverSocket)
-        #Send clients requests to  _handle_client_requests
         self.serverWorker.signal.clientRequest.connect(self._handle_client_requests)
         self.threabool.start(self.serverWorker)
-        #Start listning for user input
         self.sendUserInput.start_listning()
+        self.Stack.setCurrentIndex(1)
+
 
 
 
@@ -169,7 +189,7 @@ class MainWindow(QMainWindow):
     def _switch_input_to_client(self, shortcutPressed):
         self.sendUserInput.supress_user_input(True)
         try:
-            for connection in self.clientsConnections:
+            for connection in self.connections:
                 if connection['shortcut'] == shortcutPressed:
                     self.sendUserInput.send_input_to_client(connection['connection'])
         except Exception as ex:
@@ -211,19 +231,18 @@ class MainWindow(QMainWindow):
             self.serverView.scrollArea.add_device(tempLable)
             return
 
-        
         shortcut = '<ctrl>+m+' + str(self.connectionsID[-1])
         self.shortcutHandle.define_shortcut((shortcut, '_switch_input_to_client'), addToExist=True, passShortcut=True)
         
         # self.clientsConnections.append(((socket.socket(socket.AF_INET, socket.SOCK_STREAM), shortcut), self.connectionID))
-        self.clientsConnections.append({'connection' : socket.socket(socket.AF_INET, socket.SOCK_STREAM), 'shortcut' : shortcut})
+        self.connections.append({'connection' : socket.socket(socket.AF_INET, socket.SOCK_STREAM), 'shortcut' : shortcut})
 
         try:
-            self.clientsConnections[-1]['connection'].connect((clientIP, int(clientPort)))
+            self.connections[-1]['connection'].connect((clientIP, int(clientPort)))
         except Exception as ex:
             print(f'[*]{os.path.basename(__file__)} || ', f'{inspect.stack()[0][3]} || ', f'{inspect.stack()[1][3]} || ', f"Exception raised while server trying to connect to client.\nCient IP: {clientIP}\nClient Port: {clientPort}\n\nException:\n{ex}")
         try:
-            self._add_client_widget(clientName, clientIP, self.clientsConnections[-1]['connection'].getsockname()[1], shortcut, self.connectionsID[-1])
+            self._add_client_widget(clientName, clientIP, self.connections[-1]['connection'].getsockname()[1], shortcut, self.connectionsID[-1])
         except IndexError as ie:
             print(f'[*]{os.path.basename(__file__)} || ', f'{inspect.stack()[0][3]} || ', f'{inspect.stack()[1][3]} || ', f"Endex error while trying to add client : {clientName}, with ip : {clientIP} and shortcut : {shortcut}\n{ie}")
 
@@ -248,6 +267,12 @@ class MainWindow(QMainWindow):
         print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Server Socket terminated")
         self.sendUserInput.stop_listning()
         print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Input listner terminated")
+
+        for connection in self.connections:
+            message = 'SS'.encode()
+            header = struct.pack('<L', len(message))
+            connection['connection'].sendall(header + message)
+
         self.Stack.setCurrentIndex(0)
 
                 

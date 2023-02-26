@@ -11,6 +11,7 @@ import re
 import socket
 import struct
 import datetime
+import inspect
 
 import pdb
 
@@ -72,4 +73,7 @@ class ServerWorker(QRunnable):
                 pass
             except IOError:
                 pass
-        print("ServerWorker terminated")
+            except Exception as ex:
+                print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f"Exception rasied:\n{ex}")
+
+        print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', "ServerWorker terminated")
