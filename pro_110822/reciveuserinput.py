@@ -2,9 +2,13 @@
 """
 Recive mouse and keyboard input.
 """
-from PySide6.QtCore import QRunnable, Slot
+from PySide6.QtCore import QRunnable, Slot, QObject, Signal
 from pynput.mouse import Controller as MC
+from pynput.mouse import Button
+
 from pynput.keyboard import Controller as KC
+from pynput.keyboard import Key
+
 
 import socket
 import platform
@@ -14,12 +18,19 @@ import os
 import inspect
 
 
+class ReciveUserInputSignals(QObject):
+    serverStoped = Signal(object, object, object)
+
+
+# self.signal.serverStoped.emit(self.conn, self.id, self.serverPort)
 class ReciveUserInput(QRunnable):
-    def __init__(self, serverIP: str, serverPort: str)-> None:
+    def __init__(self, serverIP: str, serverPort: str, id : int)-> None:
         super(ReciveUserInput, self).__init__()
+        self.signal = ReciveUserInputSignals()    
         self.serverIP = serverIP
         self.serverPort = int(serverPort)
         self.alive = True
+        self.id = id
         self.sendSocket = None
         self.reciveSocket = None
         self.data = None
@@ -85,7 +96,14 @@ class ReciveUserInput(QRunnable):
         self.reciveSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.reciveSocket.bind(('',0))
         self.reciveSocket.setblocking(0)
-        self.sendSocket.connect((self.serverIP, self.serverPort))
+        try:
+            self.sendSocket.connect((self.serverIP, self.serverPort))
+        except socket.error as error:
+            if (error.errno == 10061):
+                print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'[*]Socket error while trying to connect to server\nError message: {error}\nserverStoped signal emited to main thread.')
+                self.signal.serverStoped.emit(self.reciveSocket, self.id, self.serverPort)
+                self.sendSocket.close()
+                return
         screenRez = self.get_screen_resulotion()
         receiveSocetPort = self.reciveSocket.getsockname()[1]
         message = "C!{}!{}!{}!{}".format(screenRez[0], screenRez[1], receiveSocetPort, self.get_pc_name())
@@ -135,6 +153,8 @@ class ReciveUserInput(QRunnable):
                                 keyboard.release(eval(self.data.split('!')[1]))
                             except Exception as ex:
                                 print(ex)
+                        elif(self.data == 'SS'):
+                            self.signal.serverStoped.emit(self.conn, self.id, self.serverPort)
                     else:
                         print("Header data value is not equal to received data length")
             except UnboundLocalError:

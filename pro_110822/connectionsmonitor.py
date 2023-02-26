@@ -21,13 +21,24 @@ class ConnectionsMonitor(QRunnable):
         while(self.alive):
             for connection in self.connectionsList:
                 try:
-                    connection[0].sendall('*'.encode())
+                    connection['connection'].sendall('*'.encode())
                 except socket.error as error:
+                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'socket error, errno: {error}')
+
                     try:
-                        self.signal.socketError.emit(connection[0].getsockname()[1])
-                        connection[0].close()
+                        self.signal.socketError.emit(connection['connection'].getsockname()[1])
+                        connection['connection'].close()
+                    except socket.error as error:
+                        if(error.errno == 10038):
+                            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'Exception raside : {ex} [OK]')
                     except Exception as ex:
-                        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'Exception raside : {ex}')
+                        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'Exception raside : {ex} [Unhandeled]')
+                        pass
+                    try:
+                        self.connectionsList.remove(connection)
+                    except ValueError as ve:
+                        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', 'Value error [OK]: {ve}')
+
                 time.sleep(1)
             time.sleep(1)
         print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', 'ConnectionsMonitor terminated')
