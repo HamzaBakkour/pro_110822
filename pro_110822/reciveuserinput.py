@@ -51,7 +51,6 @@ class ReciveUserInput(QRunnable):
         screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
         return screensize
 
-
     def get_pc_name(self)-> str:
         """
         Get the PC name.
@@ -64,7 +63,6 @@ class ReciveUserInput(QRunnable):
         """
         return platform.node()
 
-
     def _receive_n_bytes(self, n):
         """
         Receiving exactly n bytes from socket connection (assuming it's open and connected).
@@ -76,7 +74,6 @@ class ReciveUserInput(QRunnable):
                 break
             data += chunk
         return data
-
 
     @Slot()
     def run(self)-> None:

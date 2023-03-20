@@ -86,7 +86,7 @@ class MainWindow(QMainWindow):
         self.connections = []
         self.connectionsMonitor = ConnectionsMonitor(self.connections)
         self.connectionsMonitor.connectionsList = self.connections
-        self.connectionsMonitor.signal.socketError.connect(self._remove_client_widget)
+        self.connectionsMonitor._signal.socketError.connect(self._remove_client_widget)
         self.threabool.start(self.connectionsMonitor)
 
 
@@ -98,18 +98,11 @@ class MainWindow(QMainWindow):
         self.shortcutHandle.define_shortcut(('<ctrl>+m+1', '_unsupress_user_input'), addToExist=False, passShortcut=False)
 
 
-
         self.clientView.upperFrame.createButton.clicked.connect(lambda : self._create_server(12345) if (not self.searchOngoning) else ())
         self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self.clientView.scrollArea.reseat() if (not self.searchOngoning) else ())
         self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345) if (not self.searchOngoning) else ())
         self.serverView.upperFrame.stopButton.clicked.connect(lambda: self._close_server())
 
-
-
-        # self._add_server('TEST-SERVER1', '111.999.999.999', 10000)
-        # self._add_server('TEST-SERVER2', '222.999.999.999', 10000)
-        # self._add_server('TEST-SERVER3', '333.999.999.999', 10000)
-        # self._add_server('TEST-SERVER4', '444.999.999.999', 10000)
 
     def _search_for_servers(self, serverPort):
         searchForServersWorker = SearchForServersWorker(serverPort)
@@ -155,7 +148,7 @@ class MainWindow(QMainWindow):
                     serverConnection.close()
                 except RuntimeError:#Delete a widget that already has been deleted
                     print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'RuntimeError (widget already deleted) -> passed')
-                    pass
+                    
                 except Exception as ex:
                     print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')
 
@@ -168,7 +161,7 @@ class MainWindow(QMainWindow):
                 widget.deleteLater()
             except RuntimeError:#Delete a widget that already has been deleted
                 print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'RuntimeError (widget already deleted) -> passed')
-                pass
+                
             except Exception as ex:
                 print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')    
 

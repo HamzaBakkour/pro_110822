@@ -2,8 +2,10 @@ import asyncio
 import time
 import socket
 import ipaddress
+from typing import Generator, Any, Literal
 import os
 import inspect
+
 try:
     import netifaces
 except ModuleNotFoundError as ex:
@@ -97,11 +99,8 @@ What does it return?
            time is passed on the current iteration data.
     'percentage': Work progress.
 -------------------------------------------------------------------------------------------------
-* installing netifaces  
+* Installing netifaces requires installing Microsoft Visual C++ (MSVC) and windows SDK.
 """
-
-
-"No duplicat, A function that returns a device name"
 
 
 async def _async_ping(address : tuple[str, int]) -> tuple[str, int, int]:
@@ -116,7 +115,9 @@ async def _async_ping(address : tuple[str, int]) -> tuple[str, int, int]:
 
     stdout, stderr = await proc.communicate()
 
-    if ('TTL' in stdout.decode()):
+    # if ('TTL' in stdout.decode() or 'Lost = 0' in stdout.decode()):
+    if ('Lost = 0' in stdout.decode()):
+
         return address + (1,)
     elif (stderr.decode() != ''):
         return address + (-1,)
@@ -124,13 +125,14 @@ async def _async_ping(address : tuple[str, int]) -> tuple[str, int, int]:
         return address + (0,)
 
 
-async def _chain_ip_and_port_ping(address : tuple[str, int]) -> tuple[str, int, int] | tuple[str, int, int, int]:
-    pingResult = await _async_ping(address)
+async def _chain_ip_and_port_ping(address : tuple[str | int, ...]) -> tuple[str, int, int] | tuple[str, int, int, int]:
+
+    pingResult = await _async_ping(address) # type: ignore
 
     if (pingResult[2] == 1):
-        address = address + (1,)
+        address = address + (1,) 
         try:
-            _ , writer = await asyncio.wait_for(asyncio.open_connection(address[0], address[1]), timeout=5)
+            _ , writer = await asyncio.wait_for(asyncio.open_connection(address[0], address[1]), timeout=5)# type: ignore
         except socket.error:
             address = pingResult + (0,)
         except asyncio.exceptions.TimeoutError:
@@ -152,7 +154,7 @@ async def _chain_ip_and_port_ping(address : tuple[str, int]) -> tuple[str, int, 
                     address = address + ('Unknown',)
     else:
         address = pingResult
-    return address  
+    return address   # type: ignore
 
 
 async def _main_chain_ip_and_port_ping(args : list[tuple[str, int]]) -> list[tuple[str, int, int] | tuple[str, int, int, int]] :
@@ -160,7 +162,7 @@ async def _main_chain_ip_and_port_ping(args : list[tuple[str, int]]) -> list[tup
     return(result)
 
 
-def wrapper_to_main_chain_ip_and_port_ping(ip_addresses : list[tuple[str, int]] , groupMax : int, rest : int) -> dict[int, str, str, str, list[str], list [str], float, str]:
+def _wrapper_to_main_chain_ip_and_port_ping(ip_addresses : list[tuple[str, int]] , groupMax : int, rest : int) -> Generator[dict[str, int | list[Any] | str | list[str] | float], None, None]:
     GROUP_MAX = groupMax
     totalNum = len(ip_addresses)
     groups = []
@@ -190,8 +192,6 @@ def wrapper_to_main_chain_ip_and_port_ping(ip_addresses : list[tuple[str, int]] 
         groupScanned = groupScanned + 1
         percentage = (100* int(len(group))/(len(group) * len(groups)))
 
-        # for el in grouResult:
-        #     print(el)
 
         yield {'pinged' : len(group), 
             'start_address' : group[0][0],
@@ -206,35 +206,43 @@ def wrapper_to_main_chain_ip_and_port_ping(ip_addresses : list[tuple[str, int]] 
         time.sleep(rest)
 
 
-def get_active_interfaces(duplicates : bool = False)->list[dict[str, str, str, ipaddress.IPv4Network]]:
+def get_active_interfaces(duplicates : bool = False)->list[dict[str, ipaddress.IPv4Network]]:
     ipV4 = 2
     ipV6 = 23
     active = []
-    ipSocket = socket.gethostbyname(socket.gethostname())
-    active.append({'addr' : ipSocket})
-    interfaces_id = netifaces.interfaces()
 
-    for interface_id in interfaces_id:
-        try:
-            if (ipV4 in netifaces.ifaddresses(interface_id).keys()):
-                if (netifaces.ifaddresses(interface_id)[ipV4][0]['addr'] != '127.0.0.1' ):#127.0. 0.1 (loopback address).
-                    if (netifaces.ifaddresses(interface_id)[ipV4][0]['addr'] == ipSocket):
-                        netmask = netifaces.ifaddresses(interface_id)[ipV4][0]['netmask']
-                        broadcast = netifaces.ifaddresses(interface_id)[ipV4][0]['broadcast']
-                        network = ipaddress.IPv4Network(netifaces.ifaddresses(interface_id)[ipV4][0]['addr'] + '/' + netifaces.ifaddresses(interface_id)[ipV4][0]['netmask'], strict=False)
+    hostIpFromSocket = socket.gethostbyname(socket.gethostname())
+    active.append({'addr' : hostIpFromSocket})
+    
+    hostInterfacesID = netifaces.interfaces()
 
-                        active[0].update({'netmask' : netmask, 'broadcast' : broadcast, 'network' : network})
-                    else:
-                        active.append(netifaces.ifaddresses(interface_id)[ipV4][0])
-                        network = ipaddress.IPv4Network(active[-1]['addr'] + '/' + active[-1]['netmask'], strict=False)
-                        active[-1].update({'network' : network})
-            else:
-                continue
+    def has_ipv4_address(interfaceID):
+        if (
+            (ipV4 in netifaces.ifaddresses(interfaceID).keys())
+            and 
+            (netifaces.ifaddresses(interfaceID)[ipV4][0]['addr'] != '127.0.0.1')#127.0. 0.1 (loopback address).
+            ):
+            return True
+        return False
+    
+    def get_interface_ipv4_address(interfaceID):
+        return netifaces.ifaddresses(interfaceID)[ipV4][0]['addr']
+    
 
-        except Exception as ex:
-            print(f'{os.path.basename(__file__)} || ', f'{inspect.stack()[0][3]} || ', f'Exception raised: {ex}')
+    for interfaceID in hostInterfacesID:
+            if (has_ipv4_address(interfaceID)):
+                if (get_interface_ipv4_address(interfaceID) == hostIpFromSocket):
+                    netmask = netifaces.ifaddresses(interfaceID)[ipV4][0]['netmask']
+                    broadcast = netifaces.ifaddresses(interfaceID)[ipV4][0]['broadcast']
+                    network = ipaddress.IPv4Network(netifaces.ifaddresses(interfaceID)[ipV4][0]['addr'] + '/' + netifaces.ifaddresses(interfaceID)[ipV4][0]['netmask'], strict=False)
+                    active[0].update({'netmask' : netmask, 'broadcast' : broadcast, 'network' : network})  
+                else:
+                    active.append(netifaces.ifaddresses(interfaceID)[ipV4][0])
+                    network = ipaddress.IPv4Network(active[-1]['addr'] + '/' + active[-1]['netmask'], strict=False)
+                    active[-1].update({'network' : network})
 
-    #Remove duplicates.i.e, interfaces that have the same network address and netmask
+
+    #Remove duplicates.i.e, interfaces that have share the same network address and netmask
     seen = set()
     activeNoDuplicates = []
     for el in active:
@@ -262,10 +270,9 @@ def port_scanner(port : int, groupSize : int, rest : int | float) -> dict[int, s
         hosts = get_hosts_list(interface['addr'], interface['netmask'])
         for host in hosts:
             allHosts.append((str(host), port))
-    scanResult = wrapper_to_main_chain_ip_and_port_ping(allHosts, groupSize, rest)
+    scanResult = _wrapper_to_main_chain_ip_and_port_ping(allHosts, groupSize, rest)
 
     return scanResult
-
 
 
 def port_scanner_(port : int, ipAndNetmask : list[str] | str, groupSize : int, rest : int | float) -> dict[int, str, str, str, list[str], list [str], float, str]:
@@ -274,7 +281,7 @@ def port_scanner_(port : int, ipAndNetmask : list[str] | str, groupSize : int, r
         hosts = get_hosts_list(ipAndNetmask.split('/')[0], ipAndNetmask.split('/')[1])
         for host in hosts:
             allHosts.append((str(host), port))
-        scanResult = wrapper_to_main_chain_ip_and_port_ping(allHosts, groupSize, rest)
+        scanResult = _wrapper_to_main_chain_ip_and_port_ping(allHosts, groupSize, rest)
         return scanResult
 
     elif (isinstance(ipAndNetmask, list)):
@@ -286,7 +293,7 @@ def port_scanner_(port : int, ipAndNetmask : list[str] | str, groupSize : int, r
             else:
                 raise SystemExit(f'The argument "{address}" is of type {type(ipAndNetmask)}\nstr is required!')
 
-        scanResult = wrapper_to_main_chain_ip_and_port_ping(allHosts, groupSize, rest)
+        scanResult = _wrapper_to_main_chain_ip_and_port_ping(allHosts, groupSize, rest)
         return scanResult
     
     else:
