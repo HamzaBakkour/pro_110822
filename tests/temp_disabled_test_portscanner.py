@@ -50,7 +50,7 @@ class TestPortscanner(unittest.TestCase):
         # two of these ip addresses are valid 
         # port_scanner should be able to estaplis a TCP connection with them
 
-        socketThread = threading.Thread(target=self._create_socket)
+        socketThread = threading.Thread(target=self._create_test_socket)
         socketThread.start()
         time.sleep(1)
         PORT = self.socketPort
@@ -120,7 +120,7 @@ class TestPortscanner(unittest.TestCase):
         self.assertEqual(result[200].compressed, '192.168.0.201')
         self.assertEqual(result[253].compressed, '192.168.0.254')
 
-    def _create_socket(self):
+    def _create_test_socket(self):
         tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         tempSocket.bind(('localhost', 0))
         self.socketPort = tempSocket.getsockname()[1]
