@@ -76,8 +76,8 @@ class ReciveUserInput(QRunnable):
             sendSocket.sendall(header + message)
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'Exception raisde {ex}')
-        sendSocket.close()
         sendSocket.shutdown(SHUT_RDWR)
+        sendSocket.close()
 
     def _establish_connection_with_server(self):
         self.reciveSocket.setblocking(False)
@@ -113,7 +113,8 @@ class ReciveUserInput(QRunnable):
                 except Exception as ex:
                     print(ex)
             case 'SS':
-                self.signal.serverStoped.emit(self.conn, self.id, self.serverPort)  
+                self.signal.serverStoped.emit(self.conn, self.id, self.serverPort)
+
 
     @Slot()
     def run(self)-> None:

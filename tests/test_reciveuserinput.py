@@ -9,87 +9,83 @@ import struct
 from pro_110822.reciveuserinput import ReciveUserInput
 
 
-# from PySide6.QtCore import QThreadPool, SIGNAL
-# self.threabool = QThreadPool()
-# self.threabool.setMaxThreadCount(25)
-# self.threabool.start(self.reciveMouseMovementWorkers[-1])
+_actions_ = []
+def _append_action(action):
+    _actions_.append(action)
 
 
-    # def __init__(self, methodName: str = "runTest") -> None:
-    #     super().__init__(methodName)
-    #     self.testSocketPort = 0
-    #     self.runThread = True
-    #     socketThread = threading.Thread(target=self._create_test_socket)
-    #     socketThread.start()
-    #     time.sleep(1)
+#Send input to ReicveInput
+#check that recive input is passing
+#the right instruction to mouse and keyboard controlers
+
 
 class TestReciveuserinput(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)
-        self.testSocketPort = 0
-        self.runThread = True
-        self.conn = socket.socket()
+        self.testServerPort = 0
+        self.runTestServer = True
+        self.testServerConnection = socket.socket()
         # socketThread = threading.Thread(target=self._create_test_socket)
         # # socketThread.start()
         # time.sleep(1)
 
 
     def setUp(self):
-        self.runThread = True
-        socketThread = threading.Thread(target=self._create_test_socket)
-        socketThread.start()
+        self.runTestServer = True
+        serverThread = threading.Thread(target=self._create_test_server)
+        serverThread.start()
         time.sleep(1)
 
     def tearDown(self) -> None:
-        self.runThread = False
-        tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        tempSocket.connect(('localhost', self.testSocketPort))
-        tempSocket.shutdown(SHUT_RDWR)
-        tempSocket.close()
+        self.runTestServer = False
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(('localhost', self.testServerPort))
+        s.shutdown(SHUT_RDWR)
+        s.close()
 
 
-
-
-    def _create_test_socket(self):
-        tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        tempSocket.bind(('localhost', 0))
-        self.testSocketPort = tempSocket.getsockname()[1]
-        while(self.runThread): 
-            tempSocket.listen(1)
-            self.conn, addr = tempSocket.accept()
-        self.conn.shutdown(SHUT_RDWR)
-        self.conn.close()
+    def _create_test_server(self):
+        testServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        testServerSocket.bind(('localhost', 0))
+        self.testServerPort = testServerSocket.getsockname()[1]
+        while(self.runTestServer): 
+            testServerSocket.listen(1)
+            self.testServerConnection, _ = testServerSocket.accept()
+        self.testServerConnection.shutdown(SHUT_RDWR)
+        self.testServerConnection.close()
 
     def _send_message(self, message):
         message = message.encode()
         header = struct.pack('<L', len(message))
-        self.conn.sendall(header + message)
-
+        self.testServerConnection.sendall(header + message)
+        print('x')
 
     def test_recive_from_server(self):
-        reciveUserInput = ReciveUserInput('localhost', str(self.testSocketPort), 1)
+        reciveUserInput = ReciveUserInput('localhost', str(self.testServerPort), 1)
         threabool = QThreadPool()
         threabool.setMaxThreadCount(5)
         threabool.start(reciveUserInput)
-        self._send_message('hello')
+        time.sleep(1)
+        try:
+            self._send_message('hello')
+        except:
+            pass
+        try:
+            self._send_message('hello')
+        except Exception as ex:
+            v = type(ex)
+            print('x')
+        try:
+            self._send_message('hello')
+        except:
+            pass
+
         reciveUserInput.alive = False
+        try:
+            self._send_message('hello')
+        except:
+            pass
         print('x')
         
 
 
-
-    # def _create_test_socket(self):
-    #     tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #     tempSocket.bind(('localhost', 0))
-    #     self.socketPort = tempSocket.getsockname()[1]
-    #     conn = socket.socket()
-    #     n = 0
-    #     while(self.runThread): 
-    #         tempSocket.listen(1)
-    #         conn, addr = tempSocket.accept()
-    #         n = n + 1
-    #         if (n == 2):#One working ip addresses in _pre_defined_hosts_list_
-    #             pass   #Two interfaces
-    #                     #1 * 2 = Two connection requests.
-    #     conn.shutdown(SHUT_RDWR)
-    #     conn.close()

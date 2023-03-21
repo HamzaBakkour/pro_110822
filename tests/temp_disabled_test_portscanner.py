@@ -13,7 +13,6 @@ from pro_110822.portscanner import port_scanner, \
     get_active_interfaces, \
     get_hosts_list
 
-
 _pre_defined_hosts_list_ = ['999.999.999.999',
                           '999.999.999.999',
                           '999.999.999.999',
@@ -136,6 +135,5 @@ class TestPortscanner(unittest.TestCase):
         conn.shutdown(SHUT_RDWR)
         conn.close()    
         
-
 if __name__ == '__main__':
     unittest.main()
