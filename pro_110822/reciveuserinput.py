@@ -31,12 +31,11 @@ class ReciveUserInput(QRunnable):
         self.serverPort = int(serverPort)
         self.alive = True
         self.id = id
-        self.reciveSocket = None
+        self.reciveSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.mouse = MC()
         self.keyboard = KC()
         self.screenRez = (0,0)
-
-        
+    
     def _get_screen_resulotion(self)-> tuple[int, int]:
         user32 = ctypes.windll.user32
         screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
@@ -68,6 +67,7 @@ class ReciveUserInput(QRunnable):
                 sendSocket.shutdown(SHUT_RDWR)
                 return
         self.screenRez = self._get_screen_resulotion()
+        self.reciveSocket.bind(('',0))
         receiveSocetPort = self.reciveSocket.getsockname()[1]
         message = "C!{}!{}!{}!{}".format(self.screenRez[0], self.screenRez[1], receiveSocetPort, self._get_pc_name())
         message = message.encode()
@@ -80,9 +80,7 @@ class ReciveUserInput(QRunnable):
         sendSocket.shutdown(SHUT_RDWR)
 
     def _establish_connection_with_server(self):
-        self.reciveSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.reciveSocket.bind(('',0))
-        self.reciveSocket.setblocking(0)
+        self.reciveSocket.setblocking(False)
         self.reciveSocket.listen(5)
         while(True):
             try:
@@ -119,7 +117,6 @@ class ReciveUserInput(QRunnable):
 
     @Slot()
     def run(self)-> None:
-
         self._send_to_server()
         self._establish_connection_with_server()
         while(self.alive):
