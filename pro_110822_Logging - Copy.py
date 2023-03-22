@@ -1,5 +1,6 @@
 import logging
 
+
 logging.getLogger().setLevel(logging.NOTSET)
 
 # Create a custom logger
@@ -8,6 +9,8 @@ logger = logging.getLogger(__name__)
 # Create handlers
 c_handler = logging.StreamHandler()
 f_handler = logging.FileHandler('file.log')
+
+
 
 # Create formatters and add it to handlers
 format = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')

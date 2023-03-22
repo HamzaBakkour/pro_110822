@@ -58,7 +58,6 @@ class TestReciveuserinput(unittest.TestCase):
         message = message.encode()
         header = struct.pack('<L', len(message))
         self.testServerConnection.sendall(header + message)
-        print('x')
 
     def test_recive_from_server(self):
         reciveUserInput = ReciveUserInput('localhost', str(self.testServerPort), 1)

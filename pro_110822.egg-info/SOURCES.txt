@@ -5,6 +5,7 @@ pro_110822/connectionsmonitor.py
 pro_110822/coverscreenalpha.py
 pro_110822/mainwindow.py
 pro_110822/portscanner.py
+pro_110822/prologging.py
 pro_110822/reciveuserinput.py
 pro_110822/searchforserversworker.py
 pro_110822/senduserinput.py

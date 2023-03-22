@@ -17,6 +17,11 @@ import ctypes
 import struct
 import os
 import inspect
+# from . import prologging
+# from prologging import Log
+from pro_110822.prologging import Log
+
+log = Log(20)
 
 
 class ReciveUserInputSignals(QObject):
@@ -48,7 +53,7 @@ class ReciveUserInput(QRunnable):
         data = ''.encode()
         while len(data) < n:
             chunk = self.conn.recv(n - len(data))
-            if ((chunk == ''.encode())):
+            if (chunk == ''.encode()):
                 break
             data += chunk
         return data
@@ -59,9 +64,7 @@ class ReciveUserInput(QRunnable):
             sendSocket.connect((self.serverIP, self.serverPort))
         except socket.error as error:
             if (error.errno == 10061):
-                print(f'{os.path.basename(__file__)} | ',
-                      f'{inspect.stack()[0][3]} | ',
-                      f'[*]Socket error while trying to connect to server\nError message: {error}\nserverStoped signal emited to main thread.')
+                log.error('Socket error while trying to connect to server')
                 self.signal.serverStoped.emit(self.reciveSocket, self.id, self.serverPort)
                 sendSocket.close()
                 sendSocket.shutdown(SHUT_RDWR)
@@ -75,20 +78,24 @@ class ReciveUserInput(QRunnable):
         try:
             sendSocket.sendall(header + message)
         except Exception as ex:
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'Exception raisde {ex}')
+            log.exception('Exception')
         sendSocket.shutdown(SHUT_RDWR)
         sendSocket.close()
 
     def _establish_connection_with_server(self):
+        log.debug('in in 1')
         self.reciveSocket.setblocking(False)
+        log.debug('in in 2')
         self.reciveSocket.listen(5)
+        log.debug('in in 3')
         while(True):
             try:
                 self.conn, address = self.reciveSocket.accept()
-                print("from receive worker accepted {} {}".format(self.conn, address))
+                print()
+                log.info(f'from receive worker accepted {self.conn} {address}')
                 break
-            except BlockingIOError:
-                pass
+            except Exception:
+                log.exception('Exception')
 
     def _mouse_and_keyboard_controller(self, message):
         match message.split('!')[0]:
@@ -118,8 +125,11 @@ class ReciveUserInput(QRunnable):
 
     @Slot()
     def run(self)-> None:
+        log.debug('in 1')
         self._send_to_server()
+        log.debug('in 2')
         self._establish_connection_with_server()
+        log.debug('in 3')
         while(self.alive):
             try:
                 headerData = self._receive_n_bytes(4)
@@ -130,7 +140,7 @@ class ReciveUserInput(QRunnable):
                         data = data.decode()
                         self._mouse_and_keyboard_controller(data)
                     else:
-                        print("Header data value is not equal to received data length")
+                        log.info('Header data value is not equal to received data length')
             except UnboundLocalError:
                 pass
             except BlockingIOError:
@@ -139,4 +149,4 @@ class ReciveUserInput(QRunnable):
                 pass
         self.conn.close()
         self.conn.shutdown(SHUT_RDWR)
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', '---- | ' , "ReciveUserInput QRunnable terminated")
+        log.info('ReciveUserInput QRunnable terminated')
