@@ -1,0 +1,10 @@
+2023-03-22 16:53:37,253 | __main__ | DEBUG | debug message
+2023-03-22 16:53:37,253 | __main__ | INFO | info message
+2023-03-22 16:53:37,253 | __main__ | WARNING | warning message
+2023-03-22 16:53:37,261 | __main__ | ERROR | error message
+2023-03-22 16:53:37,261 | __main__ | CRITICAL | critical message
+2023-03-22 16:54:03,617 | __main__ | DEBUG | debug
+2023-03-22 16:54:03,625 | __main__ | INFO | info
+2023-03-22 16:54:03,625 | __main__ | WARNING | warning
+2023-03-22 16:54:03,633 | __main__ | ERROR | error
+2023-03-22 16:54:03,633 | __main__ | CRITICAL | critical
