@@ -31,6 +31,7 @@ class ReciveUserInputSignals(QObject):
 class ReciveUserInput(QRunnable):
     def __init__(self, serverIP: str, serverPort: str, id : int)-> None:
         super(ReciveUserInput, self).__init__()
+        log.debug("**STARTED**")
         self.signal = ReciveUserInputSignals()    
         self.serverIP = serverIP
         self.serverPort = int(serverPort)
@@ -40,25 +41,33 @@ class ReciveUserInput(QRunnable):
         self.mouse = MC()
         self.keyboard = KC()
         self.screenRez = (0,0)
+        log.debug("**EXITE**")
     
     def _get_screen_resulotion(self)-> tuple[int, int]:
+        log.debug("**STARTED**")
         user32 = ctypes.windll.user32
         screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+        log.debug(f"**EXITE** with {screensize}")
         return screensize
 
     def _get_pc_name(self)-> str:
+        log.debug("**STARTED**")
+        log.debug(f"**EXITE** with {platform.node()}")
         return platform.node()
 
     def _receive_n_bytes(self, n):
+        log.debug("**STARTED**")
         data = ''.encode()
         while len(data) < n:
             chunk = self.conn.recv(n - len(data))
             if (chunk == ''.encode()):
                 break
             data += chunk
+        log.debug(f"**EXITE** with {data}")
         return data
 
     def _send_to_server(self):
+        log.debug("**STARTED**")
         sendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             sendSocket.connect((self.serverIP, self.serverPort))
@@ -81,21 +90,27 @@ class ReciveUserInput(QRunnable):
             log.exception('Exception')
         sendSocket.shutdown(SHUT_RDWR)
         sendSocket.close()
+        log.debug("**EXITED**")
 
     def _establish_connection_with_server(self):
-        log.debug('in in 1')
-        self.reciveSocket.setblocking(False)
-        log.debug('in in 2')
+        log.debug("**STARTED**")
+        self.reciveSocket.setblocking(True)
+        log.debug("[1]")
         self.reciveSocket.listen(5)
-        log.debug('in in 3')
+        log.debug("[2]")
         while(True):
+            log.debug("[3]")
             try:
+                log.debug("[4]")
                 self.conn, address = self.reciveSocket.accept()
-                print()
+                log.debug("[5]")
                 log.info(f'from receive worker accepted {self.conn} {address}')
+                log.debug("[6]")
                 break
             except Exception:
+                log.debug("[7]")
                 log.exception('Exception')
+        log.debug("**EXITED**")
 
     def _mouse_and_keyboard_controller(self, message):
         match message.split('!')[0]:
@@ -121,15 +136,14 @@ class ReciveUserInput(QRunnable):
                     print(ex)
             case 'SS':
                 self.signal.serverStoped.emit(self.conn, self.id, self.serverPort)
+        log.debug("**EXITED**")
 
 
     @Slot()
     def run(self)-> None:
-        log.debug('in 1')
+        log.debug("**STARTED**")
         self._send_to_server()
-        log.debug('in 2')
         self._establish_connection_with_server()
-        log.debug('in 3')
         while(self.alive):
             try:
                 headerData = self._receive_n_bytes(4)
@@ -149,4 +163,5 @@ class ReciveUserInput(QRunnable):
                 pass
         self.conn.close()
         self.conn.shutdown(SHUT_RDWR)
+        log.debug("**EXITED**")
         log.info('ReciveUserInput QRunnable terminated')

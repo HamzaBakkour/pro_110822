@@ -25,9 +25,7 @@ class TestReciveuserinput(unittest.TestCase):
         self.testServerPort = 0
         self.runTestServer = True
         self.testServerConnection = socket.socket()
-        # socketThread = threading.Thread(target=self._create_test_socket)
-        # # socketThread.start()
-        # time.sleep(1)
+
 
 
     def setUp(self):
@@ -47,7 +45,9 @@ class TestReciveuserinput(unittest.TestCase):
     def _create_test_server(self):
         testServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         testServerSocket.bind(('localhost', 0))
+        
         self.testServerPort = testServerSocket.getsockname()[1]
+        s.connect(('localhost', self.testServerPort))
         while(self.runTestServer): 
             testServerSocket.listen(1)
             self.testServerConnection, _ = testServerSocket.accept()
@@ -67,24 +67,13 @@ class TestReciveuserinput(unittest.TestCase):
         time.sleep(1)
         try:
             self._send_message('hello')
-        except:
+        except Exception:
             pass
         try:
             self._send_message('hello')
-        except Exception as ex:
-            v = type(ex)
-            print('x')
-        try:
-            self._send_message('hello')
-        except:
+        except Exception:
             pass
-
-        reciveUserInput.alive = False
-        try:
-            self._send_message('hello')
-        except:
-            pass
-        print('x')
+   
         
 
 
