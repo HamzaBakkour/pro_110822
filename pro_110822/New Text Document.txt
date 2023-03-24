@@ -1,8 +1,0 @@
-MainWindow is passed to Eratosthenes.
-Eratosthenes can access main MainWindow widegets
-	and uppdate them.
-Eratosthenes async event loop runs for 0.1 s
-	and then retursn to Qt event loop
-
-
- 
