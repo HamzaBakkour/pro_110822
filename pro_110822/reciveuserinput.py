@@ -69,9 +69,12 @@ class ReciveUserInput(QRunnable):
     def _send_to_server(self):
         log.debug("**STARTED**")
         sendSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        log.info(f"created sendSocket {sendSocket}")
         try:
             sendSocket.connect((self.serverIP, self.serverPort))
+            log.info(f"connected to server {self.serverIP} at port {self.serverPort}")
         except socket.error as error:
+            log.exception("Exception")
             if (error.errno == 10061):
                 log.error('Socket error while trying to connect to server')
                 self.signal.serverStoped.emit(self.reciveSocket, self.id, self.serverPort)
@@ -86,6 +89,7 @@ class ReciveUserInput(QRunnable):
         header = struct.pack('<L', len(message))
         try:
             sendSocket.sendall(header + message)
+            log.info(f'message header + message: {header + message}')
         except Exception as ex:
             log.exception('Exception')
         sendSocket.shutdown(SHUT_RDWR)
@@ -152,6 +156,7 @@ class ReciveUserInput(QRunnable):
                     data = self._receive_n_bytes(dataLen)
                     if len(data) == dataLen:
                         data = data.decode()
+                        log.debug(f"recived {data}")
                         self._mouse_and_keyboard_controller(data)
                     else:
                         log.info('Header data value is not equal to received data length')

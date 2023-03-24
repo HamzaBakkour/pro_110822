@@ -43,7 +43,7 @@ class Log:
     for i in range(2, len(inspect.stack())):
       if (inspect.stack()[i][3] == '<module>'):
         break
-      trace_ = trace_ + ' -> ' + inspect.stack()[i][3]
+      trace_ = trace_ + ' <- ' + inspect.stack()[i][3]
 
     trace_ = trace_[4:]
     trace_ = trace_ + ': '
