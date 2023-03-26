@@ -13,32 +13,9 @@ import socket
 import os
 import inspect
 import ctypes
-
-
+import queue
+import time
 import ctypes
-
-def if_connected(func):
-    """
-    A wrapper to some of the SendUserInput methods.
-    The wrapper checks if a valid connection is established before
-    calling the wrapped function.
-    """
-    @functools.wraps(func)
-    def _wrapper(self, *args, **kwargs):
-        if ((self.mouseListner.is_alive() or self.keyboardListner.is_alive()) and self.activeConnection):
-            try:
-                func(self, *args, **kwargs)
-            except socket.error as error:
-                if (error.errno == 10054 or error.errno == 10053 or error.errno == 10038):
-                    self._terminate_socket()
-                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'socket error {error} [Handeled]')
-                    return
-                else:
-                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'socket errno {error} [Unhandeled]')
-            except Exception as ex:
-                print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', ex)
-
-    return _wrapper
 
 
 class SendUserInputSignals(QObject):
@@ -57,77 +34,61 @@ class SendUserInput():
         self.keyBoard = keyboard.Controller()
         self.screenWidth = self.get_screen_resulotion()[0]
         self.screenHight = self.get_screen_resulotion()[1]
-
+        self.events_queue = queue.Queue(maxsize=200)
 
     def get_screen_resulotion(self):
         user32 = ctypes.windll.user32
         screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
         return screensize
 
-
-    @if_connected
     def _on_move(self, x, y):
-        message = f'M!{x/self.screenWidth}!{y/self.screenHight}'
-        message = message.encode()
-        header = struct.pack('<L', len(message))
-        self.activeConnection.sendall(header + message)
+        event = f'M!{x/self.screenWidth}!{y/self.screenHight}'
+        if self.events_queue.full():
+            return
+        self.events_queue.put(event)
 
-
-    @if_connected
     def _on_click(self, x, y, button, pressed):
         if pressed:
-            message = f'P!{button}!1!{x}!{y}'
+            event = f'P!{button}!1!{x}!{y}'
         else:
-            message = f'P!{button}!0!{x}!{y}'
-        message = message.encode()
-        header = struct.pack('<L', len(message))
-        self.activeConnection.sendall(header + message)
+            event = f'P!{button}!0!{x}!{y}'
+        if self.events_queue.full():
+            return
+        self.events_queue.put(event)
 
-
-    @if_connected
     def _on_scroll(self, x, y, dx, dy):
         if dy < 0:
-            message = f'S!d!{x}!{y}'
+            event = f'S!d!{x}!{y}'
         else:
-            message = f'S!u!{x}!{y}'
-        message = message.encode()
-        header = struct.pack('<L', len(message))
-        self.activeConnection.sendall(header + message)
+            event = f'S!u!{x}!{y}'
+        if self.events_queue.full():
+            return
+        self.events_queue.put(event)
 
-
-    @if_connected
     def _on_press(self, key):
-        if (str(key)[0:3] == 'Key'):
-            pass
-        else:
+        if (str(key)[0:3] != 'Key'):
             key = self.keyboardListner.canonical(key)
         try:
-            message = f'K!a!{key.char}'
+            event = f'K!a!{key.char}'
         except AttributeError:
-            message = f'K!s!{key}'
-        message = message.encode()
-        header = struct.pack('<L', len(message))
-        self.activeConnection.sendall(header + message)
+            event = f'K!s!{key}'
+        if self.events_queue.full():
+            return
+        self.events_queue.put(event)
 
-
-    @if_connected
     def _on_release(self, key):
-        if (str(key)[0:3] == 'Key'):
-            pass
-        else:
+        if (str(key)[0:3] != 'Key'):
             key = self.keyboardListner.canonical(key)
-        message = f'R!{key}'
-        message = message.encode()
-        header = struct.pack('<L', len(message))
-        self.activeConnection.sendall(header + message)
-
+        event = f'R!{key}'
+        if self.events_queue.full():
+            return
+        self.events_queue.put(event)
 
     def _keyboard_win32_event_filter(self, msg, data):
         if(self.activeWin32Filter):
             self.keyboardListner._suppress = True
         else:
             self.keyboardListner._suppress = False
-
 
     def _mouse_win32_event_filter(self, msg, data):
         if(self.activeWin32Filter):
@@ -138,55 +99,7 @@ class SendUserInput():
         else:
             self.mouseListner._suppress = False
 
-
-    def supress_user_input(self, supress : bool)-> None:
-        """
-        Calling this method will disable the mouse and keyboard input and
-        will hide the mouse pointer.
-
-        Args:
-            supress: True, input supressed.
-                     False, input unsupressed.
-
-        Returns:
-            None
-        """
-        if (supress == True and self.screenCovered == False):
-            screenCoverScriptpath = os.path.dirname(os.path.realpath(__file__)) 
-            screenCoverScriptpath = screenCoverScriptpath + '\coverscreenalpha.py'
-            self.coverScreenProcess = subprocess.Popen(["py",screenCoverScriptpath], stdout=PIPE, stderr=STDOUT)
-            self.screenCovered = True
-            self.activeWin32Filter = True
-        elif (supress == False):
-            self.activeWin32Filter = False
-            if(self.screenCovered):
-                self.coverScreenProcess.kill()
-                self.keyboardListner._suppress = False
-                try:
-                    self.keyBoard.press(keyboard.Key.ctrl_l)
-                    self.keyBoard.release(keyboard.Key.ctrl_l)
-                except Exception as ex:
-                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exceptions raisde, press ctrl_l\n{ex}')
-                try:
-                    self.keyBoard.press(keyboard.Key.ctrl_r)
-                    self.keyBoard.release(keyboard.Key.ctrl_r)
-                except:
-                    print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exceptions raisde, press ctrl_r\n{ex}')
-                self.screenCovered = False
-
-
     def start_listning(self):
-        """
-        Start the mouse and keyboard listner.
-        To send the input to a socket, call the method send_input_to_client
-        and provide a valid socket connection as an argument.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
         self.mouseListner = mouse.Listener(on_move=self._on_move,
         on_click = self._on_click,
         on_scroll = self._on_scroll,
@@ -202,44 +115,42 @@ class SendUserInput():
 
         self.mouseListner.start()
         self.keyboardListner.start()
-
-
-    def _terminate_socket(self)-> None:
-        self.signal.socketTerminated.emit(self.activeConnection.getsockname()[1])
-        try:
-            self.activeConnection.close()
-        except Exception as ex:
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisd while terminating socket\n{self.activeConnection}\n{ex}')
-        self.activeConnection = None
-        self.supress_user_input(False)
-
+        print("listening STARTED")
 
     def stop_listning(self):
-        """
-        Stop listning to the mouse and keyboard input.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.supress_user_input(False)
         self.mouseListner.stop()
         self.keyboardListner.stop()
-        self.activeConnection = None
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "LISTNINGSTOPED")
+        print("listening SOPED")
 
-    def send_input_to_client(self, clientSocket: socket.socket)-> None:
-        """
-        Set the connection that the mouse and keyboard input 
-        will be sent to.
 
-        Args:
-            clientSocket: The connection that the mouse and keyboard input
-                            will be sent to
 
-        Returns:
-            None
-        """
-        self.activeConnection = clientSocket
+
+
+
+
+
+
+
+    # def supress_user_input(self, supress : bool)-> None:
+    #     if (supress == True and self.screenCovered == False):
+    #         screenCoverScriptpath = os.path.dirname(os.path.realpath(__file__)) 
+    #         screenCoverScriptpath = screenCoverScriptpath + '\coverscreenalpha.py'
+    #         self.coverScreenProcess = subprocess.Popen(["py",screenCoverScriptpath], stdout=PIPE, stderr=STDOUT)
+    #         self.screenCovered = True
+    #         self.activeWin32Filter = True
+    #     elif (supress == False):
+    #         self.activeWin32Filter = False
+    #         if(self.screenCovered):
+    #             self.coverScreenProcess.kill()
+    #             self.keyboardListner._suppress = False
+    #             try:
+    #                 self.keyBoard.press(keyboard.Key.ctrl_l)
+    #                 self.keyBoard.release(keyboard.Key.ctrl_l)
+    #             except Exception as ex:
+    #                 print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exceptions raisde, press ctrl_l\n{ex}')
+    #             try:
+    #                 self.keyBoard.press(keyboard.Key.ctrl_r)
+    #                 self.keyBoard.release(keyboard.Key.ctrl_r)
+    #             except:
+    #                 print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exceptions raisde, press ctrl_r\n{ex}')
+    #             self.screenCovered = False
