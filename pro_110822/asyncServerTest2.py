@@ -24,6 +24,8 @@ class AsyncServer():
         self._start_stream_s1_ = 0.1
         self._start_stream_s2_ = 1
 
+
+
     def send_data(self, data):
         asyncio.run(self._send_data(data))
 
@@ -53,8 +55,7 @@ class AsyncServer():
                 self._writer =  client['writer']
                 print(f"streaming to client {client['addr'][0]}:{client['addr'][1]}")
                 return
-        print(f"could not fined client {client['addr'][0]}:{client['addr'][1]} in connected clients.")
-
+        print(f"could not fined client {clientIP}:{clientPort} in connected clients.")
 
 
 
@@ -64,7 +65,6 @@ class AsyncServer():
          for item in self.clients_queue:
               temp.append(item['addr'])
          return  temp
-
 
 
 
@@ -82,11 +82,14 @@ class AsyncServer():
 
 
     def close(self):
-        self.server_coro.close()
-        try:
-            asyncio.run(self.server_coro.wait_closed())
-        except Exception as ex:
-            print('in AsyncServer, close, ' ,ex, type(ex))
+        if (self.server_coro != None):
+            self.server_coro.close()
+            try:
+                asyncio.run(self.server_coro.wait_closed())
+            except Exception as ex:
+                print('in AsyncServer, close, ' ,ex, type(ex))
+        if (self.tasks_group == None):
+            return
         self.tasks_group.cancel()
 
 

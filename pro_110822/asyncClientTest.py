@@ -53,6 +53,8 @@ class AsyncClient():
     
 
     async def _wait_on_connection_close(self):
+        if (self._writer == None):
+            return
         print("waiting on connection close")
         await self._writer.wait_closed()
         print("connection closed")
@@ -62,7 +64,6 @@ class AsyncClient():
         tasks = []
         tasks.append(asyncio.create_task(self._connect(serverIP, serverPort)))
         tasks.append(asyncio.create_task(self._recive_message()))
-        # tasks.append(asyncio.create_task(self._export_data())) 
 
         await asyncio.gather(*tasks)
 
