@@ -1,64 +1,110 @@
-import asyncio
-from multiprocessing.dummy import Pool
+from PySide6.QtCore import QRunnable, Slot, QObject, Signal
 import time
-# Listen for connections
-# Accept connections and emmit to the mainwindow
-# Send mouse and keyboard input
-# Send managment data
-# Recive managment data
-# Connections monitor
+from server.asyncserver import AsyncServer
+
+class Server(QRunnable):
+    def __init__(self, serverIP, serverPort) -> None:
+        super(Server, self).__init__()
+        self.ip = serverIP
+        self.port = serverPort
+        self._server = AsyncServer(self.ip, self.port)
+        self.alive = True
 
 
-class Server():
-    def __init__(self, ip, port) -> None:
-        self.IP = ip
-        self.Port = port
-        self._writer = None
+    @property
+    def connected_clients(self):
+        return self._server.connected_clients()
+    
 
-    async def _handler(self, reader, writer):
-        self._writer = writer
-        data = await reader.read(100)
-        message = data.decode()
-        addr = self._writer.get_extra_info('peername')
-
-        print(f"Received {message!r} from {addr!r}")
-
-    async def _send_data(self, data):
-            await asyncio.sleep(2)
-            print(f"Send: {data!r}")
-            self._writer.write(data.encode())
-            await self._writer.drain()
-
-    async def close_connection(self):
-            print("Close the connection")
-            self._writer.close()
-            await self._writer.wait_closed()
+    @property
+    def recived_messages(self):
+        return self._server.recived_messages()
 
 
-    async def _start_server(self):
-        server_coro = await asyncio.start_server(self._handler, self.IP, self.Port)
-        async with server_coro:
-            await server_coro.serve_forever()
+    def send_data(self, data):
+        self._server.send_data(data)
 
 
-    async def main(self):
-        tasks = []
-        tasks.append(asyncio.create_task(self._send_data("yes")))
-        tasks.append(asyncio.create_task(self._start_server()))
+    def set_client(self, clientIP, clientPort):
+        self._server.set_client(clientIP, clientPort)
 
-        await asyncio.gather(*tasks)
+    def start_stream(self):
+        self._server.start_stream()
+
+    def stop_stream(self):
+        self._server.stop_stream()
+
+    def close_server(self):
+        self._server.close()
 
 
-    def boo(self):
-         asyncio.run(self.main())
+    @Slot()
+    def run(self)-> None:
+        self._server.run()
         
 
-server = Server('127.0.0.1', 8888)
-server.boo()
 
-print('1')
-time.sleep(4)
-print('2')
+class SSignals(QObject):
+     connected_clients = Signal(object)
+     recived_messages = Signal(object)
+class ServerSignals(QRunnable):
+    def __init__(self, connected_clients, recived_messages) -> None:
+        super(ServerSignals, self).__init__()
+        self.signals = SSignals()
+        self.connected_clients = connected_clients
+        self.recived_messages = recived_messages
+        self.alive = True
+        self.tick = 1
+    @Slot()
+    def run(self) -> None:
+        while(True):
+            self.signals.connected_clients.emit(self.connected_clients)
+            self.signals.recived_messages.emit(self.recived_messages)
+            time.sleep(self.tick)
+
+
+
+
+
+
+
+
+
+# server = Server('127.0.0.1', 8888)
+# threabool = QThreadPool()
+# threabool.setMaxThreadCount(25)
+# threabool.start(server)
+# print('')
+# server.close_server()
+# connected = server.connected_clients()
+# server.set_client(connected[0][0], connected[0][1])
+# print('')
+# print('stream started')
+# server.start_stream()
+# print('')
+# print('stream stoped')
+# server.stop_stream()
+#[len data + 3]
+#[++++++]     [data][+++]
+# for _ in range(100):
+#     server.send_data("29++++12345!6789AB!CDEFGH!IJKLM!+++")
+# server.send_data("19++++yes from server1+++")
+# server.send_data("18++++no from server1+++")
+# connected = server.connected_clients()
+# server.stream_to_client(connected[1][0], connected[1][1])
+# server.send_data("19++++yes from server2+++")
+# server.send_data("18++++no from server1+++")
+# connected_clients = server.connected_clients()
+# recived_messages = server.recived_messages()
+# print("ended")
+
+
+
+
+
+
+
+
 
 
 

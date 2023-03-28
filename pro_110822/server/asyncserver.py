@@ -1,7 +1,7 @@
 import asyncio
 from asyncio.exceptions import CancelledError
 import queue
-from senduserinput import SendUserInput
+from server.senduserinput import SendUserInput
 import pdb
 
 class AsyncServer():
@@ -31,19 +31,15 @@ class AsyncServer():
 
 
 
-
     def start_stream(self):
         self._capture_input.start_listning()
         self.stream = True
 
 
 
-
-
     def stop_stream(self):
         self.stream = False
         self._capture_input.stop_listning()
-
 
 
 
@@ -56,7 +52,6 @@ class AsyncServer():
                 print(f"streaming to client {client['addr'][0]}:{client['addr'][1]}")
                 return
         print(f"could not fined client {clientIP}:{clientPort} in connected clients.")
-
 
 
 
@@ -95,10 +90,8 @@ class AsyncServer():
 
 
 
-
     def _connected_clients_all(self):
         return self.clients_queue
-
 
 
 
@@ -107,7 +100,6 @@ class AsyncServer():
         if (len(data) > 0):
             print(f"added {data} to inbound queue")
             self.inbound_queue.put(data)
-
 
 
 
@@ -128,7 +120,6 @@ class AsyncServer():
 
 
 
-
     async def _start_stream(self):
         while(True):
             if (self.stream): 
@@ -138,7 +129,6 @@ class AsyncServer():
                 await asyncio.sleep(self._start_stream_s1_)
             else:
                 await asyncio.sleep(self._start_stream_s2_)
-
 
 
 
@@ -159,13 +149,12 @@ class AsyncServer():
 
 
 
-
     async def _connections_monitor(self):
         while(True):
             connections = self._connected_clients_all()
             for connection in connections:
                 try:
-                    connection['writer'].write(' '.encode())
+                    connection['writer'].write('*'.encode())
                     await connection['writer'].drain()
                 except Exception as ex:
                     print('in _connections_monitor ',  connection['addr'], type(ex), ' ', ex, ' [CLOSED]')
@@ -186,8 +175,6 @@ class AsyncServer():
 
 
 
-
-
     async def _handler(self, reader, writer):
         addr = writer.get_extra_info('peername')
         print(f"{addr!r} is connected.")
@@ -200,11 +187,10 @@ class AsyncServer():
         self.server_coro = await asyncio.start_server(self._handler, self.ip, self.port)
         async with self.server_coro:
             try:
+                print(f"starting server at {self.ip}:{self.port}")
                 await self.server_coro.serve_forever()
             except CancelledError:
                 print('server_coro apported', CancelledError)
-
-
 
 
 

@@ -19,7 +19,7 @@ import os
 import inspect
 # from . import prologging
 # from prologging import Log
-from pro_110822.prologging import Log
+from prologging import Log
 
 log = Log(20)
 

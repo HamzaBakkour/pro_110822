@@ -1,6 +1,6 @@
 from PySide6.QtCore import QRunnable, Slot, QObject, Signal
 import time
-from asyncClientTest import AsyncClient
+from client.asyncclient import AsyncClient
 
 
 class Client(QRunnable):
@@ -11,6 +11,10 @@ class Client(QRunnable):
         self.serverPort = serverPort
         self.alive = True
 
+    @property
+    def recived_messages(self):
+        return self._client.recived_messages()
+
 
     def _connect(self):
         self._client.connect(self.serverIP, self.serverPort )
@@ -19,9 +23,6 @@ class Client(QRunnable):
     def send_data(self, data):
         self._client.send_data(data)
 
-
-    def recived_messages(self):
-        return self._client.recived_messages()
 
 
     def close_connection(self):
@@ -37,9 +38,9 @@ class Client(QRunnable):
 
 class CSignal(QObject):
      recived_messages = Signal(object)
-class ClientMonitor(QRunnable):
+class ClientSignals(QRunnable):
     def __init__(self, recived_messages) -> None:
-        super(ClientMonitor, self).__init__()
+        super(ClientSignals, self).__init__()
         self.signal = CSignal()
         self.recived_messages = recived_messages
         self.alive = True

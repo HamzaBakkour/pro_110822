@@ -5,7 +5,7 @@ class AsyncClient():
     def __init__(self) -> None:
         self._reader = None
         self._writer = None
-        self.inbound_queue = queue.Queue()
+        self._inbound_queue = queue.Queue()
         self._outbound_queue = queue.SimpleQueue()
 
 
@@ -13,6 +13,11 @@ class AsyncClient():
     def send_data(self, data):
         asyncio.run(self._send_data(data))
 
+
+    def addto_inbound_queue(self, data):
+        if (data != '*'):
+            self._inbound_queue.put(data)
+            print(f"{data} added to self._inbound_queue")
 
 
     async def _send_data(self, data):
@@ -28,17 +33,19 @@ class AsyncClient():
                 print(type(ex), ex, 'Unhandeled')
 
 
+
     async def _connect(self, serverIP, serverPort):
         self._reader, self._writer = await asyncio.open_connection(serverIP, serverPort)
 
 
+
     async def _recive_message(self):
+        await asyncio.sleep(1)
         while(True):
                 try:
                     data = await self._reader.read(50)
                     data = data.decode()
-                    self.inbound_queue.put(data)
-                    print(f"{data} added to self._inbound_queue")
+                    self.addto_inbound_queue(data)
                 except AttributeError as ae:
                     print('in _recive_message ', ae, ' ', type(ae))
                     await asyncio.sleep(1)
@@ -49,7 +56,7 @@ class AsyncClient():
 
 
     def recived_messages(self):
-        return  list(self.inbound_queue.queue)
+        return  list(self._inbound_queue.queue)
     
 
     async def _wait_on_connection_close(self):
