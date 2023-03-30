@@ -12,15 +12,14 @@ from PySide6.QtWidgets import (
 )
 
 class ClientWidget(QtWidgets.QFrame):
-    def __init__(self, clientName: str, clientIP: list, clientPort : int, shortcut : str, connectionID,*args, **kwargs):        
-        super(ClientWidget, self).__init__(*args, **kwargs)
+    def __init__(self, name: str, ip: list, port : int):        
+        super(ClientWidget, self).__init__()
 
-        self.port = clientPort
-        self.shortcut = shortcut
-        self.id = connectionID
+        self.ip = ip
+        self.port = port
         self.layout = QGridLayout(self)
         self.setFixedHeight(75)
-        self._init_ui(clientName, clientIP, clientPort, shortcut)
+        self._init_ui(name, ip, port)
         self._set_style()
 
     def _set_style(self):
@@ -32,7 +31,7 @@ class ClientWidget(QtWidgets.QFrame):
                             "border: none;}"
                            )
 
-    def _init_ui(self, clientName, clientIP, clientPort, shortcut):
+    def _init_ui(self, clientName, clientIP, clientPort):
         leftGrid = QGridLayout()
         rightGrid = QGridLayout()
 
@@ -41,7 +40,7 @@ class ClientWidget(QtWidgets.QFrame):
         self.layout.setColumnStretch(1,1)
 
         leftGrid.addWidget(QLabel('Client name : ' + clientName),0,0)
-        leftGrid.addWidget(QLabel('Shortcut: ' + shortcut), 1, 0)
+        # leftGrid.addWidget(QLabel('Shortcut: ' + shortcut), 1, 0)
         rightGrid.addWidget(QLabel('Client IP: ' + clientIP),0,0)
         rightGrid.addWidget(QLabel('Connected via: ' + str(clientPort)),1,0)
 

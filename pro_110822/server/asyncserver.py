@@ -49,15 +49,16 @@ class AsyncServer():
             if ((client['addr'][0] == clientIP) and (client['addr'][1] == clientPort)):
                 self._reader =  client['reader']
                 self._writer =  client['writer']
-                print(f"streaming to client {client['addr'][0]}:{client['addr'][1]}")
+                print(f"asyncserver, streaming to client {client['addr'][0]}:{client['addr'][1]}")
                 return
-        print(f"could not fined client {clientIP}:{clientPort} in connected clients.")
+        print(f"asyncserver, could not fined client {clientIP}:{clientPort} in connected clients.")
 
 
 
     def connected_clients(self):
          temp = []
          for item in self.clients_queue:
+              pdb.set_trace()
               temp.append(item['addr'])
          return  temp
 
@@ -98,7 +99,7 @@ class AsyncServer():
 
     def _add_to_inbound (self, data):
         if (len(data) > 0):
-            print(f"added {data} to inbound queue")
+            print(f"asyncserver, added {data} to inbound queue")
             self.inbound_queue.put(data)
 
 
@@ -106,16 +107,16 @@ class AsyncServer():
 
     async def _send_data(self, data):
             if (self._writer == None):
-                print("no client was set. use set_client to set one.")
+                print("asyncserver, no client was set. use set_client to set one.")
                 return
             try:
                 self._writer.write(data.encode())
                 await self._writer.drain()
             except ConnectionResetError:
-                print('ConnectionResetError')
+                print('asyncserver, ConnectionResetError')
                 await asyncio.sleep(self._send_data_s1_)
             except Exception as ex:
-                    print(type(ex), ex, 'Unhandeled')
+                    print('asyncserver, ', type(ex), ex, 'Unhandeled')
 
 
 
@@ -142,7 +143,7 @@ class AsyncServer():
                     message = data.decode()
                     self._add_to_inbound(message)
                 except Exception as ex:
-                    print(f'in _recive_data {type(ex)}, {ex}')
+                    print(f'asyncserver, in _recive_data {type(ex)}, {ex}')
                 await asyncio.sleep(self._recive_data_s1_)
             await asyncio.sleep(self._recive_data_s2_)
 
@@ -157,7 +158,7 @@ class AsyncServer():
                     connection['writer'].write('*'.encode())
                     await connection['writer'].drain()
                 except Exception as ex:
-                    print('in _connections_monitor ',  connection['addr'], type(ex), ' ', ex, ' [CLOSED]')
+                    print('asyncserver, in _connections_monitor ',  connection['addr'], type(ex), ' ', ex, ' [CLOSED]')
                     try:
                         connection['writer'].close()
                         await connection['writer'].wait_closed()
@@ -166,7 +167,7 @@ class AsyncServer():
                     except ConnectionResetError:
                         pass
                     except Exception as ex:
-                        print('in _connections_monitor ', type(ex), ' ', ex)
+                        print('asyncserver, in _connections_monitor ', type(ex), ' ', ex)
                     connections.remove(connection)
                 await asyncio.sleep(self._connections_monitor_s1_)
             await asyncio.sleep(self._connections_monitor_s2_)
@@ -177,7 +178,7 @@ class AsyncServer():
 
     async def _handler(self, reader, writer):
         addr = writer.get_extra_info('peername')
-        print(f"{addr!r} is connected.")
+        print(f"asyncserver, {addr!r} is connected.")
         self.clients_queue.append({'addr' : addr, 'writer' : writer, 'reader' : reader})
 
 
@@ -187,10 +188,10 @@ class AsyncServer():
         self.server_coro = await asyncio.start_server(self._handler, self.ip, self.port)
         async with self.server_coro:
             try:
-                print(f"starting server at {self.ip}:{self.port}")
+                print(f"asyncserver, starting server at {self.ip}:{self.port}")
                 await self.server_coro.serve_forever()
             except CancelledError:
-                print('server_coro apported', CancelledError)
+                print('asyncserver, server_coro apported', CancelledError)
 
 
 
@@ -205,7 +206,7 @@ class AsyncServer():
         try:
             await self.tasks_group
         except CancelledError:
-            print('tasks_group cancelled', CancelledError)
+            print('asyncserver, tasks_group cancelled', CancelledError)
 
 
 

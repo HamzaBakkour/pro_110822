@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QLabel
 )
 
+from typing import Any
 
 from PySide6 import QtWidgets
 from pynput import keyboard
@@ -52,6 +53,7 @@ import struct
 
 
 class MainWindow(QMainWindow):
+
     def __init__(self, *args, **kwargs)-> None:
         super().__init__(*args, **kwargs)
 
@@ -64,8 +66,8 @@ class MainWindow(QMainWindow):
         #Server variables
         self.serverView = ServerView()
         self.connectedClientss = []
-        self.clientWidgets = []
-        self.server = None
+        self._clientWidgets = []
+        self._server = None
         self.serverSignals = None
 
         #Client variables
@@ -88,39 +90,15 @@ class MainWindow(QMainWindow):
 
 
 
-    def _init_server(self, serverIP, serverPort):
-        self.server = Server(serverIP, serverPort)
-        self.serverSignals = ServerSignals(self.server.connected_clients, 
-                                           self.server.recived_messages)
+
+        
 
 
     def _connect_buttons(self):
-        self.clientView.upperFrame.createButton.clicked.connect(lambda : self.create_server())
+        self.clientView.upperFrame.createButton.clicked.connect(lambda : self.start_server())
         self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self.create_client())
         # self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345) if (not self.searchOngoning) else ())
         # self.serverView.upperFrame.stopButton.clicked.connect(lambda: self._close_server())
-
-    def _connect_server_signals(self):
-        self.serverSignals.signals.connected_clients.connect(self._server_view_maneger)
-        self.serverSignals.signals.recived_messages.connect(self.boo2)
-
-# Recives a list of connected clients
-# if a connected client is in the list 
-#   but it does not have a widget
-#   -> create a widget for this client
-
-# if a clients has a widget 
-#   but its not in the connected clients list
-#   -> remove this client
-
-
-# 
-
-    def _server_view_maneger(self, connected_clients):
-        for client in connected_clients:
-            if client not in self.connectedClientss:
-                self.connectedClientss.append(client)
-        pass
 
 
 
@@ -128,9 +106,8 @@ class MainWindow(QMainWindow):
         print(f"boo {connected_clients}")
 
 
-    def boo2(self, recived_messages):
-        print(f"boo2 {recived_messages}")
-        
+    def boo2(self):
+        pass        
 
 
     def set_view(self, view):
@@ -143,12 +120,57 @@ class MainWindow(QMainWindow):
 
 
 
-    def create_server(self):
+
+
+    def start_server(self):
         self.set_view('SERVER')
         self._init_server('localhost', 8888)
-        self.threabool.start(self.server)
+        self.threabool.start(self._server)
         self.threabool.start(self.serverSignals)
-        self._connect_server_signals()
+
+
+
+    def _init_server(self, serverIP, serverPort):
+        self._server = Server(serverIP, serverPort)
+        self.serverSignals = ServerSignals()
+        self.serverSignals.signals.server_manager.connect(self._server_view_maneger)
+        self.serverSignals.signals.recived_messages.connect(self.boo2)
+
+
+
+    def _server_view_maneger(self):
+        for client in self._server.connected_clients:
+                if (not self._has_widget(client)):
+                    self._create_widget(client)
+        
+        for widget in self._clientWidgets:
+            if (not self._still_connected(widget)):
+                self._remove_widget(widget)
+                self._clientWidgets.remove(widget)
+
+
+
+    def _has_widget(self, client: tuple[str, int] ):
+        for widget in self._clientWidgets:
+            if ((client[0] == widget.ip) and (client[1] == widget.port)):
+                return True
+        return False
+
+
+    def _create_widget(self, client):
+        self._clientWidgets.append(ClientWidget('name to be implemented', client[0], client[1]))
+        self.serverView.scrollArea.add_device(self._clientWidgets[-1])
+
+
+    def _still_connected(self, widget):
+        for client in self._server.connected_clients:
+            if ((client[0], client[1]) == (widget.ip, widget.port)):
+                return True
+        return False
+
+
+    def _remove_widget(self, widget):
+        widget.deleteLater()
 
 
 
@@ -158,6 +180,11 @@ class MainWindow(QMainWindow):
         self.clientSignals = ClientSignals(self.client.recived_messages)
         self.threabool.start(self.client)
         self.threabool.start(self.clientSignals)
+
+
+
+
+
 
 
         # for connection in self.connections:

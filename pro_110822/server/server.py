@@ -1,6 +1,19 @@
-from PySide6.QtCore import QRunnable, Slot, QObject, Signal
+import PySide6
+from PySide6.QtCore import QRunnable, Slot, QObject, Signal, QTimer, SIGNAL
+from typing import Optional
 import time
 from server.asyncserver import AsyncServer
+
+
+# Server emmit signal to main window every 1s
+# -> Server needs a slot that the clien can connect to
+# -> Server will emmit
+# -> Server needs a timer which tick every 1s
+#
+#
+#
+
+
 
 class Server(QRunnable):
     def __init__(self, serverIP, serverPort) -> None:
@@ -9,7 +22,7 @@ class Server(QRunnable):
         self.port = serverPort
         self._server = AsyncServer(self.ip, self.port)
         self.alive = True
-
+        self.timer = None       
 
     @property
     def connected_clients(self):
@@ -45,25 +58,21 @@ class Server(QRunnable):
 
 
 class SSignals(QObject):
-     connected_clients = Signal(object)
-     recived_messages = Signal(object)
+     server_manager = Signal()
+     recived_messages = Signal()
+
 class ServerSignals(QRunnable):
-    def __init__(self, connected_clients, recived_messages) -> None:
+    def __init__(self) -> None:
         super(ServerSignals, self).__init__()
         self.signals = SSignals()
-        self.connected_clients = connected_clients
-        self.recived_messages = recived_messages
         self.alive = True
         self.tick = 1
     @Slot()
     def run(self) -> None:
         while(True):
-            self.signals.connected_clients.emit(self.connected_clients)
-            self.signals.recived_messages.emit(self.recived_messages)
+            self.signals.server_manager.emit()
+            self.signals.recived_messages.emit()
             time.sleep(self.tick)
-
-
-
 
 
 
