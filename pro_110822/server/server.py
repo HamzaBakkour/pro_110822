@@ -26,22 +26,24 @@ class Server(QRunnable):
 
     @property
     def connected_clients(self):
-        return self._server.connected_clients()
+        return self._server.connected_clients
     
 
     @property
     def recived_messages(self):
         return self._server.recived_messages()
 
+    def set_client(self, clientIP, clientPort):
+        self._server.set_active(clientIP, clientPort)
 
     def send_data(self, data):
-        self._server.send_data(data)
+        self._server.send_data_to_active(data)
+
+    def broadcast(self, message):
+        self._server.broadcast(message)
 
 
-    def set_client(self, clientIP, clientPort):
-        self._server.set_client(clientIP, clientPort)
-
-    def start_stream(self):
+    def stream_to_client(self):#must set client first
         self._server.start_stream()
 
     def stop_stream(self):
@@ -58,7 +60,7 @@ class Server(QRunnable):
 
 
 class SSignals(QObject):
-     server_manager = Signal()
+     server_view_maneger = Signal()
      recived_messages = Signal()
 
 class ServerSignals(QRunnable):
@@ -70,7 +72,7 @@ class ServerSignals(QRunnable):
     @Slot()
     def run(self) -> None:
         while(True):
-            self.signals.server_manager.emit()
+            self.signals.server_view_maneger.emit()
             self.signals.recived_messages.emit()
             time.sleep(self.tick)
 

@@ -1,5 +1,7 @@
 import asyncio
 import queue
+import platform
+from ctypes import windll
 
 class AsyncClient():
     def __init__(self) -> None:
@@ -7,11 +9,7 @@ class AsyncClient():
         self._writer = None
         self._inbound_queue = queue.Queue()
         self._outbound_queue = queue.SimpleQueue()
-
-
-
-    def send_data(self, data):
-        asyncio.run(self._send_data(data))
+        self._recive_message_s1 = 0.1
 
 
     def addto_inbound_queue(self, data):
@@ -20,12 +18,89 @@ class AsyncClient():
             print(f"{data} added to self._inbound_queue")
 
 
+
+    @staticmethod
+    def _pack_data(data_, head_length = 7):
+        head = str(len(data_.encode()))
+        for _ in range(0, head_length - len(head)):
+            head = head + '+'
+        # packed_data = head + data_ + '++++'
+        packed_data = head + data_ 
+        return packed_data.encode()
+
+
+    async def _connect(self, serverIP, serverPort):
+        try:
+            print(f"trying to connect to server {serverIP}:{serverPort}")
+            self._reader, self._writer = await asyncio.open_connection(serverIP, serverPort)
+            print("connected")
+        except Exception as ex:
+            print(f'asyncclient, _connect, {type(ex)}, {ex}')
+
+
+
+
+    async def _recive_message(self):
+        while(True):
+            try:
+                head_length = await self._reader.read(7)
+            except AttributeError as ae:
+                await asyncio.sleep(1)
+                print(f'asyncclient, in _recive_message, {ae}, sleeping 1s')
+                continue
+
+            head_length = head_length.decode()
+            head_length = head_length.replace('+', '')
+            try:
+                head_length = int(head_length)
+            except ValueError:
+                print(f'asyncclient, _recive_message, invaled head_length:{head_length}, passed.')
+                continue
+            data = await self._reader.read(head_length)
+            data = data.decode()
+            if data.startswith('$'):
+                print("client message recived $$")
+                await self._handel_server_messages(data)
+            else:
+                self.addto_inbound_queue(data)
+
+            await asyncio.sleep(self._recive_message_s1)
+
+
+    async def _handel_server_messages(self, message):
+        match message:
+            case '$INFO_R':
+                await self._send_client_info_to_server()
+
+
+    async def _send_client_info_to_server(self):
+        name = self._get_pc_name()
+        resulotion = self._get_screen_resulotion()
+        await self._send_data(f'€INFO_R!{name}!{resulotion}')
+
+
+    @staticmethod
+    def _get_pc_name():
+        return platform.node()
+    
+
+    @staticmethod
+    def _get_screen_resulotion():
+        user32 = windll.user32
+        resulotion = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+        return resulotion
+
+
+
     async def _send_data(self, data):
         if (self._writer == None):
             return
         try:
-            self._writer.write(data.encode())
+            data = self._pack_data(data)
+            print(f"asyncclient, _send_data, sending:{data}")
+            self._writer.write(data)
             await self._writer.drain()
+            print(f"asyncclient, _send_data, sending:{data}, complete")
         except ConnectionResetError:
             print('ConnectionResetError')
             await asyncio.sleep(0.1)
@@ -33,31 +108,11 @@ class AsyncClient():
                 print(type(ex), ex, 'Unhandeled')
 
 
-
-    async def _connect(self, serverIP, serverPort):
-        self._reader, self._writer = await asyncio.open_connection(serverIP, serverPort)
-
-
-
-    async def _recive_message(self):
-        await asyncio.sleep(1)
-        while(True):
-                try:
-                    data = await self._reader.read(50)
-                    data = data.decode()
-                    self.addto_inbound_queue(data)
-                except AttributeError as ae:
-                    print('in _recive_message ', ae, ' ', type(ae))
-                    await asyncio.sleep(1)
-                except Exception as ex:
-                    print(type(ex), ex,' in _recive_message')
-                    await asyncio.sleep(1)
-
-
-
     def recived_messages(self):
         return  list(self._inbound_queue.queue)
     
+
+
 
     async def _wait_on_connection_close(self):
         if (self._writer == None):

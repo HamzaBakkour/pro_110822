@@ -35,15 +35,9 @@ from server.shortcuthandle import ShortcutsHandle
 from client.client import Client
 from client.client import ClientSignals
 
-
-import socket
 import sys
-import logging
-import time
-from ctypes import *
-import os
-import inspect
-import struct
+import pdb
+
 
 
 #Creating and setting the format of the log file. 
@@ -66,7 +60,7 @@ class MainWindow(QMainWindow):
         #Server variables
         self.serverView = ServerView()
         self.connectedClientss = []
-        self._clientWidgets = []
+        self._clientsWidgets = []
         self._server = None
         self.serverSignals = None
 
@@ -91,14 +85,11 @@ class MainWindow(QMainWindow):
 
 
 
-        
-
-
     def _connect_buttons(self):
         self.clientView.upperFrame.createButton.clicked.connect(lambda : self.start_server())
-        self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self.create_client())
+        self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self.start_client())
         # self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345) if (not self.searchOngoning) else ())
-        # self.serverView.upperFrame.stopButton.clicked.connect(lambda: self._close_server())
+        self.serverView.upperFrame.stopButton.clicked.connect(lambda: self.close_server())
 
 
 
@@ -114,57 +105,61 @@ class MainWindow(QMainWindow):
         if (view == 'SERVER'):
             self.stack.setCurrentIndex(1)
         elif(view == 'CLIENT'):
+            self._clear_server_view()
             self.stack.setCurrentIndex(0)
         else:
             print(f"{view} is unknown view name.")
 
 
 
-
-
     def start_server(self):
         self.set_view('SERVER')
-        self._init_server('localhost', 8888)
+        self._init_server('192.168.0.107', 8888)
         self.threabool.start(self._server)
         self.threabool.start(self.serverSignals)
-
 
 
     def _init_server(self, serverIP, serverPort):
         self._server = Server(serverIP, serverPort)
         self.serverSignals = ServerSignals()
-        self.serverSignals.signals.server_manager.connect(self._server_view_maneger)
+        self.serverSignals.signals.server_view_maneger.connect(self._server_view_add_remove_client_widgets)
         self.serverSignals.signals.recived_messages.connect(self.boo2)
 
 
 
-    def _server_view_maneger(self):
+    def _server_view_add_remove_client_widgets(self):
         for client in self._server.connected_clients:
                 if (not self._has_widget(client)):
+                    print(f'\n mainwindow, _server_view_add_remove_client_widgets, _create_widget ' \
+                          f'was called with client:{client}')
+                    if (len(client[2]) < 1):
+                        print(f'\nmainwindow, _server_view_add_remove_client_widgets, client:{client} '\
+                              f'did not report resolution to the server yet, skipped.')    
+                        continue
                     self._create_widget(client)
         
-        for widget in self._clientWidgets:
+        for widget in self._clientsWidgets:
             if (not self._still_connected(widget)):
                 self._remove_widget(widget)
-                self._clientWidgets.remove(widget)
+                self._clientsWidgets.remove(widget)
 
 
 
-    def _has_widget(self, client: tuple[str, int] ):
-        for widget in self._clientWidgets:
-            if ((client[0] == widget.ip) and (client[1] == widget.port)):
+    def _has_widget(self, client):
+        for widget in self._clientsWidgets:
+            if ((client[0][0] == widget.ip) and (client[0][1] == widget.port) and (len(client[2]) > 1)):
                 return True
         return False
 
 
     def _create_widget(self, client):
-        self._clientWidgets.append(ClientWidget('name to be implemented', client[0], client[1]))
-        self.serverView.scrollArea.add_device(self._clientWidgets[-1])
+        self._clientsWidgets.append(ClientWidget(client))
+        self.serverView.scrollArea.add_device(self._clientsWidgets[-1])
 
 
     def _still_connected(self, widget):
         for client in self._server.connected_clients:
-            if ((client[0], client[1]) == (widget.ip, widget.port)):
+            if ((client[0][0], client[0][1]) == (widget.ip, widget.port)):
                 return True
         return False
 
@@ -174,40 +169,24 @@ class MainWindow(QMainWindow):
 
 
 
-    def create_client(self):
+    def start_client(self):
         self.set_view('CLIENT')
-        self.client = Client('localhost', 8888)
+        self.client = Client('192.168.0.107', 8888)
         self.clientSignals = ClientSignals(self.client.recived_messages)
         self.threabool.start(self.client)
         self.threabool.start(self.clientSignals)
 
 
 
+    def _clear_server_view(self):
+        for widget in self._clientsWidgets:
+            widget.deleteLater()
 
 
-
-
-        # for connection in self.connections:
-        #     connection.close()
-        # for widget in self.serverWidgets:
-        #     try:
-        #         widget.deleteLater()
-        #     except RuntimeError:#Delete a widget that already has been deleted
-        #         print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'RuntimeError (widget already deleted) -> passed')
-                
-        #     except Exception as ex:
-        #         print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')    
-
-        # self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # self.serverSocket.setblocking(False)
-        # self.serverSocket.bind(('', serverPort))
-        # self.serverWorker = ServerWorker(self.serverSocket)
-        # self.serverWorker.signal.clientRequest.connect(self._handle_client_requests)
-        # self.threabool.start(self.serverWorker)
-        # self.sendUserInput.start_listning()
-        # self.Stack.setCurrentIndex(1)
-
-
+    def close_server(self):
+        self._server.close_server()
+        self.set_view('CLIENT')
+        
 
 
 
@@ -356,20 +335,7 @@ class MainWindow(QMainWindow):
         #         self.shortcutHandle.remove_shortcut(widget.shortcut)
 
 
-    def _close_server(self):
-        print('')
-        # self.serverWorker.alive = False
-        # self.serverSocket.close()
-        # print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Server Socket terminated")
-        # self.sendUserInput.stop_listning()
-        # print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Input listner terminated")
 
-        # for connection in self.connections:
-        #     message = 'SS'.encode()
-        #     header = struct.pack('<L', len(message))
-        #     connection['connection'].sendall(header + message)
-
-        # self.Stack.setCurrentIndex(0)
 
                 
 
