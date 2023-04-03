@@ -111,7 +111,6 @@ class MainWindow(QMainWindow):
             print(f"{view} is unknown view name.")
 
 
-
     def start_server(self):
         self.set_view('SERVER')
         self._init_server('192.168.0.107', 8888)
@@ -122,18 +121,17 @@ class MainWindow(QMainWindow):
     def _init_server(self, serverIP, serverPort):
         self._server = Server(serverIP, serverPort)
         self.serverSignals = ServerSignals()
-        self.serverSignals.signals.server_view_maneger.connect(self._server_view_add_remove_client_widgets)
+        self.serverSignals.signals.server_view_maneger.connect(self._server_view_add_remove_client_widget)
         self.serverSignals.signals.recived_messages.connect(self.boo2)
 
 
-
-    def _server_view_add_remove_client_widgets(self):
+    def _server_view_add_remove_client_widget(self):
         for client in self._server.connected_clients:
                 if (not self._has_widget(client)):
-                    print(f'\n mainwindow, _server_view_add_remove_client_widgets, _create_widget ' \
+                    print(f'\n mainwindow, _server_view_add_remove_client_widget, _create_widget ' \
                           f'was called with client:{client}')
                     if (len(client[2]) < 1):
-                        print(f'\nmainwindow, _server_view_add_remove_client_widgets, client:{client} '\
+                        print(f'\nmainwindow, _server_view_add_remove_client_widget, client:{client} '\
                               f'did not report resolution to the server yet, skipped.')    
                         continue
                     self._create_widget(client)
@@ -142,7 +140,6 @@ class MainWindow(QMainWindow):
             if (not self._still_connected(widget)):
                 self._remove_widget(widget)
                 self._clientsWidgets.remove(widget)
-
 
 
     def _has_widget(self, client):
@@ -168,14 +165,12 @@ class MainWindow(QMainWindow):
         widget.deleteLater()
 
 
-
     def start_client(self):
         self.set_view('CLIENT')
         self.client = Client('192.168.0.107', 8888)
         self.clientSignals = ClientSignals(self.client.recived_messages)
         self.threabool.start(self.client)
         self.threabool.start(self.clientSignals)
-
 
 
     def _clear_server_view(self):
@@ -187,10 +182,7 @@ class MainWindow(QMainWindow):
         self._server.close_server()
         self.set_view('CLIENT')
         
-
-
-
-
+        
 
     def _search_for_servers(self, serverPort):
         self.threabool.start()
@@ -199,7 +191,6 @@ class MainWindow(QMainWindow):
         # searchForServersWorker.signal.infoSignal.connect(self._update_client_view_progress_bar)
         # searchForServersWorker.signal.foundServer.connect(self._add_server)
         # self.threabool.start(searchForServersWorker)
-
 
     def _update_client_view_progress_bar(self, progressBarValue, progressBarMessage):
         print('')
@@ -218,7 +209,6 @@ class MainWindow(QMainWindow):
         # self.serverWidgetID = self.serverWidgetID + 1
         # localID = self.serverWidgetID
         # self.serverWidgets[-1].connectButton.clicked.connect(lambda: self._connect__disconnect_to_server(serverIP, serverPort, localID))
-
 
     def _connect__disconnect_to_server(self ,serverIP: str, serverPort: int, id):
         print('')
@@ -246,10 +236,6 @@ class MainWindow(QMainWindow):
         #         except Exception as ex:
         #             print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')
 
-
-
-
-
     def _unsupress_user_input(self):
         print('')
         # self.sendUserInput.supress_user_input(False)
@@ -265,10 +251,6 @@ class MainWindow(QMainWindow):
         # except Exception as ex:
         #     print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raisde {ex}')
 
-
-
-
-
     def _handle_client_requests(self, data : str):
         print('')
         # print(f'[*]{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', "Recived client request : ", data)
@@ -283,8 +265,6 @@ class MainWindow(QMainWindow):
         # except Exception as ex:
         #     print(f'[*]{os.path.basename(__file__)} || ', f'{inspect.stack()[0][3]} || ', "Exception raised while handling client requst.\nRequst data:\n{}\n\Exception:\n{}".format(data, ex))
         # self._estaplish_connection_to_client((CLIENT_SCREEN_W, CLIENT_SCREEN_H), CLIENT_IP, CLIENT_PORT, CLIENT_NAME)
-
-
 
     def _estaplish_connection_to_client(self, clientScreenResolution : tuple, clientIP : str, clientPort : str, clientName : str):
         print('')
@@ -318,12 +298,10 @@ class MainWindow(QMainWindow):
         # except IndexError as ie:
         #     print(f'[*]{os.path.basename(__file__)} || ', f'{inspect.stack()[0][3]} || ', f'{inspect.stack()[1][3]} || ', f"Endex error while trying to add client : {clientName}, with ip : {clientIP} and shortcut : {shortcut}\n{ie}")
 
-
     def _add_client_widget(self, clientName, clientIP, clientPort, shortcut, connectionID):
         print('')
         # self.clientWidgets.append(clientwidget.ClientWidget(clientName, clientIP, clientPort, shortcut, connectionID))
         # self.serverView.scrollArea.add_device(self.clientWidgets[-1])
-
 
     def _remove_client_widget(self, socketPort):
         print('')
