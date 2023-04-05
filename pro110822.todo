@@ -1,1 +1,131 @@
-{"todotree":{"tree":[{"key":1680462455564,"children":[],"todo":{"content":"server close","id":1680462455564,"level":"default","done":false,"start":1680462455564}},{"key":1680462533382,"children":[],"todo":{"content":"server widget on client view","id":1680462533382,"level":"default","done":false,"start":1680462533382}},{"key":1680462575434,"children":[{"key":1680462746537,"children":[],"todo":{"content":"progress bar","id":1680462746537,"level":"default","done":false,"start":1680462746537}},{"key":1680462879488,"children":[],"todo":{"content":"connec/dissconnect button","id":1680462879488,"level":"default","done":false,"start":1680462879488}},{"key":1680462758638,"children":[],"todo":{"content":"info text box","id":1680462758638,"level":"secondary","done":false,"start":1680462758638}}],"todo":{"content":"search for servers, port scanner","id":1680462575434,"level":"default","done":false,"start":1680462575434}},{"key":1680462607493,"children":[],"todo":{"content":"client close","id":1680462607493,"level":"default","done":false,"start":1680462607493}}],"expandKeys":[1680462455564],"schema":"https://github.com/Saber2pr/vsc-ext-todolist/blob/master/src/api/type.ts#L3","add_mode":"bottom","virtual":false,"showLine":false,"playFontSize":24,"title":"Todo List","autoSort":false,"showEndTime":false,"lang":"en","version":"1680549425581"}}
+{
+  "todotree": {
+    "tree": [
+      {
+        "key": 1680462455564,
+        "children": [
+          {
+            "key": 1680703206341,
+            "children": [],
+            "todo": {
+              "content": "impelemnt the task.close() function",
+              "id": 1680703206341,
+              "level": "default",
+              "done": false,
+              "start": 1680703206341
+            }
+          }
+        ],
+        "todo": {
+          "content": "server close",
+          "id": 1680462455564,
+          "level": "default",
+          "done": false,
+          "start": 1680462455564,
+          "focus": true
+        }
+      },
+      {
+        "key": 1680462533382,
+        "children": [
+          {
+            "key": 1680703253631,
+            "children": [],
+            "todo": {
+              "content": "server pc name",
+              "id": 1680703253631,
+              "level": "default",
+              "done": false,
+              "start": 1680703253631
+            }
+          },
+          {
+            "key": 1680703261263,
+            "children": [],
+            "todo": {
+              "content": "connect/disconnect",
+              "id": 1680703261263,
+              "level": "default",
+              "done": false,
+              "start": 1680703261263
+            }
+          }
+        ],
+        "todo": {
+          "content": "server widget on client view",
+          "id": 1680462533382,
+          "level": "default",
+          "done": false,
+          "start": 1680462533382
+        }
+      },
+      {
+        "key": 1680462575434,
+        "children": [
+          {
+            "key": 1680462746537,
+            "children": [],
+            "todo": {
+              "content": "progress bar",
+              "id": 1680462746537,
+              "level": "default",
+              "done": false,
+              "start": 1680462746537
+            }
+          },
+          {
+            "key": 1680462879488,
+            "children": [],
+            "todo": {
+              "content": "connec/dissconnect button",
+              "id": 1680462879488,
+              "level": "default",
+              "done": false,
+              "start": 1680462879488
+            }
+          },
+          {
+            "key": 1680462758638,
+            "children": [],
+            "todo": {
+              "content": "info text box",
+              "id": 1680462758638,
+              "level": "secondary",
+              "done": false,
+              "start": 1680462758638
+            }
+          }
+        ],
+        "todo": {
+          "content": "search for servers, port scanner",
+          "id": 1680462575434,
+          "level": "default",
+          "done": false,
+          "start": 1680462575434
+        }
+      },
+      {
+        "key": 1680462607493,
+        "children": [],
+        "todo": {
+          "content": "client close",
+          "id": 1680462607493,
+          "level": "default",
+          "done": false,
+          "start": 1680462607493
+        }
+      }
+    ],
+    "expandKeys": [],
+    "schema": "https://github.com/Saber2pr/vsc-ext-todolist/blob/master/src/api/type.ts#L3",
+    "add_mode": "bottom",
+    "virtual": false,
+    "showLine": false,
+    "playFontSize": 24,
+    "title": "pro110822",
+    "autoSort": false,
+    "showEndTime": false,
+    "lang": "en",
+    "version": "1680703670226"
+  }
+}
