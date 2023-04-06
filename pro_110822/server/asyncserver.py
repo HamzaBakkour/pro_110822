@@ -318,18 +318,25 @@ class AsyncServer():
 
 
     def close(self):
+        try:
+            asyncio.run(self._close())
+        except CancelledError:
+            pass
+
+
+
+    async def _close(self):
         tasks = asyncio.all_tasks()
         for task in tasks:
-            print(f'closing task:{task}')
-            task.cancel()
-        # asyncio.run(self._close())
-
-
-
-
-
-
-    # async def _close(self):
+            print(f'canceling task:{task}')
+            try:
+                task.cancel()
+            except CancelledError:
+                pass
+            except Exception as ex:
+                print(f'\nasycnserver, Excpetion while cancelling task:{task}\n' \
+                      f'{type(ex)}, {ex}')
+            print(f'task:{task} was cancelled')
 
         # loop = asyncio.get_running_loop()
         # for task in self._server_tasks:
