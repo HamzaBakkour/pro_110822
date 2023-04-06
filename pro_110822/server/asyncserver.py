@@ -14,6 +14,8 @@ class AsyncServer():
         self.clients_queue = []
         self._server_coro = None
         self._main_tasks_group = None
+        self._server_recive_data_tasks = []
+        self._server_tasks = []
         self._writer = None
         self._reader = None
         self._capture_input = SendUserInput()
@@ -193,10 +195,10 @@ class AsyncServer():
                 print(f"\nasyncserver, _recive_data, {type(cr)}, {cr}, returning")
                 return
 
-    async def _schedule_recive_data_tasks(self, async_task_group):
+    async def _schedule_recive_data_tasks(self):
 
         tracked_clients = []
-        recive_data_tasks = []
+        self._server_recive_data_tasks = []
 
         def in_list1_not_in_list2(list1, list2):
             result = []
@@ -243,8 +245,9 @@ class AsyncServer():
         async def reschedule_tasks(changes_):
             for change in changes_['to_be_added']:
 
-                recive_data_tasks.append(async_task_group.create_task(self._recive_data_task(change)))
-
+                # self._server_recive_data_tasks.append(async_task_group.create_task(self._recive_data_task(change)))
+                self._server_recive_data_tasks.append(asyncio.create_task(self._recive_data_task(change)))
+                
             await asyncio.sleep(1)
 
             for change in changes_['to_be_removed']:
@@ -280,7 +283,9 @@ class AsyncServer():
         print("\ninfo request sent")
 
     async def _start_server(self):
+        # self._server_coro = await asyncio.start_server(self._handler, self.ip, self.port)
         self._server_coro = await asyncio.start_server(self._handler, self.ip, self.port)
+
         async with self._server_coro:
             try:
                 print(f"\nasyncserver, starting server at {self.ip}:{self.port}")
@@ -289,59 +294,110 @@ class AsyncServer():
                 print('\nasyncserver, server_coro apported', CancelledError)
 
     async def _main(self):
-        main_tasks = []
 
-        async with asyncio.TaskGroup() as tg:
-            main_tasks.append(asyncio.create_task(self._start_server()))
-            main_tasks.append(asyncio.create_task(self._schedule_recive_data_tasks(tg)))
-            main_tasks.append(asyncio.create_task(self._connections_monitor()))
-            main_tasks.append(asyncio.create_task(self._start_stream()))
+        # async with asyncio.TaskGroup() as tg:
+        self._server_tasks.append(asyncio.create_task(self._start_server()))
+        self._server_tasks.append(asyncio.create_task(self._schedule_recive_data_tasks()))#tg
+        self._server_tasks.append(asyncio.create_task(self._connections_monitor()))
+        self._server_tasks.append(asyncio.create_task(self._start_stream()))
 
-            self._main_tasks_group = asyncio.gather(*main_tasks)
-            try:
-                await self._main_tasks_group
-            except CancelledError:
-                print('\nasyncserver, _main_tasks_group cancelled', CancelledError)
-            print('\nasyncserver, _main() exited.')
+        loop = asyncio.get_running_loop()
+
+        result = await asyncio.gather(*self._server_tasks, return_exceptions=True)
+
+        exceptions = [res for res in result if isinstance(res, Exception)]
+        successful = [res for res in result if not isinstance(res, Exception)]
+
+        print(f'\nasyncserver, _main, exceptions:{exceptions}')
+        print(f'\nasyncserver, _main, successful:{successful}')
+
+        print('\nasyncserver, _main() exited.')
 
     def run(self):
-         asyncio.run(self._main())
+         asyncio.run(self._main(), debug=True)
+
 
     def close(self):
-        succes = True
-        if (self._server_coro != None):
-            print("\nasyncserver, close, closing...")
-            try:
-                self._server_coro.close()
-            except Exception as ex:
-                succes = False
-                print('\nin AsyncServer, close server coro, ' ,ex, type(ex), '[X]')
+        tasks = asyncio.all_tasks()
+        for task in tasks:
+            print(f'closing task:{task}')
+            task.cancel()
+        # asyncio.run(self._close())
 
-            try:
-                asyncio.run(self._server_coro.wait_closed())
-            except Exception as ex:
-                succes = False
-                print('\nin AsyncServer, close, ' ,ex, type(ex), '[X]')
-            else:
-                print("\nasyncserver, close, server closed. [OK]")
 
-        if (self._main_tasks_group == None):
-            return
+
+
+
+
+    # async def _close(self):
+
+        # loop = asyncio.get_running_loop()
+        # for task in self._server_tasks:
+            # await task.close()
+            # if (task.get_name() == 'Task-2'):
+            #     print(task.get_name(), ' > ', task)
+            #     if not task.cancelled():
+            #         try:
+            #             print('trying to cancel task')
+            #             task.cancel()
+            #             print('task canceld')
+            #         except Exception as ex:
+            #             print(f'\nasyncserver, close, task:{task}\n',
+            #                   f'{type(ex)}, {ex}')
+            # elif (task.get_name() == 'Task-33'):
+            #     print(task.get_name(), ' > ', task)
+            #     if not task.cancelled():
+            #         print('trying to cancel task')
+            #         task.cancel()
+            #         print('task canceld')
+            # elif (task.get_name() == 'Task-44'):
+            #     print(task.get_name(), ' > ', task)
+            #     if not task.cancelled():
+            #         print('trying to cancel task')
+            #         task.cancel()
+            #         print('task canceld')
+            # elif (task.get_name() == 'Task-5'):
+            #     print(task.get_name(), ' > ', task)
+            #     if not task.cancelled():
+            #         print('trying to cancel task')
+            #         task.cancel()
+            #         print('task canceld')
+
+
+        # succes = True
+        # if (self._server_coro != None):
+        #     print("\nasyncserver, close, closing...")
+        #     try:
+        #         self._server_coro.close()
+        #     except Exception as ex:
+        #         succes = False
+        #         print('\nin AsyncServer, close server coro, ' ,ex, type(ex), '[X]')
+
+        #     try:
+        #         asyncio.run(self._server_coro.wait_closed())
+        #     except Exception as ex:
+        #         succes = False
+        #         print('\nin AsyncServer, close, ' ,ex, type(ex), '[X]')
+        #     else:
+        #         print("\nasyncserver, close, server closed. [OK]")
+
+        # if (self._main_tasks_group == None):
+        #     return
         
-        try:
-            print("\nasyncserver, close, canceling tasks group...")
-            self._main_tasks_group.cancel()
-        except Exception as ex:
-            succes = False
-            print('\nin AsyncServer, close, server groups, ' ,ex, type(ex), '[X]')
-        else:
-            print("\nasyncserver, close, canceling tasks group, canceled. [OK]")
+        # try:
+        #     print("\nasyncserver, close, canceling tasks group...")
+        #     self._main_tasks_group.cancel()
+        # except Exception as ex:
+        #     succes = False
+        #     print('\nin AsyncServer, close, server groups, ' ,ex, type(ex), '[X]')
+        # else:
+        #     print("\nasyncserver, close, canceling tasks group, canceled. [OK]")
 
 
-        if(succes):
-            print("\nasyncserver, server closed SUCCESSFULLY [OK]")
-        else:
-            print("\nasyncserver, server closed with ERROR [X].")
+        # if(succes):
+        #     print("\nasyncserver, server closed SUCCESSFULLY [OK]")
+        # else:
+        #     print("\nasyncserver, server closed with ERROR [X].")
     ################################################################
         
 
