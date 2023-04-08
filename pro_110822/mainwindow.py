@@ -71,7 +71,6 @@ class MainWindow(QMainWindow):
         self._clientViewWidgets = []
         self._client = None
         self._clientSignals = None
-        # self._connected_servers = []
        
 
         self._stack = QStackedWidget(self)
@@ -84,9 +83,6 @@ class MainWindow(QMainWindow):
         self._threabool.setMaxThreadCount(25)
 
         self._connect_buttons()
-
-
-
 
     def _connect_buttons(self):
         self.clientView.upperFrame.createButton.clicked.connect(lambda : self.start_server())

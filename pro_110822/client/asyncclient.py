@@ -6,9 +6,14 @@ import pdb
 from ctypes import windll
 
 
-class TasksAborted(Exception):
+class TooManyAttributeErrorValueError(Exception):
     pass
 
+class ServerIsNotConnected(Exception):
+    pass
+
+class IntendedAbortGroupTask(Exception):
+    pass
 
 class AsyncClient():
     def __init__(self) -> None:
@@ -22,9 +27,7 @@ class AsyncClient():
         self._recive_message_s1 = 0.1
     
     def is_connected(self):
-        if (self._reader == None) and (self._writer == None):
-            return False
-        return True
+        return self._connected
 
     def _inbound_queue_put(self, data):
         if (data != '*'):
@@ -50,90 +53,65 @@ class AsyncClient():
             print("\nasyncclient, _connect, connected")
             self._connected = True
 
-    async def _recive_message(self):
+
+    async def _can_start_recive_message_task(self, sleep_ = 0.3, allowed_failures = 20 ):
         failed = 0
-        sleep_ = 0.3
-        allowed_failures = 20 
         while (True):
             if not self._connected:
-                print('asyncclient, in _recive_message, client is not connected to the server yet,'\
+                print('asyncclient, in _can_start_recive_message_task, client is not connected to the server yet,'\
                       f'\ncannot start reciving message task, cheking again in {sleep_} seconds...')
                 await asyncio.sleep(sleep_)
                 failed += 1
                 if failed > allowed_failures:
-                    print(f"\nasyncclient, _recive_message, waited for {failed*sleep_}s"\
-                          "\nasyncclient, client still not connected -> RASING EXEPTION, EXITING...")
-                    raise TasksAborted
+                    print(f"\nasyncclient, _can_start_recive_message_task, waited for {failed*sleep_}s"\
+                          "\nasyncclient, _can_start_recive_message_task, client still not connected -> RASING EXEPTION, EXITING...")
+                    raise ServerIsNotConnected
             else:
-                print('\nasyncclient, cliens is now connected, STARTING recive message task')
+                print('\nasyncclient, _can_start_recive_message_task, cliens is now connected, STARTING recive message task')
                 break
 
-        failed = 0
+    async def _recive_message(self):
 
+        await self._can_start_recive_message_task()
+
+        failed = 0
         while(True):
             try:
                 head_length = await self._reader.read(7)
-            except AttributeError:
-                print('\nasyncclient, in _recive_message, AttributeError, -> sleeping 0.1s + continue [OK]')
-                await asyncio.sleep(0.1)
-                failed += 1
-                if failed > 50:
-                    print('\nasyncclient, in _recive_message, reached max failed allowed RAISING EXEPTION')
-                    raise TasksAborted
-                continue
-            except Exception as ex:
-                print(f'\nasyncclient, in _recive_message, head_length {type(ex)}, {ex}, RAISING EXEPTION -> TERMINATING...')
-                raise TasksAborted
-
-
-            try:
                 head_length = head_length.decode()
                 head_length = head_length.replace('+', '')
                 head_length = int(head_length)
-            except ValueError:
-                print(f'asyncclient, _recive_message, invaled head_length:{head_length}, sleeping 0.1s + continue [OK].')
+                data = await self._reader.read(head_length)
+                data = data.decode()
+
+                if data.startswith('$'):
+                    await self._handel_server_messages(data)
+                else:
+                    self._inbound_queue_put(data)
+
+                failed = 0
+
+            except (AttributeError, ValueError) as ex:
+                print(f'\nasyncclient, in _recive_message, {type(ex)}, {ex},  -> sleeping 0.1s + continue [OK]')
                 await asyncio.sleep(0.1)
                 failed += 1
                 if failed > 50:
                     print('\nasyncclient, in _recive_message, reached max failed allowed RAISING EXEPTION')
-                    raise TasksAborted
+                    raise TooManyAttributeErrorValueError
                 continue
             except Exception as ex:
-                print(f'\nasyncclient, in _recive_message, head_length2 {ex}, {type(ex)}, RAISING EXPETION')
-                raise TasksAborted
+                print(f'\nasyncclient, in _recive_message, {type(ex)}, {ex}, RAISING EXEPTION -> TERMINATING...')
+                raise ex
 
-            
-            try:
-                data = await self._reader.read(head_length)
-                data = data.decode()
-            except AttributeError:
-                await asyncio.sleep(0.1)
-                failed += 1
-                if failed > 50:
-                    print('\nasyncclient, in _recive_message, data, reached max failed allowed RAISING EXEPTION')
-                    raise TasksAborted
-                continue
-            except Exception as ex:
-                print(f'\nasyncclient, in _recive_message, data {ex}, {type(ex)}, RAISING EXPETION')
-                raise TasksAborted
-            if data.startswith('$'):
-                print("client message recived $$")
-                await self._handel_server_messages(data)
-            else:
-                self._inbound_queue_put(data)
 
-            failed = 0
-            
             await asyncio.sleep(self._recive_message_s1)
 
     async def _group_tasks_terminator(self, sleep_ = 0.5):
         while(True):
             if self._abort_tasks:
-                print("\nasyncclient, _group_tasks_terminator, raising TasksAborted...")
-                raise TasksAborted
+                print("\nasyncclient, _group_tasks_terminator, raising IntendedAbortGroupTask...")
+                raise IntendedAbortGroupTask
             await asyncio.sleep(sleep_)
-
-
 
     async def _handel_server_messages(self, message):
         match message:
@@ -201,7 +179,6 @@ class AsyncClient():
             except Exception as ex:
                 print(f'\nasyncclient, _main, task.cancel(), {type(ex)}, {ex}')
 
-
     async def _close_connection(self):
         try:
             self._writer.close()
@@ -235,367 +212,3 @@ class AsyncClient():
         # except Exception as ex:
         #     print(type(ex))
 
-
-#init the client class without any input
-
-#call the method connect with ip and port
-# -> start the connect tasks + recive message task
-
-#dissconnect -> end the tasks and close the connection
-#reconnect   -> reopen the connection
-
-
-    # def close_connection_perm(self):
-    #     print(' ')
-
-    # def close_connection_temp(self):
-    #     if (self._reader == None) or (self._writer == None):
-    #         print(f'\nasyncclient in close_connection_temp reader:{self._reader} or writer:{self._writer}'\
-    #               'nis allready None, cannot pause connection -> RETURNING')
-    #         return
-    #     self._reader_save = self._reader 
-    #     self._writer_save = self._writer
-    #     self._reader = None
-    #     self._writer = None
-
-    # def reopen_connection(self):
-    #     if (self._reader != None) and (self._writer != None):
-    #         print(f'\nasyncclient in reopen_connection reader:{self._reader} and writer:{self._writer}'\
-    #               'nare not None, cannot reopen connection -> RETURNING')
-    #         return
-    #     self._reader = self._reader_save
-    #     self._writer = self._writer_save      
-    #     self._reader_save = None
-    #     self._writer_save = None
-
-
-
-
-                #  if (self._abort_tasks):
-                #     print('\nasyncclient, in _recive_message, raising TasksAborted -> RETURNING...')
-                #     raise TasksAborted
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    #26/03/2023 12:36
-    # async def _recive_message(self):
-    #     while(True):
-    #         try:
-    #             data = await self._reader.read(6)
-    #             if (len(data) == 6):   
-    #                 head = data.decode()
-    #                 data_length = int(head.replace('+', ''))
-    #                 data = await self._reader.read(data_length)
-    #                 data = data.decode()
-    #                 self.inbound_queue.put(data)
-    #                 print(f"{data} added to self._inbound_queue")
-    #             else:
-    #                 await asyncio.sleep(0.1)
-    #         except AttributeError as ae:
-    #             print('in _recive_message ', ae, ' ', type(ae))
-    #             await asyncio.sleep(1)
-    #         except Exception as ex:
-    #             print(type(ex), ex,' in _recive_message')
-    #             await asyncio.sleep(1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-# async def tcp_echo_client(message):
-#     reader, writer = await asyncio.open_connection('127.0.0.1', 8888)
-
-
-#     while(True):
-#         try:
-#             data = await reader.read(100)
-#             print(f'Received: {data.decode()!r}')
-#             await asyncio.sleep(1)
-#         except Exception as ex:
-#             print(type(ex))
-#             print('Close the connection')
-#             try:
-#                 writer.close()
-#                 await writer.wait_closed()
-#             except Exception as ex:
-#                 print(type(ex))
-#             break
-
-# asyncio.run(tcp_echo_client('Hello World!'))
-
-
-
-    # print(f'Send: {message!r}')
-    # writer.write(message.encode())
-    # await writer.drain()
-
-
-
-
-
-# import asyncio
-
-# async def tcp_echo_client(message):
-#     reader, writer = await asyncio.open_connection(
-#         '127.0.0.1', 8888)
-
-#     print(f'Send: {message!r}')
-#     writer.write(message.encode())
-#     await writer.drain()
-
-#     data = await reader.read(100)
-#     print(f'Received: {data.decode()!r}')
-
-#     print('Close the connection')
-#     writer.close()
-#     await writer.wait_closed()
-
-# asyncio.run(tcp_echo_client('Hello World!'))

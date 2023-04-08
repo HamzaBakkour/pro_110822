@@ -1,5 +1,5 @@
 from PySide6 import QtWidgets
-
+import time
 from PySide6.QtWidgets import (
     QGridLayout,
     QLabel
@@ -34,6 +34,14 @@ class ServerWidget(QtWidgets.QFrame):
             print(f"\nseverwidget, connected, value:{value} must be of type boolean")
             return
         self._connected = value
+        if (self._connected):
+            self.connectButton.change_style_on_checked(True)
+
+
+        else:
+            self.connectButton.change_style_on_checked(False)
+
+
 
 
     def _set_style(self):
