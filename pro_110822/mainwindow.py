@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         self._clientViewWidgets = []
         self._client = None
         self._clientSignals = None
-        self._connected_servers = []
+        # self._connected_servers = []
        
 
         self._stack = QStackedWidget(self)
@@ -189,90 +189,46 @@ class MainWindow(QMainWindow):
         if self.clientView.widget_already_exist(serverIP, serverPort):
             print(f"\nmainwindow, _client_view_add_server, server:{serverIP}:{serverPort}, already exist, returning...")
             return
-
+        print(f"\nmainwindow, _client_view_add_server, adding widget for server:{serverIP}:{serverPort}")
         self.clientView.add_widget(ServerWidget(serverName, serverIP, serverPort))
-        self.clientView.last_added_widget.connectButton.clicked.connect(lambda: self._connect_to_server(serverIP, serverPort))
+        self.clientView.last_added_widget.connectButton.clicked.connect(lambda: self._server_connection(serverIP, serverPort))
 
 
-    def _connect_to_server(self ,serverIP: str, serverPort: int):
-        print(f'\nmainwindow, _connect_to_server, called with server:{serverIP}:{serverPort}')
+    def _server_connection(self ,serverIP: str, serverPort: int):
+        print(f'\nmainwindow, _server_connection, called with server:{serverIP}:{serverPort}')
 
-        if (serverIP, serverPort) in self._connected_servers:
-            print(f'\nmainwindow, _connect_to_server, server:{serverIP}:{serverPort} allready exist' \
-                  '\nchecking if client is connected/disonnected')
-            if self._client.is_connected():
-                print('\nmainwindow, _connect_to_server, client connected - > closing the connection')
-                self._client.close_connection()
-                print('\nmainwindow, _connect_to_server, connection CLOSED|||')
-            else:
-                self._client.re_open_connection()
-                print('\nmainwindow, _connect_to_server, connection RESUMMED>>>')
-            return
-        self._init_client(serverIP, serverPort)
-
+        for server_widget in self.clientView.widgets:
+            if (server_widget.serverIP == serverIP) and (server_widget.port == serverPort):
+                print(f'\nmainwindow, _server_connection,  server_widget.connected:{server_widget.connected}')
+                if server_widget.connected:
+                    print(f"DISSONNECTIN FROM SERVER {serverIP}:{serverPort}")
+                    self._disconnect_from_server()
+                    server_widget.connected = False
+                else:
+                    print(f"CONNECTING TO SERVER {serverIP}:{serverPort}")
+                    self._connect_to_server(serverIP, serverPort)
+                    server_widget.connected = True
 
 
-    def _init_client(self, serverIP, serverPort):
+
+    def _connect_to_server(self, serverIP, serverPort):
             if self._client != None:
-                print(f'\nmainwindow, _init_client, cannot connect to server:{serverIP}:{serverPort}' 
+                print(f'\nmainwindow, _connect_to_server, cannot connect to server:{serverIP}:{serverPort}' 
                       '\n client already connected, RETURNING...')
                 return
-
             self._client = Client(serverIP, serverPort)
             self._clientSignals = ClientSignals(self._client.recived_messages)
             self._threabool.start(self._client)
             self._threabool.start(self._clientSignals)
-            self._connected_servers.append((serverIP, serverPort))
-
-        # self._client = Client(serverIP, serverPort)
-        # self._clientSignals = ClientSignals(self._client.recived_messages)
-        # self._threabool.start(self._client)
-        # self._threabool.start(self._clientSignals)
-        # if(self.serverWidgets[id-1].connectButton.isChecked()):
-        #     self.serverWidgets[id-1].connectButton.change_style_on_checked(True)
-        #     self.reciveMouseMovementWorkers.append(ReciveUserInput(serverIP, serverPort, id))
-        #     self.reciveMouseMovementWorkers[-1].signal.serverStoped.connect(self._remove_server_widget)
-        #     self.threabool.start(self.reciveMouseMovementWorkers[-1])
-        # else:
-        #     self.serverWidgets[id-1].connectButton.change_style_on_checked(False)
-        #     for worker in self.reciveMouseMovementWorkers:
-        #         if (worker.id == id):
-        #             worker.alive = False
 
 
-
-
-#region _client_view_add_server
-        # self._clientViewWidgets.append(ServerWidget(serverName, serverIP, serverPort))
-        # self.clientView.scrollArea.add_device(self._clientViewWidgets[-1])
-        # self._clientViewWidgets[-1].connectButton.clicked.connect(lambda: self._connect_to_server(serverIP, serverPort))
-#endregion
-
-#now we know that there is a socket on this ip address and this pre-defined port
-# we knew that because we could ping this ip address:port
-# we did not estaplish any TCP connections to this socket port
-
-#on the SERVER side nothing happened yet.
-
-#we create a server widget for this socket
-# this widget has a [connect button]
-
-########################################################
-
-#when we press the connection button ->
-# create a client instance
-# connectet to the server
-# change the connection button style
-
-#When we press again ->
-# we want to close the connection
-# change the button style
-
-#when we press the connection button ->
-# connectet to the server
-# change the connection button style
-
-
+    def _disconnect_from_server(self):
+        if self._client == None:
+            print('\nmainwindow, _disconnect_from_server, client is already disconnected, RETURNING...')
+            return
+        self._client.close_connection()
+        self._client = None
+        self._clientSignals.alive = False
 
 
 
@@ -374,3 +330,69 @@ app = QApplication([])
 window = MainWindow()
 window.show()
 sys.exit(app.exec())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 08/04/2023 15:47
+            # self._connected_servers.append((serverIP, serverPort))
+        # self._client = Client(serverIP, serverPort)
+        # self._clientSignals = ClientSignals(self._client.recived_messages)
+        # self._threabool.start(self._client)
+        # self._threabool.start(self._clientSignals)
+        # if(self.serverWidgets[id-1].connectButton.isChecked()):
+        #     self.serverWidgets[id-1].connectButton.change_style_on_checked(True)
+        #     self.reciveMouseMovementWorkers.append(ReciveUserInput(serverIP, serverPort, id))
+        #     self.reciveMouseMovementWorkers[-1].signal.serverStoped.connect(self._remove_server_widget)
+        #     self.threabool.start(self.reciveMouseMovementWorkers[-1])
+        # else:
+        #     self.serverWidgets[id-1].connectButton.change_style_on_checked(False)
+        #     for worker in self.reciveMouseMovementWorkers:
+        #         if (worker.id == id):
+        #             worker.alive = False
+        # if (serverIP, serverPort) in self._connected_servers:
+        #     print(f'\nmainwindow, _connect_to_server, server:{serverIP}:{serverPort} allready exist' \
+        #           '\nchecking if client is connected/disonnected')
+        #     if self._client.is_connected():
+        #         print('\nmainwindow, _connect_to_server, client connected - > closing the connection')
+        #         self._client.close_connection()
+        #         print('\nmainwindow, _connect_to_server, connection CLOSED|||')
+        #     else:
+        #         self._client.re_open_connection()
+        #         print('\nmainwindow, _connect_to_server, connection RESUMMED>>>')
+        #     return
+#region _client_view_add_server
+        # self._clientViewWidgets.append(ServerWidget(serverName, serverIP, serverPort))
+        # self.clientView.scrollArea.add_device(self._clientViewWidgets[-1])
+        # self._clientViewWidgets[-1].connectButton.clicked.connect(lambda: self._connect_to_server(serverIP, serverPort))
+#endregion
+#now we know that there is a socket on this ip address and this pre-defined port
+# we knew that because we could ping this ip address:port
+# we did not estaplish any TCP connections to this socket port
+#on the SERVER side nothing happened yet.
+#we create a server widget for this socket
+# this widget has a [connect button]
+########################################################
+#when we press the connection button ->
+# create a client instance
+# connectet to the server
+# change the connection button style
+#When we press again ->
+# we want to close the connection
+# change the button style
+#when we press the connection button ->
+# connectet to the server
+# change the connection button style

@@ -28,8 +28,7 @@ class Client(QRunnable):
     def close_connection(self):
         self._client.close_connection()
 
-    def re_open_connection(self):
-        self._client.re_open_connection()
+
 
 
 
@@ -38,6 +37,7 @@ class Client(QRunnable):
         print('client, run, started')
         self._connect()
         print('client, run, ENDED')
+        return
 
 
         
@@ -55,7 +55,7 @@ class ClientSignals(QRunnable):
         self.tick = 1
     @Slot()
     def run(self) -> None:
-        while(True):
+        while(self.alive):
             self.signal.recived_messages.emit(self.recived_messages)
             time.sleep(self.tick)
 

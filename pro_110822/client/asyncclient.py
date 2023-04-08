@@ -14,12 +14,8 @@ class AsyncClient():
     def __init__(self) -> None:
         self._reader = None
         self._writer = None
-        # self._serverIP = None
-        # self._serverPort = None
         self._connected = False
         self._abort_tasks = False
-        self._exit = False
-        self._resume = True
         self._tasks = []
         self._inbound_queue = queue.Queue()
         self._outbound_queue = queue.SimpleQueue()
@@ -48,12 +44,11 @@ class AsyncClient():
         try:
             print(f"\nasyncclient, _connect, trying to connect to server {serverIP}:{serverPort}")
             self._reader, self._writer = await asyncio.open_connection(serverIP, serverPort)
-            self._serverIP = serverIP
-            self._serverPort = serverPort
-            self._connected = True
-            print("\nasyncclient, _connect, connected")
         except Exception as ex:
-            print(f'asyncclient, _connect, {type(ex)}, {ex}')
+            print(f'asyncclient, _connect, CANNOT CONNECT to server {type(ex)}, {ex}')
+        else:
+            print("\nasyncclient, _connect, connected")
+            self._connected = True
 
     async def _recive_message(self):
         failed = 0
@@ -73,19 +68,19 @@ class AsyncClient():
                 print('\nasyncclient, cliens is now connected, STARTING recive message task')
                 break
 
-        # failed = 0
+        failed = 0
 
         while(True):
             try:
                 head_length = await self._reader.read(7)
-            # except AttributeError:
-            #     print('\nasyncclient, in _recive_message, AttributeError, -> sleeping 0.1s + continue [OK]')
-            #     await asyncio.sleep(0.1)
-            #     failed += 1
-            #     if failed > 50:
-            #         print('\nasyncclient, in _recive_message, reached max failed allowed RAISING EXEPTION')
-            #         raise TasksAborted
-            #     continue
+            except AttributeError:
+                print('\nasyncclient, in _recive_message, AttributeError, -> sleeping 0.1s + continue [OK]')
+                await asyncio.sleep(0.1)
+                failed += 1
+                if failed > 50:
+                    print('\nasyncclient, in _recive_message, reached max failed allowed RAISING EXEPTION')
+                    raise TasksAborted
+                continue
             except Exception as ex:
                 print(f'\nasyncclient, in _recive_message, head_length {type(ex)}, {ex}, RAISING EXEPTION -> TERMINATING...')
                 raise TasksAborted
@@ -95,14 +90,14 @@ class AsyncClient():
                 head_length = head_length.decode()
                 head_length = head_length.replace('+', '')
                 head_length = int(head_length)
-            # except ValueError:
-            #     print(f'asyncclient, _recive_message, invaled head_length:{head_length}, sleeping 0.1s + continue [OK].')
-            #     await asyncio.sleep(0.1)
-            #     failed += 1
-            #     if failed > 50:
-            #         print('\nasyncclient, in _recive_message, reached max failed allowed RAISING EXEPTION')
-            #         raise TasksAborted
-            #     continue
+            except ValueError:
+                print(f'asyncclient, _recive_message, invaled head_length:{head_length}, sleeping 0.1s + continue [OK].')
+                await asyncio.sleep(0.1)
+                failed += 1
+                if failed > 50:
+                    print('\nasyncclient, in _recive_message, reached max failed allowed RAISING EXEPTION')
+                    raise TasksAborted
+                continue
             except Exception as ex:
                 print(f'\nasyncclient, in _recive_message, head_length2 {ex}, {type(ex)}, RAISING EXPETION')
                 raise TasksAborted
@@ -111,13 +106,13 @@ class AsyncClient():
             try:
                 data = await self._reader.read(head_length)
                 data = data.decode()
-            # except AttributeError:
-            #     await asyncio.sleep(0.1)
-            #     failed += 1
-            #     if failed > 50:
-            #         print('\nasyncclient, in _recive_message, data, reached max failed allowed RAISING EXEPTION')
-            #         raise TasksAborted
-            #     continue
+            except AttributeError:
+                await asyncio.sleep(0.1)
+                failed += 1
+                if failed > 50:
+                    print('\nasyncclient, in _recive_message, data, reached max failed allowed RAISING EXEPTION')
+                    raise TasksAborted
+                continue
             except Exception as ex:
                 print(f'\nasyncclient, in _recive_message, data {ex}, {type(ex)}, RAISING EXPETION')
                 raise TasksAborted
@@ -127,27 +122,18 @@ class AsyncClient():
             else:
                 self._inbound_queue_put(data)
 
-            # failed = 0
+            failed = 0
             
             await asyncio.sleep(self._recive_message_s1)
 
-    async def _group_tasks_terminator(self, sleep_ = 1):
+    async def _group_tasks_terminator(self, sleep_ = 0.5):
         while(True):
-            if self._abort_tasks or self._exit:
+            if self._abort_tasks:
                 print("\nasyncclient, _group_tasks_terminator, raising TasksAborted...")
-                self._abort_tasks = False
-                self._resume = False
                 raise TasksAborted
             await asyncio.sleep(sleep_)
 
-    def re_open_connection(self):
-        if not self._resume:
-            self._resume = True
-        else:
-            print('\nasyncclient, re_open_connection called, _resume is True, [X]')
 
-    def close_connection(self):
-        self._abort_tasks = True
 
     async def _handel_server_messages(self, message):
         match message:
@@ -190,62 +176,30 @@ class AsyncClient():
 
     async def _main(self, serverIP, serverPort):
 
-        while(True):
-            if self._exit:
-                return
-            if not self._resume:
-                # print('\nasyncclient, _main, _resum is false -> sleeping for 0.1s')
-                await asyncio.sleep(1)
-                continue
-
-            self._tasks.append(asyncio.create_task(self._connect(serverIP, serverPort)))
-            self._tasks.append(asyncio.create_task(self._recive_message()))
-            self._tasks.append(asyncio.create_task(self._group_tasks_terminator()))
+        self._tasks.append(asyncio.create_task(self._connect(serverIP, serverPort)))
+        self._tasks.append(asyncio.create_task(self._recive_message()))
+        self._tasks.append(asyncio.create_task(self._group_tasks_terminator()))
 
 
-            done, pending = await asyncio.wait(self._tasks , return_when=asyncio.FIRST_EXCEPTION)
+        done, pending = await asyncio.wait(self._tasks , return_when=asyncio.FIRST_EXCEPTION)
 
-            for task in done:
-                print(f'\nasyncserver, _main, done tasks:{task}')
-            for task in pending:
-                print(f'\nasyncserver, _main, pending tasks:{task}')
+        for task in done:
+            print(f'\nasyncserver, _main, done tasks:{task}')
+        for task in pending:
+            print(f'\nasyncserver, _main, pending tasks:{task}')
 
-            await self._close_connection()
+        await self._close_connection()
 
-            # tasks = asyncio.all_tasks()
-            for task in  self._tasks:
-                # pdb.set_trace()
-                try:
-                    # if task.get_coro().__name__ != '_main':
-                    print(f'\nCANCELING>>> task:{task}')
-                    task.cancel()
-                    self._tasks.remove(task)
-                    print(f'\ntask:{task.get_name()} <<<CANCELED')
-                except Exception as ex:
-                    print(f'\nasyncserver, _main, task.cancel(), {type(ex)}, {ex}')
+        tasks = asyncio.all_tasks()
 
-            # for task in 
-
-            print(f'\nasyncclient, _main, at END, asyncio.all_tasks:{asyncio.all_tasks()}')
-            print(f'\nasyncclient, _main, at END, self._tasks:{self._tasks}')
-            await asyncio.sleep(1)
-
-            # pdb.set_trace()
-
-#run _main in a while loop
-#when self._abort_tasks is set to true in the task _group_tasks_terminator 
-#   _group_tasks_terminator will raise an exeption, 
-#   the asyncio.wait will return
-#   the connection will be terminated
-#   and the tasks will be canceled
-
-#here we have two variable (false from the begning)
-# self._exit and self._resume
-
-#if self._exit is false and self._resume is false -> sleep for 0.1s
-#if self._exit is false and self._resume is true -> continue + set self._resum to false
-#if self._exit is true, return
-
+        for task in tasks:
+            try:
+                print(f'\nCANCELING>>> task:{task}')
+                task.cancel()
+                self._tasks.remove(task)
+                print(f'\ntask:{task.get_name()} <<<CANCELED')
+            except Exception as ex:
+                print(f'\nasyncclient, _main, task.cancel(), {type(ex)}, {ex}')
 
 
     async def _close_connection(self):
@@ -257,27 +211,16 @@ class AsyncClient():
         except Exception as ex:
             print('\nasyncclient, _close_connection ', type(ex), ' ', ex)
             return
-        self._writer = None
-        self._reader = None
         print('\nasyncclient, _close_connection connection CLOSED.')
 
-
-    async def _wait_on_connection_close(self):
-        if (self._writer == None):
-            return
-        print("waiting on connection close")
-        await self._writer.wait_closed()
-        self._writer = None
-        self._reader = None
-        self._connected = False
-        print("connection closed")
+    def close_connection(self):
+        self._abort_tasks = True
 
     def connect(self, serverIP, serverPort):
-
         try:
             asyncio.run(self._main(serverIP, serverPort))
         except CancelledError:
-            print('asyncclient, connect, asyncio.run catched CancelledError -> EXITING')
+            print(f'\asyncclient, connect, {CancelledError}, EXITING...')
 
         
             
