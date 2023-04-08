@@ -16,7 +16,10 @@ from PySide6.QtWidgets import (
 import threading
 import time
 
+
+
 from client_view.clientview import ClientView 
+from client_view.serverwidget import ServerWidget
 from client_view.serverwidget import  ServerWidget
 
 from server_view.serverview import ServerView
@@ -24,6 +27,7 @@ from server_view.clientwidget import ClientWidget
 
 
 from client.reciveuserinput import ReciveUserInput
+from client.searchforserversworker import SearchForServersWorker
 
 from server.server import Server
 from server.server import ServerSignals
@@ -60,23 +64,24 @@ class MainWindow(QMainWindow):
         self.connectedClientss = []
         self._clientsWidgets = []
         self._server = None
-        self.serverSignals = None
+        self._serverSignals = None
 
         #Client variables
         self.clientView = ClientView()
-        self.serverWidgets = []
-        self.client = None
-        self.clientSignals = None
+        self._clientViewWidgets = []
+        self._client = None
+        self._clientSignals = None
+        self._connected_servers = []
        
 
-        self.stack = QStackedWidget(self)
-        self.setCentralWidget(self.stack)
-        self.stack.addWidget(self.clientView)
-        self.stack.addWidget(self.serverView)
-        self.stack.setCurrentIndex(0)
+        self._stack = QStackedWidget(self)
+        self.setCentralWidget(self._stack)
+        self._stack.addWidget(self.clientView)
+        self._stack.addWidget(self.serverView)
+        self.set_view('CLIENT')
 
-        self.threabool = QThreadPool()
-        self.threabool.setMaxThreadCount(25)
+        self._threabool = QThreadPool()
+        self._threabool.setMaxThreadCount(25)
 
         self._connect_buttons()
 
@@ -85,43 +90,36 @@ class MainWindow(QMainWindow):
 
     def _connect_buttons(self):
         self.clientView.upperFrame.createButton.clicked.connect(lambda : self.start_server())
-        self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self.start_client())
+        self.clientView.upperFrame.searchButton.clicked.connect(lambda:  self._search_for_servers(8888))
         # self.clientView.upperFrame.searchButton.clicked.connect(lambda : self._search_for_servers(12345) if (not self.searchOngoning) else ())
         self.serverView.upperFrame.stopButton.clicked.connect(lambda: self.close_server())
-
-
 
     def boo(self, connected_clients):
         print(f"boo {connected_clients}")
 
-
     def boo2(self):
         pass        
 
-
     def set_view(self, view):
         if (view == 'SERVER'):
-            self.stack.setCurrentIndex(1)
+            self._stack.setCurrentIndex(1)
         elif(view == 'CLIENT'):
             self._clear_server_view()
-            self.stack.setCurrentIndex(0)
+            self._stack.setCurrentIndex(0)
         else:
             print(f"{view} is unknown view name.")
-
 
     def start_server(self):
         self.set_view('SERVER')
         self._init_server('192.168.0.107', 8888)
-        self.threabool.start(self._server)
-        self.threabool.start(self.serverSignals)
-
+        self._threabool.start(self._server)
+        self._threabool.start(self._serverSignals)
 
     def _init_server(self, serverIP, serverPort):
         self._server = Server(serverIP, serverPort)
-        self.serverSignals = ServerSignals()
-        self.serverSignals.signals.server_view_maneger.connect(self._server_view_add_remove_client_widget)
-        self.serverSignals.signals.recived_messages.connect(self.boo2)
-
+        self._serverSignals = ServerSignals()
+        self._serverSignals.signals.server_view_maneger.connect(self._server_view_add_remove_client_widget)
+        self._serverSignals.signals.recived_messages.connect(self.boo2)
 
     def _server_view_add_remove_client_widget(self):
         for client in self._server.connected_clients:
@@ -139,18 +137,15 @@ class MainWindow(QMainWindow):
                 self._remove_widget(widget)
                 self._clientsWidgets.remove(widget)
 
-
     def _has_widget(self, client):
         for widget in self._clientsWidgets:
             if ((client[0][0] == widget.ip) and (client[0][1] == widget.port) and (len(client[2]) > 1)):
                 return True
         return False
 
-
     def _create_widget(self, client):
         self._clientsWidgets.append(ClientWidget(client))
         self.serverView.scrollArea.add_device(self._clientsWidgets[-1])
-
 
     def _still_connected(self, widget):
         for client in self._server.connected_clients:
@@ -158,58 +153,81 @@ class MainWindow(QMainWindow):
                 return True
         return False
 
-
     def _remove_widget(self, widget):
         widget.deleteLater()
 
-
     def start_client(self):
         self.set_view('CLIENT')
-        self.client = Client('192.168.0.107', 8888)
-        self.clientSignals = ClientSignals(self.client.recived_messages)
-        self.threabool.start(self.client)
-        self.threabool.start(self.clientSignals)
-
+        self._client = Client('192.168.0.107', 8888)
+        self._clientSignals = ClientSignals(self._client.recived_messages)
+        self._threabool.start(self._client)
+        self._threabool.start(self._clientSignals)
 
     def _clear_server_view(self):
         for widget in self._clientsWidgets:
             widget.deleteLater()
-
+            self._clientsWidgets.remove(widget)
 
     def close_server(self):
         self._server.close_server()
+        self._serverSignals.alive = False
         self.set_view('CLIENT')
-        
         
 
     def _search_for_servers(self, serverPort):
-        self.threabool.start()
-        print('')
-        # searchForServersWorker = SearchForServersWorker(serverPort)
-        # searchForServersWorker.signal.infoSignal.connect(self._update_client_view_progress_bar)
-        # searchForServersWorker.signal.foundServer.connect(self._add_server)
-        # self.threabool.start(searchForServersWorker)
+        search = SearchForServersWorker(serverPort)
+        search.signal.infoSignal.connect(self._client_view_progress_bar)
+        search.signal.foundServer.connect(self._client_view_add_server)
+        self._threabool.start(search)
 
-    def _update_client_view_progress_bar(self, progressBarValue, progressBarMessage):
-        print('')
-        # if (progressBarValue > 0):
-        #     self.searchOngoning = True
-        # if(progressBarValue == 999):
-        #     self.searchOngoning = False
+    def _client_view_progress_bar(self, progressBarValue, progressBarMessage):
+        self.clientView.bottomFrame.brogressBar.setValue(progressBarValue)
+        self.clientView.bottomFrame.info_text(progressBarMessage)
 
-        # self.clientView.bottomFrame.brogressBar.setValue(progressBarValue)
-        # self.clientView.bottomFrame.info_text(progressBarMessage)
 
-    def _add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
-        print('')
-        # self.serverWidgets.append(serverwidget.ServerWidget(serverName, serverIP, serverPort))
-        # self.clientView.scrollArea.add_device(self.serverWidgets[-1])
-        # self.serverWidgetID = self.serverWidgetID + 1
-        # localID = self.serverWidgetID
-        # self.serverWidgets[-1].connectButton.clicked.connect(lambda: self._connect__disconnect_to_server(serverIP, serverPort, localID))
+    def _client_view_add_server(self, serverName : str, serverIP: str, serverPort: int)-> None:
+        if self.clientView.widget_already_exist(serverIP, serverPort):
+            print(f"\nmainwindow, _client_view_add_server, server:{serverIP}:{serverPort}, already exist, returning...")
+            return
 
-    def _connect__disconnect_to_server(self ,serverIP: str, serverPort: int, id):
-        print('')
+        self.clientView.add_widget(ServerWidget(serverName, serverIP, serverPort))
+        self.clientView.last_added_widget.connectButton.clicked.connect(lambda: self._connect_to_server(serverIP, serverPort))
+
+
+    def _connect_to_server(self ,serverIP: str, serverPort: int):
+        print(f'\nmainwindow, _connect_to_server, called with server:{serverIP}:{serverPort}')
+
+        if (serverIP, serverPort) in self._connected_servers:
+            print(f'\nmainwindow, _connect_to_server, server:{serverIP}:{serverPort} allready exist' \
+                  '\nchecking if client is connected/disonnected')
+            if self._client.is_connected():
+                print('\nmainwindow, _connect_to_server, client connected - > closing the connection')
+                self._client.close_connection()
+                print('\nmainwindow, _connect_to_server, connection CLOSED|||')
+            else:
+                self._client.re_open_connection()
+                print('\nmainwindow, _connect_to_server, connection RESUMMED>>>')
+            return
+        self._init_client(serverIP, serverPort)
+
+
+
+    def _init_client(self, serverIP, serverPort):
+            if self._client != None:
+                print(f'\nmainwindow, _init_client, cannot connect to server:{serverIP}:{serverPort}' 
+                      '\n client already connected, RETURNING...')
+                return
+
+            self._client = Client(serverIP, serverPort)
+            self._clientSignals = ClientSignals(self._client.recived_messages)
+            self._threabool.start(self._client)
+            self._threabool.start(self._clientSignals)
+            self._connected_servers.append((serverIP, serverPort))
+
+        # self._client = Client(serverIP, serverPort)
+        # self._clientSignals = ClientSignals(self._client.recived_messages)
+        # self._threabool.start(self._client)
+        # self._threabool.start(self._clientSignals)
         # if(self.serverWidgets[id-1].connectButton.isChecked()):
         #     self.serverWidgets[id-1].connectButton.change_style_on_checked(True)
         #     self.reciveMouseMovementWorkers.append(ReciveUserInput(serverIP, serverPort, id))
@@ -220,6 +238,43 @@ class MainWindow(QMainWindow):
         #     for worker in self.reciveMouseMovementWorkers:
         #         if (worker.id == id):
         #             worker.alive = False
+
+
+
+
+#region _client_view_add_server
+        # self._clientViewWidgets.append(ServerWidget(serverName, serverIP, serverPort))
+        # self.clientView.scrollArea.add_device(self._clientViewWidgets[-1])
+        # self._clientViewWidgets[-1].connectButton.clicked.connect(lambda: self._connect_to_server(serverIP, serverPort))
+#endregion
+
+#now we know that there is a socket on this ip address and this pre-defined port
+# we knew that because we could ping this ip address:port
+# we did not estaplish any TCP connections to this socket port
+
+#on the SERVER side nothing happened yet.
+
+#we create a server widget for this socket
+# this widget has a [connect button]
+
+########################################################
+
+#when we press the connection button ->
+# create a client instance
+# connectet to the server
+# change the connection button style
+
+#When we press again ->
+# we want to close the connection
+# change the button style
+
+#when we press the connection button ->
+# connectet to the server
+# change the connection button style
+
+
+
+
 
     def _remove_server_widget(self, serverConnection, id, port):
         print('')

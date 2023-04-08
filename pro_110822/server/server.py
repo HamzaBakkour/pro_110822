@@ -1,4 +1,4 @@
-import PySide6
+from asyncio.exceptions import CancelledError
 from PySide6.QtCore import QRunnable, Slot, QObject, Signal, QTimer, SIGNAL
 from typing import Optional
 import time
@@ -55,8 +55,11 @@ class Server(QRunnable):
 
     @Slot()
     def run(self)-> None:
-        self._server.run()
-        
+        try:
+            self._server.run()
+        except CancelledError:
+            print(f'\nserver, server was canceled {CancelledError}, returning...')
+            return
 
 
 class SSignals(QObject):
@@ -71,7 +74,7 @@ class ServerSignals(QRunnable):
         self.tick = 1
     @Slot()
     def run(self) -> None:
-        while(True):
+        while(self.alive):
             self.signals.server_view_maneger.emit()
             self.signals.recived_messages.emit()
             time.sleep(self.tick)

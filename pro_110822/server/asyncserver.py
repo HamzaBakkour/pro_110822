@@ -4,6 +4,8 @@ import queue
 from server.senduserinput import SendUserInput
 import pdb
 
+class TasksAborted(Exception):
+    pass
 
 class AsyncServer():
     def __init__(self, ip, port) -> None:
@@ -23,18 +25,15 @@ class AsyncServer():
         self._connections_monitor_s2_ = 1
         self._start_stream_s1_ = 0.1
         self._start_stream_s2_ = 1
-
     @property
     def connected_clients(self):
          temp = []
          for item in self.clients_queue:
               temp.append((item['addr'], item['name'], item['rez']))
          return  temp
-
     @property
     def _connected_clients_all(self):
         return self.clients_queue
-
     @staticmethod
     def _pack_data(data_, head_length = 7):
         head = str(len(data_.encode()))
@@ -73,17 +72,6 @@ class AsyncServer():
             except Exception as ex:
                     print('\nasyncserver, ', type(ex), ex, 'Unhandeled')
 
-    def broadcast(self, message):
-        was_active_r = self._reader
-        was_active_w = self._writer
-
-        for client in self.connected_clients:
-            self.set_active(client[0], client[1])
-            self.send_data_to_active(message)
-
-        self._reader = was_active_r 
-        self._writer = was_active_w 
-
     def start_stream(self):
         self._capture_input.start_listning()
         self.stream = True
@@ -108,6 +96,17 @@ class AsyncServer():
    ######## all clients ########################################################    
     def recived_messages(self):
          return  list(self.inbound_queue.queue)
+
+    def broadcast(self, message):
+        was_active_r = self._reader
+        was_active_w = self._writer
+
+        for client in self.connected_clients:
+            self.set_active(client[0], client[1])
+            self.send_data_to_active(message)
+
+        self._reader = was_active_r 
+        self._writer = was_active_w 
 
     def _add_to_inbound (self, data):
         if (len(data) > 0):
@@ -252,7 +251,6 @@ class AsyncServer():
                 await close_connection(change['writer'])
                 for task in self._tasks:
                     if task.done():
-                        pdb.set_trace()
                         self._tasks.remove(task)
                         print(f'\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, task:{task}, REMOVED')
 
@@ -265,7 +263,7 @@ class AsyncServer():
             if (self._abort_tasks):
                 for client in self._connected_clients_all:
                     await close_connection(client['writer'])
-                raise Exception('triggered because self._abort_tasks was set to True')
+                raise TasksAborted
             
             if (not changes):
                 await asyncio.sleep(1)
@@ -292,9 +290,9 @@ class AsyncServer():
                                    'name' : '',
                                    'rez' : '',
                                    'id' : ''})
-        print("\nsending info request to client")
+        print("\nasyncserver, _handler, sending info request to client")
         await self._async_send_data_on_writer('$INFO_R', writer)
-        print("\ninfo request sent")
+        print("\nasyncserver, _handler, info request sent")
 
     async def _start_server(self):
         self._server_coro = await asyncio.start_server(self._handler, self.ip, self.port)
@@ -306,7 +304,6 @@ class AsyncServer():
                 print('\nasyncserver, server_coro aborted, CancelledError')
             except Exception as ex:
                 print(f'\nasyncserver, server_coro aborted, {type(ex)}, {ex}')
-
 
     async def _main(self):
 

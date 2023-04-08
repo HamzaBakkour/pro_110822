@@ -14,30 +14,38 @@ class Client(QRunnable):
     @property
     def recived_messages(self):
         return self._client.recived_messages()
-
+    
+    
+    def is_connected(self):
+        return self._client.is_connected()
 
     def _connect(self):
         self._client.connect(self.serverIP, self.serverPort )
-        
 
     def send_data(self, data):
         self._client.send_data(data)
 
-
-
     def close_connection(self):
         self._client.close_connection()
+
+    def re_open_connection(self):
+        self._client.re_open_connection()
+
 
 
     @Slot()
     def run(self)-> None:
+        print('client, run, started')
         self._connect()
+        print('client, run, ENDED')
+
 
         
 
 
 class CSignal(QObject):
      recived_messages = Signal(object)
+
 class ClientSignals(QRunnable):
     def __init__(self, recived_messages) -> None:
         super(ClientSignals, self).__init__()
@@ -51,6 +59,9 @@ class ClientSignals(QRunnable):
             self.signal.recived_messages.emit(self.recived_messages)
             time.sleep(self.tick)
 
+
+    # def resume_connection(self):
+    #     self._client.reopen_connection()
 
 # client = Client()
 # client.connect('127.0.0.1', 8888)

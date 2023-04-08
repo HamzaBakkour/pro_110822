@@ -13,7 +13,6 @@ except ModuleNotFoundError as ex:
     print(f'{ex}\nYou can not use the function "port_scanner" without installing netifaces.\nPlease install netifaces or use "port_scanner_" instead!')
     print('************************************************************************\n')
 
-
 """
 -------------------------------------------------------------------------------------------------
 portscanner.py by Hamza Bakkour. alexander.x4.hb@outlook.com
