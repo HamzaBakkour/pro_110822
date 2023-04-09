@@ -115,12 +115,15 @@ class SendUserInput():
 
         self.mouseListner.start()
         self.keyboardListner.start()
-        print("listening STARTED")
+        print("\nsendunserinput, start_listning, listening STARTED")
 
     def stop_listning(self):
+        if self.mouseListner == None:
+            return
         self.mouseListner.stop()
         self.keyboardListner.stop()
-        print("listening SOPED")
+        print("\nsendunserinput, stop_listning, listening STOPPED")
+
 
 
 

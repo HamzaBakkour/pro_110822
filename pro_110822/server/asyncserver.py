@@ -2,6 +2,7 @@ import asyncio
 from asyncio.exceptions import CancelledError
 import queue
 from server.senduserinput import SendUserInput
+from server.shortcuthandle import ShortcutsHandle
 import pdb
 
 class TasksAborted(Exception):
@@ -19,6 +20,12 @@ class AsyncServer():
         self._writer = None
         self._reader = None
         self._capture_input = SendUserInput()
+        self._shortcut = ShortcutsHandle(self)
+        self._shortcut.define_shortcut(('<ctrl>+m+1', 
+                                                '_shortcut_handler'), 
+                                               addToExist=False, 
+                                               passShortcut=True)
+        self._id_list = []
         self._send_data_s1_ = 1
         self._recive_data_task_s1 = 1
         self._connections_monitor_s1_ = 0.1
@@ -29,7 +36,7 @@ class AsyncServer():
     def connected_clients(self):
          temp = []
          for item in self.clients_queue:
-              temp.append((item['addr'], item['name'], item['rez']))
+              temp.append(((item['ip'], item['port']), item['name'], item['rez']))
          return  temp
     @property
     def _connected_clients_all(self):
@@ -43,15 +50,17 @@ class AsyncServer():
         packed_data = head + data_ 
         return packed_data.encode()
 
+    def noo(self):
+        print('noo')
 
     ######## active client ########################################################       
     def set_active(self, clientIP, clientPort):
         temp = self._connected_clients_all
         for client in temp:
-            if ((client['addr'][0] == clientIP) and (client['addr'][1] == clientPort)):
+            if ((client['ip'] == clientIP) and (client['port'] == clientPort)):
                 self._reader =  client['reader']
                 self._writer =  client['writer']
-                print(f"\nasyncserver, {client['addr'][0]}:{client['addr'][1]} is now active")
+                print(f"\nasyncserver, {client['ip']}:{client['port']} is now active")
                 return
         print(f"\nasyncserver, could not fined client {clientIP}:{clientPort} in connected clients.")
 
@@ -60,17 +69,20 @@ class AsyncServer():
         asyncio.run(self._send_data(data))
 
     async def _send_data(self, data):
-            if (self._writer == None):
-                print("\nasyncserver, no client was set. use set_client to set one.")
-                return
+            # if (self._writer == None):
+            #     print("\nasyncserver, no client was set. use set_client to set one.")
+            #     return
             try:
                 self._writer.write(data)
                 await self._writer.drain()
             except ConnectionResetError:
-                print('\nasyncserver, ConnectionResetError')
+                print('\nasyncserver, _send_data, ConnectionResetError')
                 await asyncio.sleep(self._send_data_s1_)
             except Exception as ex:
-                    print('\nasyncserver, ', type(ex), ex, 'Unhandeled')
+                    print('\nasyncserver, _send_data, ', type(ex), ex, 'Unhandeled')
+
+    def is_streaming(self):
+        return self.stream
 
     def start_stream(self):
         self._capture_input.start_listning()
@@ -85,7 +97,7 @@ class AsyncServer():
             if (self.stream): 
                 for _ in range(self._capture_input.events_queue.qsize()):
                     item = self._capture_input.events_queue.get()
-                    await self._send_data(item)
+                    await self._send_data(item.encode())
                 await asyncio.sleep(self._start_stream_s1_)
             else:
                 await asyncio.sleep(self._start_stream_s2_)
@@ -122,7 +134,10 @@ class AsyncServer():
                     connection['writer'].write(message)
                     await connection['writer'].drain()
                 except Exception as ex:
-                    print('\nasyncserver, in _connections_monitor, ',  connection['addr'], type(ex), ' ', ex, ' [CLOSED]')
+                    print('\nasyncserver, in _connections_monitor, ',  (connection['ip'], connection['port']), type(ex), ' ', ex, ' [CLOSING CONNECTION]')
+                    self._id_list.remove(connection['id'])
+                    print("\nasyncserver, in _connections_monitor removing shortcut:", f"<ctr>+m+{str(connection['id'])}")
+                    self._shortcut.remove_shortcut(f"<ctrl>+m+{str(connection['id'])}")
                     try:
                         connection['writer'].close()
                         await connection['writer'].wait_closed()
@@ -163,23 +178,21 @@ class AsyncServer():
             name, resulotion, ip, port = extract_name_and_rez(message)
             clients = self._connected_clients_all
             for client in clients:
-                if ((client['addr'][0] == ip) and (str(client['addr'][1]) == port)):
+                if ((client['ip'] == ip) and (str(client['port']) == port)):
                     #update the client with the info that was recived.
                     client['name'] = name
                     client['rez'] = resulotion
-                    print(f'\nasyncserver, _client_messages_handler, client:{client} ' \
-                            f'was updated with name:{name} and resulotion:{resulotion} ' \
-                            f'new client:{client}')
+                    print(f'client was updated with name:{name} and resulotion:{resulotion}')
         else:
             self._add_to_inbound(message)
 
     async def _recive_data_task(self, connection):
         print(f'\nasycnserver, _recive_data_task, task was created with connection:{connection}')
-        client_ip = connection['addr'][0]
-        client_port = str(connection['addr'][1])
+        client_ip = connection['ip']
+        client_port = str(connection['port'])
         while(True):
             try:
-                head_length = await connection['reader'].readexactly(7)
+                head_length = await connection['reader'].read(7)
                 head_length = head_length.decode()
                 head_length = head_length.replace('+', '')
                 head_length = int(head_length)
@@ -188,9 +201,13 @@ class AsyncServer():
                 print(f"\nasyncserver, _recive_data, data:{data}")
                 self._client_messages_handler(data + '!' + client_ip + '!' + client_port)
                 await asyncio.sleep(self._recive_data_task_s1)
-            except ConnectionResetError as cr:
-                print(f"\nasyncserver, _recive_data, {type(cr)}, {cr}, returning")
+            # except ConnectionResetError as cr:
+            #     print(f"\nasyncserver, _recive_data, {type(cr)}, {cr}, returning")
+            #     return
+            except Exception as ex:
+                print(f'\nasyncserver, _recive_data_task, EXEPTION, {type(ex)}, {ex} -> RETURNING')
                 return
+                # await asyncio.sleep(1)
 
     async def _schedule_recive_data_tasks(self):
 
@@ -241,9 +258,9 @@ class AsyncServer():
         async def reschedule_tasks(changes_):
             for change in changes_['to_be_added']:
                 self._tasks.append(asyncio.create_task(self._recive_data_task(change)))
-                print('\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, ADDING, self._tasks:')
-                for task in self._tasks:
-                    print(f'\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, task:{task}')
+                print('\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, ADDING +++')
+                for task in changes_['to_be_added']:
+                    print(f'\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, task:{task} [+++]')
 
             await asyncio.sleep(1)
 
@@ -254,9 +271,9 @@ class AsyncServer():
                         self._tasks.remove(task)
                         print(f'\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, task:{task}, REMOVED')
 
-                print('\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, REMOVING, self._tasks:')
-                for task in self._tasks:
-                    print(f'\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, task:{task}')
+                print('\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, REMOVING ---')
+                for task in changes_['to_be_removed']:
+                    print(f'\nasyncserver, _schedule_recive_data_tasks, reschedule_tasks, task:{task} [---]')
 
         while(True):
             changes = tracked_clients_changed()
@@ -268,34 +285,77 @@ class AsyncServer():
             if (not changes):
                 await asyncio.sleep(1)
                 continue
-            print(f'\nasyncserver, _schedule_recive_data_tasks, changes:{changes}')
             for change in changes['to_be_added']:
                 tracked_clients.append(change)
             for change in changes['to_be_removed']:
                 tracked_clients.remove(change)
-            print(f'\nasyncserver, _schedule_recive_data_tasks, tracked_clients:{tracked_clients}')
             await reschedule_tasks(changes)
     ################################################################
 
 
-    ######## server ########################################################   
-    async def _handler(self, reader, writer):
+    ######## server ########################################################
+    def _get_id(self):
+        for i in range(2,9):
+            if i not in self._id_list:
+                self._id_list.append(i)
+                return i
+        return False
+    
+    def _shortcut_handler(self, shortcut):
+        print(f"\nasyncserver, _shortcut_handler. called with shortcut:{shortcut}")
+        if shortcut == '<ctrl>+m+1':
+            self.stop_stream()
+            # self.set_active(None, None)
+            return
+        clients = self._connected_clients_all
+        for client in clients:
+            if client['shortcut'] == shortcut:
+                if self.is_streaming():
+                    self.stop_stream()
+                    self.set_active(client['ip'], client['port'])
+                    self.start_stream()
+                else:
+                    self.set_active(client['ip'], client['port'])
+                    self.start_stream()
+
+
+    def _defin_ctrl_m_id_shortcut(self, id_):
+        print(f"\nasyncserver, _defin_ctrl_m_id_shortcut, called with id:{id_}'")
+        shortcut_ = '<ctrl>+m+'+str(id_)
+        target_function_ = '_shortcut_handler'
+        self._shortcut.define_shortcut((shortcut_, target_function_))
+        print(f"\nasyncserver, _defin_ctrl_m_id_shortcut, defined shortcut: '<ctrl>+m+{str(id_)}'")
+        return shortcut_, target_function_
+
+    async def _server_handler(self, reader, writer):
         if self._abort_tasks:
             return
         addr = writer.get_extra_info('peername')
         print(f"\nasyncserver, {addr!r} is connected.")
-        self._connected_clients_all.append({'addr' : addr,
+
+        id_ = self._get_id()
+        if not id_:
+            print('\nasyncserver, _handler, all IDs 2->9 are in use, RETURNING...')
+            return
+
+        shortcut, target_function = self._defin_ctrl_m_id_shortcut(id_)
+
+        self._connected_clients_all.append({'ip' : addr[0],
+                                    'port' : addr[1],
                                    'writer' : writer,
                                    'reader' : reader,
                                    'name' : '',
                                    'rez' : '',
-                                   'id' : ''})
+                                   'id' : id_,
+                                   'shortcut' : shortcut,
+                                   'targe_function' : target_function})
+        
         print("\nasyncserver, _handler, sending info request to client")
         await self._async_send_data_on_writer('$INFO_R', writer)
         print("\nasyncserver, _handler, info request sent")
 
     async def _start_server(self):
-        self._server_coro = await asyncio.start_server(self._handler, self.ip, self.port)
+        self._server_coro = await asyncio.start_server(self._server_handler, self.ip, self.port)
         async with self._server_coro:
             try:
                 print(f"\nasyncserver, starting server at {self.ip}:{self.port}")
@@ -343,10 +403,28 @@ class AsyncServer():
 
 
 
+#Now each client has an associated shortcut
 
+#The client and its shortcut -among others- are saved in self._connected_clients_all
 
+#When we define a shortcut, the listner will start automatically
+#   and the target function will be called when the shortcut is pressed
 
+#When the user press a pre-defined shortcut -> this will call the fcuntion "_shortcut_handle"
+#   and pass the pressed shortcut
 
+#"shortcut_handle" will check which client is associated with this shortcut and
+#   starts streaming >>>
+
+#How this is going to be done;
+
+#Check is_streaming
+#   True -> stop_stream
+#           set active
+#           start_stream
+
+#   False -> set_active
+#            start_stream
 
 
 

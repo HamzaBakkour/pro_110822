@@ -1,7 +1,7 @@
 from pynput import keyboard
 import inspect
 import os
-
+import pdb
 
 class ShortcutsHandle():
     """Define a shortcut and a method to ba called when the shortcut is pressed"""
@@ -34,7 +34,7 @@ class ShortcutsHandle():
 
 
     #Define the shortcuts that the listener will listen to.
-    def define_shortcut(self,*args : list[tuple[str, str]],  addToExist: bool = False, passShortcut = False) -> None:
+    def define_shortcut(self,*args : list[tuple[str, str]],  addToExist=True, passShortcut=True) -> None:
         """Define a shortcut.
         
         Examples:
@@ -145,12 +145,22 @@ class ShortcutsHandle():
 
     def remove_shortcut(self, shortcut: str)->None:
         """"Remove a shortcut. The listener will stop listning to the removed shortcut"""
+        print(f'\nshortcuthadle, remove_shortcut, removing shortcut:{shortcut}')
+        was_removed = False
         try:
+            # pdb.set_trace()
             for el in self._savedShortcuts:
                 if (el[0] == shortcut + 'PASS' or el[0] == shortcut + 'DONOT'):
                     self._savedShortcuts.remove(el)
+                    was_removed = True
+
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raised : {ex}')
             return
 
         self.define_shortcut(*self._savedShortcuts, addToExist=False, passShortcut=True)
+        if not was_removed:
+            print(f'\nshortcuthadle, remove_shortcut, called with argument {shortcut}, shortcut WAS NOT REMOVED...')
+        else:
+            print(f'\nshortcuthadle, remove_shortcut, shortcut:{shortcut} REMOVED')
+
