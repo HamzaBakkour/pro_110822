@@ -4,7 +4,11 @@ import queue
 import platform
 import pdb
 from ctypes import windll
+from pynput.mouse import Controller as MC
+from pynput.mouse import Button
 
+from pynput.keyboard import Controller as KC
+from pynput.keyboard import Key
 
 class TooManyAttributeErrorValueError(Exception):
     pass
@@ -24,6 +28,10 @@ class AsyncClient():
         self._tasks = []
         self._inbound_queue = queue.Queue()
         self._outbound_queue = queue.SimpleQueue()
+        self._mouse = MC()
+        self._keyboard = KC()
+        self._x = self._get_screen_resulotion()[0]
+        self._y = self._get_screen_resulotion()[1]
         self._recive_message_s1 = 0.1
     
     def is_connected(self):
@@ -77,18 +85,16 @@ class AsyncClient():
         failed = 0
         while(True):
             try:
-                head_length = await self._reader.read(7)
-                head_length = head_length.decode()
-                head_length = head_length.replace('+', '')
-                head_length = int(head_length)
-                data = await self._reader.read(head_length)
-                data = data.decode()
+                buffer_ = b''
+                while(buffer_[-1:] != b'&'):
+                    data = await self._reader.read(1024)
+                    if not data:
+                        break
+                    else:
+                        buffer_ = buffer_ + data
 
-                if data.startswith('$'):
-                    await self._handel_server_messages(data)
-                else:
-                    self._inbound_queue_put(data)
-
+                self._buffer_extractor(buffer_.decode())
+                
                 failed = 0
 
             except (AttributeError, ValueError) as ex:
@@ -103,8 +109,75 @@ class AsyncClient():
                 print(f'\nasyncclient, in _recive_message, {type(ex)}, {ex}, RAISING EXEPTION -> TERMINATING...')
                 raise ex
 
+    def _buffer_extractor(self, buffer_):
+        extracted_data = buffer_.split('&')
+        for data in extracted_data:
+            if data.startswith('%'):
+                self._mouse_and_keyboard_controller(data)
+            elif data.startswith('*'):   
+                print(f'monitor>>> {data}')
 
-            await asyncio.sleep(self._recive_message_s1)
+
+
+    def _mouse_and_keyboard_controller(self, data):
+        try:
+            event = data.split('!')[1]
+            match event:
+                case 'M': #Mouse position
+                    self._mouse.position = (int((float(data.split('!')[2])* self._x)), 
+                                            int((float(data.split('!')[3])* self._y)))
+                case 'P': #Mouse button
+                    if (data.split('!')[3] == '1'):#Mouse button pressed
+                            self._mouse.press(eval(data.split('!')[2]))
+                    elif (data.split('!')[3] == '0'):#Mouse button released
+                            self._mouse.release(eval(data.split('!')[2]))
+                case 'K': #Keyboard button
+                    try:
+                        if (data[6:9] == 'Key'):#Keyboard button pressed
+                            self._keyboard.press(eval(data.split('!')[3]))
+                        else:
+                            self._keyboard.press(data.split('!')[3])
+                    except Exception as ex:
+                        print(f'asyncclient, control_test, case K {type(ex)}, {ex}')
+                case 'R': #Keyboard button released
+                    try:
+                        self._keyboard.release(eval(data.split('!')[2]))
+                    except Exception as ex:
+                        print(f'asyncclient, control_test, case R {type(ex)}, {ex}')
+
+
+
+        except Exception as ex:
+            print(f'asyncclient, control_test, {type(ex)}, {ex}')
+
+
+        #     if (data.split('!')[0] == 'M'):#Mouse position
+        #             self._mouse.position = (int((float(data.split('!')[1])*self._get_screen_resulotion()[0])), 
+        #                                     int((float(data.split('!')[2])*self._get_screen_resulotion()[1])))
+        #     elif (data.split('!')[0] == 'P'):#Mouse button
+        #         if (data.split('!')[2] == '1'):#Mouse button pressed
+        #                 self._mouse.press(eval(self.data.split('!')[1]))
+        #         elif (data.split('!')[2] == '0'):#Mouse button released
+        #                 self._mouse.release(eval(self.data.split('!')[1]))
+        #     elif (data.split('!')[0] == 'K'):#Keyboard button
+        #         try:
+        #             if (data[4:7] == 'Key'):#Keyboard button pressed
+        #                 self._keyboard.press(eval(data.split('!')[2]))
+        #             else:
+        #                 self._keyboard.press(data.split('!')[2])
+        #         except Exception as ex:
+        #             print(ex)
+        #     elif (data.split('!')[0] == 'R'):#Keyboard button released
+        #         try:
+        #             self._keyboard.release(eval(data.split('!')[1]))
+        #         except Exception as ex:
+        #             print(ex)
+        #     elif(data == 'SS'):
+        #         print('stopppppppp')
+        # except Exception as ex:
+        #     print(f'asyncclient, control_test, {type(ex)}, {ex}')
+
+
 
     async def _group_tasks_terminator(self, sleep_ = 0.5):
         while(True):
@@ -212,3 +285,38 @@ class AsyncClient():
         # except Exception as ex:
         #     print(type(ex))
 
+       #     if (data.split('!')[0] == 'M'):#Mouse position
+        #             self._mouse.position = (int((float(data.split('!')[1])*self._get_screen_resulotion()[0])), 
+        #                                     int((float(data.split('!')[2])*self._get_screen_resulotion()[1])))
+        #     elif (data.split('!')[0] == 'P'):#Mouse button
+        #         if (data.split('!')[2] == '1'):#Mouse button pressed
+        #                 self._mouse.press(eval(self.data.split('!')[1]))
+        #         elif (data.split('!')[2] == '0'):#Mouse button released
+        #                 self._mouse.release(eval(self.data.split('!')[1]))
+        #     elif (data.split('!')[0] == 'K'):#Keyboard button
+        #         try:
+        #             if (data[4:7] == 'Key'):#Keyboard button pressed
+        #                 self._keyboard.press(eval(data.split('!')[2]))
+        #             else:
+        #                 self._keyboard.press(data.split('!')[2])
+        #         except Exception as ex:
+        #             print(ex)
+        #     elif (data.split('!')[0] == 'R'):#Keyboard button released
+        #         try:
+        #             self._keyboard.release(eval(data.split('!')[1]))
+        #         except Exception as ex:
+        #             print(ex)
+        #     elif(data == 'SS'):
+        #         print('stopppppppp')
+        # except Exception as ex:
+        #     print(f'asyncclient, control_test, {type(ex)}, {ex}')
+
+
+
+                # self.signal.serverStoped.emit(self.conn, self.id, self.serverPort)
+        # except UnboundLocalError:
+        #     pass
+        # except BlockingIOError:
+        #     pass
+        # except IOError:
+        #     pass

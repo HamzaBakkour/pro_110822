@@ -42,13 +42,8 @@ class AsyncServer():
     def _connected_clients_all(self):
         return self.clients_queue
     @staticmethod
-    def _pack_data(data_, head_length = 7):
-        head = str(len(data_.encode()))
-        for _ in range(0, head_length - len(head)):
-            head = head + '+'
-        # packed_data = head + data_ + '++++'
-        packed_data = head + data_ 
-        return packed_data.encode()
+    def _pack_data(data_):
+        return f'{data_}&'.encode()
 
     def noo(self):
         print('noo')
@@ -129,25 +124,25 @@ class AsyncServer():
     async def _connections_monitor(self):
         while(True):
             connections = self._connected_clients_all
-            # for connection in connections:
-            #     try:
-            #         message = self._pack_data('*')
-            #         connection['writer'].write(message)
-            #         await connection['writer'].drain()
-            #     except Exception as ex:
-            #         print('\nasyncserver, in _connections_monitor, ',  (connection['ip'], connection['port']), type(ex), ' ', ex, ' [CLOSING CONNECTION]')
-            #         self._id_list.remove(connection['id'])
-            #         print("\nasyncserver, in _connections_monitor removing shortcut:", f"<ctr>+m+{str(connection['id'])}")
-            #         self._shortcut.remove_shortcut(f"<ctrl>+m+{str(connection['id'])}")
-            #         try:
-            #             connection['writer'].close()
-            #             await connection['writer'].wait_closed()
-            #         except (ConnectionAbortedError, ConnectionResetError):
-            #             pass
-            #         except Exception as ex:
-            #             print('\nasyncserver, in _connections_monitor ', type(ex), ' ', ex)
-            #         connections.remove(connection)
-            #     await asyncio.sleep(self._connections_monitor_s1_)
+            for connection in connections:
+                try:
+                    message = self._pack_data('*')
+                    connection['writer'].write(message)
+                    await connection['writer'].drain()
+                except Exception as ex:
+                    print('\nasyncserver, in _connections_monitor, ',  (connection['ip'], connection['port']), type(ex), ' ', ex, ' [CLOSING CONNECTION]')
+                    self._id_list.remove(connection['id'])
+                    print("\nasyncserver, in _connections_monitor removing shortcut:", f"<ctr>+m+{str(connection['id'])}")
+                    self._shortcut.remove_shortcut(f"<ctrl>+m+{str(connection['id'])}")
+                    try:
+                        connection['writer'].close()
+                        await connection['writer'].wait_closed()
+                    except (ConnectionAbortedError, ConnectionResetError):
+                        pass
+                    except Exception as ex:
+                        print('\nasyncserver, in _connections_monitor ', type(ex), ' ', ex)
+                    connections.remove(connection)
+                await asyncio.sleep(self._connections_monitor_s1_)
             await asyncio.sleep(self._connections_monitor_s2_)
 
     async def _async_send_data_on_writer(self, data, writer):
