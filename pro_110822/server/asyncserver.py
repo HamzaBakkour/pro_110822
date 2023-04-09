@@ -97,6 +97,7 @@ class AsyncServer():
             if (self.stream): 
                 for _ in range(self._capture_input.events_queue.qsize()):
                     item = self._capture_input.events_queue.get()
+                    # print(f'sent {item}')
                     await self._send_data(item.encode())
                 await asyncio.sleep(self._start_stream_s1_)
             else:
@@ -128,25 +129,25 @@ class AsyncServer():
     async def _connections_monitor(self):
         while(True):
             connections = self._connected_clients_all
-            for connection in connections:
-                try:
-                    message = self._pack_data('*')
-                    connection['writer'].write(message)
-                    await connection['writer'].drain()
-                except Exception as ex:
-                    print('\nasyncserver, in _connections_monitor, ',  (connection['ip'], connection['port']), type(ex), ' ', ex, ' [CLOSING CONNECTION]')
-                    self._id_list.remove(connection['id'])
-                    print("\nasyncserver, in _connections_monitor removing shortcut:", f"<ctr>+m+{str(connection['id'])}")
-                    self._shortcut.remove_shortcut(f"<ctrl>+m+{str(connection['id'])}")
-                    try:
-                        connection['writer'].close()
-                        await connection['writer'].wait_closed()
-                    except (ConnectionAbortedError, ConnectionResetError):
-                        pass
-                    except Exception as ex:
-                        print('\nasyncserver, in _connections_monitor ', type(ex), ' ', ex)
-                    connections.remove(connection)
-                await asyncio.sleep(self._connections_monitor_s1_)
+            # for connection in connections:
+            #     try:
+            #         message = self._pack_data('*')
+            #         connection['writer'].write(message)
+            #         await connection['writer'].drain()
+            #     except Exception as ex:
+            #         print('\nasyncserver, in _connections_monitor, ',  (connection['ip'], connection['port']), type(ex), ' ', ex, ' [CLOSING CONNECTION]')
+            #         self._id_list.remove(connection['id'])
+            #         print("\nasyncserver, in _connections_monitor removing shortcut:", f"<ctr>+m+{str(connection['id'])}")
+            #         self._shortcut.remove_shortcut(f"<ctrl>+m+{str(connection['id'])}")
+            #         try:
+            #             connection['writer'].close()
+            #             await connection['writer'].wait_closed()
+            #         except (ConnectionAbortedError, ConnectionResetError):
+            #             pass
+            #         except Exception as ex:
+            #             print('\nasyncserver, in _connections_monitor ', type(ex), ' ', ex)
+            #         connections.remove(connection)
+            #     await asyncio.sleep(self._connections_monitor_s1_)
             await asyncio.sleep(self._connections_monitor_s2_)
 
     async def _async_send_data_on_writer(self, data, writer):
@@ -318,7 +319,6 @@ class AsyncServer():
                     self.set_active(client['ip'], client['port'])
                     self.start_stream()
 
-
     def _defin_ctrl_m_id_shortcut(self, id_):
         print(f"\nasyncserver, _defin_ctrl_m_id_shortcut, called with id:{id_}'")
         shortcut_ = '<ctrl>+m+'+str(id_)
@@ -355,7 +355,9 @@ class AsyncServer():
         print("\nasyncserver, _handler, info request sent")
 
     async def _start_server(self):
+        print('\nasyncserver, _start_server, creating server coro...')
         self._server_coro = await asyncio.start_server(self._server_handler, self.ip, self.port)
+        print(f'\nasyncserver, _start_server, creating server coro, DONE, {self._server_handler}, {self.ip}, {self.port}')
         async with self._server_coro:
             try:
                 print(f"\nasyncserver, starting server at {self.ip}:{self.port}")
@@ -367,12 +369,14 @@ class AsyncServer():
 
     async def _main(self):
 
+        print('\nasyncserver, _main, started')
         self._tasks.append(asyncio.create_task(self._start_server()))
         self._tasks.append(asyncio.create_task(self._schedule_recive_data_tasks()))
         self._tasks.append(asyncio.create_task(self._connections_monitor()))
         self._tasks.append(asyncio.create_task(self._start_stream()))
 
-        # result = asyncio.gather(*self._tasks)
+
+        print('\nasyncserver, _main, tasks appended -> wait')
         done, pending = await asyncio.wait(self._tasks , return_when=asyncio.FIRST_EXCEPTION)
 
         for task in done:
@@ -388,12 +392,10 @@ class AsyncServer():
                 print(f'\ntask:{task.get_name()} <<<CANCELED')
             except Exception as ex:
                 print(f'\nasyncserver, _main, task.cancel(), {type(ex)}, {ex}')
-
-            
         
         print('\nasyncserver, _main() exited.')
 
-    def run(self):
+    def start(self):
          asyncio.run(self._main(), debug=True)
 
     def close(self):

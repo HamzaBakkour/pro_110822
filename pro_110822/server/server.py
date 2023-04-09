@@ -56,7 +56,9 @@ class Server(QRunnable):
     @Slot()
     def run(self)-> None:
         try:
-            self._server.run()
+            print('server, run, STARTING the server...')
+            self._server.start()
+            print('server, run, server STOPED...')
         except CancelledError:
             print(f'\nserver, server was canceled {CancelledError}, returning...')
             return

@@ -42,25 +42,25 @@ class SendUserInput():
         return screensize
 
     def _on_move(self, x, y):
-        event = f'M!{x/self.screenWidth}!{y/self.screenHight}'
+        event = f'%!M!{x/self.screenWidth}!{y/self.screenHight}!&'
         if self.events_queue.full():
             return
         self.events_queue.put(event)
 
     def _on_click(self, x, y, button, pressed):
         if pressed:
-            event = f'P!{button}!1!{x}!{y}'
+            event = f'%!P!{button}!1!{x}!{y}!&'
         else:
-            event = f'P!{button}!0!{x}!{y}'
+            event = f'%!P!{button}!0!{x}!{y}!&'
         if self.events_queue.full():
             return
         self.events_queue.put(event)
 
     def _on_scroll(self, x, y, dx, dy):
         if dy < 0:
-            event = f'S!d!{x}!{y}'
+            event = f'%!S!d!{x}!{y}!&'
         else:
-            event = f'S!u!{x}!{y}'
+            event = f'%!S!u!{x}!{y}!&'
         if self.events_queue.full():
             return
         self.events_queue.put(event)
@@ -69,9 +69,9 @@ class SendUserInput():
         if (str(key)[0:3] != 'Key'):
             key = self.keyboardListner.canonical(key)
         try:
-            event = f'K!a!{key.char}'
+            event = f'%!K!a!{key.char}!&'
         except AttributeError:
-            event = f'K!s!{key}'
+            event = f'%!K!s!{key}!&'
         if self.events_queue.full():
             return
         self.events_queue.put(event)
@@ -79,7 +79,7 @@ class SendUserInput():
     def _on_release(self, key):
         if (str(key)[0:3] != 'Key'):
             key = self.keyboardListner.canonical(key)
-        event = f'R!{key}'
+        event = f'%!R!{key}!&'
         if self.events_queue.full():
             return
         self.events_queue.put(event)

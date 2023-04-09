@@ -95,9 +95,9 @@ class MainWindow(QMainWindow):
             self._stack.setCurrentIndex(1)
         elif(view == 'CLIENT'):
             self._clear_server_view()
-            self._stack.setCurrentIndex(0)
+            self._stack.setCurrentIndex(0) 
         else:
-            print(f"{view} is unknown view name.")
+            print(f"mainwindw, set_view, {view} is unknown view name.")
 
     def start_server(self):
         self.set_view('SERVER')
@@ -116,10 +116,10 @@ class MainWindow(QMainWindow):
                 if (not self._has_widget(client)):
                     print(f'\n mainwindow, _server_view_add_remove_client_widget, _create_widget ' \
                           f'was called with client:{client}')
-                    if (len(client[2]) < 1):
-                        print(f'\nmainwindow, _server_view_add_remove_client_widget, client:{client} '\
-                              f'did not report resolution to the server yet, skipped.')    
-                        continue
+                    # if (len(client[2]) < 1):
+                    #     print(f'\nmainwindow, _server_view_add_remove_client_widget, client:{client} '\
+                    #           f'did not report resolution to the server yet, skipped.')    
+                    #     continue
                     self._create_widget(client)
         
         for widget in self._clientsWidgets:
@@ -129,7 +129,8 @@ class MainWindow(QMainWindow):
 
     def _has_widget(self, client):
         for widget in self._clientsWidgets:
-            if ((client[0][0] == widget.ip) and (client[0][1] == widget.port) and (len(client[2]) > 1)):
+            # if ((client[0][0] == widget.ip) and (client[0][1] == widget.port) and (len(client[2]) > 1)):
+            if ((client[0][0] == widget.ip) and (client[0][1] == widget.port)):
                 return True
         return False
 
