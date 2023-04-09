@@ -43,13 +43,8 @@ class AsyncClient():
             print(f"{data} added to self._inbound_queue")
 
     @staticmethod
-    def _pack_data(data_, head_length = 7):
-        head = str(len(data_.encode()))
-        for _ in range(0, head_length - len(head)):
-            head = head + '+'
-        # packed_data = head + data_ + '++++'
-        packed_data = head + data_ 
-        return packed_data.encode()
+    def _pack_data(data_):
+        return f'{data_}&'.encode()
 
     async def _connect(self, serverIP, serverPort):
         try:
@@ -60,7 +55,6 @@ class AsyncClient():
         else:
             print("\nasyncclient, _connect, connected")
             self._connected = True
-
 
     async def _can_start_recive_message_task(self, sleep_ = 0.3, allowed_failures = 20 ):
         failed = 0
@@ -88,12 +82,15 @@ class AsyncClient():
                 buffer_ = b''
                 while(buffer_[-1:] != b'&'):
                     data = await self._reader.read(1024)
+                    # print(f'\nasyncclient, _recive_message, data: {data}')
                     if not data:
-                        break
+                        print('\nasyncclient, _recive_message, not data -> break')
+                        await asyncio.sleep(0.1)
+                        raise ValueError
                     else:
                         buffer_ = buffer_ + data
-
-                self._buffer_extractor(buffer_.decode())
+                # print(f'>>> {buffer_}')
+                await self._buffer_extractor(buffer_.decode())
                 
                 failed = 0
 
@@ -101,7 +98,7 @@ class AsyncClient():
                 print(f'\nasyncclient, in _recive_message, {type(ex)}, {ex},  -> sleeping 0.1s + continue [OK]')
                 await asyncio.sleep(0.1)
                 failed += 1
-                if failed > 50:
+                if failed > 10:
                     print('\nasyncclient, in _recive_message, reached max failed allowed RAISING EXEPTION')
                     raise TooManyAttributeErrorValueError
                 continue
@@ -109,15 +106,15 @@ class AsyncClient():
                 print(f'\nasyncclient, in _recive_message, {type(ex)}, {ex}, RAISING EXEPTION -> TERMINATING...')
                 raise ex
 
-    def _buffer_extractor(self, buffer_):
+    async def _buffer_extractor(self, buffer_):
         extracted_data = buffer_.split('&')
         for data in extracted_data:
+            # print(f'\nasyncclient, _buffer_extractor, data:{data}')
             if data.startswith('%'):
                 self._mouse_and_keyboard_controller(data)
-            elif data.startswith('*'):   
-                print(f'monitor>>> {data}')
-
-
+            elif data.startswith('$'):   
+                await self._handel_server_messages(data)
+                # print(f'monitor>>> {data}')
 
     def _mouse_and_keyboard_controller(self, data):
         try:
@@ -177,8 +174,6 @@ class AsyncClient():
         # except Exception as ex:
         #     print(f'asyncclient, control_test, {type(ex)}, {ex}')
 
-
-
     async def _group_tasks_terminator(self, sleep_ = 0.5):
         while(True):
             if self._abort_tasks:
@@ -187,6 +182,7 @@ class AsyncClient():
             await asyncio.sleep(sleep_)
 
     async def _handel_server_messages(self, message):
+        print(f'\nasyncclient, _handel_server_messages, recived: {message}')
         match message:
             case '$INFO_R':
                 await self._send_client_info_to_server()

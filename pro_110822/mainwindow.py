@@ -26,13 +26,10 @@ from server_view.serverview import ServerView
 from server_view.clientwidget import ClientWidget
 
 
-from client.reciveuserinput import ReciveUserInput
 from client.searchforserversworker import SearchForServersWorker
 
 from server.server import Server
 from server.server import ServerSignals
-from server.senduserinput import SendUserInput
-from server.shortcuthandle import ShortcutsHandle
 
 from client.client import Client
 from client.client import ClientSignals

@@ -143,24 +143,22 @@ class ShortcutsHandle():
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Started shortcut listener with argument : {argg} [-]')
 
 
-    def remove_shortcut(self, shortcut: str)->None:
+    def remove_shortcut(self, shortcut: str)->bool:
         """"Remove a shortcut. The listener will stop listning to the removed shortcut"""
         print(f'\nshortcuthadle, remove_shortcut, removing shortcut:{shortcut}')
         was_removed = False
         try:
-            # pdb.set_trace()
             for el in self._savedShortcuts:
                 if (el[0] == shortcut + 'PASS' or el[0] == shortcut + 'DONOT'):
                     self._savedShortcuts.remove(el)
                     was_removed = True
-
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raised : {ex}')
-            return
+            return was_removed
 
         self.define_shortcut(*self._savedShortcuts, addToExist=False, passShortcut=True)
         if not was_removed:
             print(f'\nshortcuthadle, remove_shortcut, called with argument {shortcut}, shortcut WAS NOT REMOVED...')
         else:
             print(f'\nshortcuthadle, remove_shortcut, shortcut:{shortcut} REMOVED')
-
+        return was_removed

@@ -64,9 +64,9 @@ class AsyncServer():
         asyncio.run(self._send_data(data))
 
     async def _send_data(self, data):
-            # if (self._writer == None):
-            #     print("\nasyncserver, no client was set. use set_client to set one.")
-            #     return
+            if (self._writer == None):
+                print("\nasyncserver, no client was set. use set_client to set one.")
+                return
             try:
                 self._writer.write(data)
                 await self._writer.drain()
@@ -92,7 +92,6 @@ class AsyncServer():
             if (self.stream): 
                 for _ in range(self._capture_input.events_queue.qsize()):
                     item = self._capture_input.events_queue.get()
-                    # print(f'sent {item}')
                     await self._send_data(item.encode())
                 await asyncio.sleep(self._start_stream_s1_)
             else:
@@ -121,89 +120,101 @@ class AsyncServer():
             print(f"\nasyncserver, added {data} to inbound queue")
             self.inbound_queue.put(data)
 
-    async def _connections_monitor(self):
-        while(True):
-            connections = self._connected_clients_all
-            for connection in connections:
-                try:
-                    message = self._pack_data('*')
-                    connection['writer'].write(message)
-                    await connection['writer'].drain()
-                except Exception as ex:
-                    print('\nasyncserver, in _connections_monitor, ',  (connection['ip'], connection['port']), type(ex), ' ', ex, ' [CLOSING CONNECTION]')
-                    self._id_list.remove(connection['id'])
-                    print("\nasyncserver, in _connections_monitor removing shortcut:", f"<ctr>+m+{str(connection['id'])}")
-                    self._shortcut.remove_shortcut(f"<ctrl>+m+{str(connection['id'])}")
-                    try:
-                        connection['writer'].close()
-                        await connection['writer'].wait_closed()
-                    except (ConnectionAbortedError, ConnectionResetError):
-                        pass
-                    except Exception as ex:
-                        print('\nasyncserver, in _connections_monitor ', type(ex), ' ', ex)
-                    connections.remove(connection)
-                await asyncio.sleep(self._connections_monitor_s1_)
-            await asyncio.sleep(self._connections_monitor_s2_)
-
     async def _async_send_data_on_writer(self, data, writer):
             if (writer == None):
                 print("\nasyncserver, _send_data_on_writer, invalid writer")
                 return
             data = self._pack_data(data)
             try:
+                print(f"\nasyncserver, _send_data_on_writer, sending: {data} on writer: {writer}")
                 writer.write(data)
                 await writer.drain()
-            except ConnectionResetError:
-                print('\nasyncserver, ConnectionResetError')
+            # except ConnectionResetError:
+            #     print('\nasyncserver, _async_send_data_on_writer, ConnectionResetError')
             except Exception as ex:
-                    print('\nasyncserver, ', type(ex), ex, 'Unhandeled')     
+                    print('\nasyncserver, _async_send_data_on_writer, ', type(ex), ex, ' Unhandeled')     
 
-    def _client_messages_handler(self, message):
+    def _client_info_respond(self, respond, client_ip, client_port):
         def extract_name_and_rez(message):
             str_to_list = message.split('!')
             name_ = str_to_list[1]
             resulotion_ = tuple((str_to_list[2], str_to_list[3]))
-            ip_ = str_to_list[-2]
-            port_ = str_to_list[-1]
-            return name_, resulotion_, ip_, port_
+            return name_, resulotion_
         
-        if message.startswith('€INFO_R'): # €INFO_R is a respond from the client to a
-                                          # $INFO_R request that is sent by the server.
-                                          # $INFO_R is a requst sent by the server to ask 
-                                          # the client for its name and screen resulotion.
-            name, resulotion, ip, port = extract_name_and_rez(message)
-            clients = self._connected_clients_all
-            for client in clients:
-                if ((client['ip'] == ip) and (str(client['port']) == port)):
-                    #update the client with the info that was recived.
-                    client['name'] = name
-                    client['rez'] = resulotion
-                    print(f'client was updated with name:{name} and resulotion:{resulotion}')
-        else:
-            self._add_to_inbound(message)
+
+        def defin_ctrl_m_id_shortcut(id_):
+            print(f"\nasyncserver, _defin_ctrl_m_id_shortcut, called with id:{id_}'")
+            shortcut_ = '<ctrl>+m+'+str(id_)
+            target_function_ = '_shortcut_handler'
+            self._shortcut.define_shortcut((shortcut_, target_function_))
+            print(f"\nasyncserver, _defin_ctrl_m_id_shortcut, defined shortcut: '<ctrl>+m+{str(id_)}'")
+            return shortcut_, target_function_
+        
+
+
+        name, resulotion = extract_name_and_rez(respond)
+        clients = self._connected_clients_all
+        for client in clients:
+            if ((client['ip'] == client_ip) and (str(client['port']) == client_port)):
+                #give the client a shortcut passed on its id
+                shortcut, target_function = defin_ctrl_m_id_shortcut(client['id'])
+                client['shortcut'] = shortcut
+                client['targe_function'] = target_function
+                #update the client with the info that was recived.
+                client['name'] = name
+
+                client['rez'] = resulotion
+
+                print(f'\nasyncserver, _client_info_respond, client{client_ip}:{client_port} was updated with {name} {shortcut} {target_function} {resulotion}')
+
+    def _buffer_extractor(self, buffer_, client_ip, client_port):
+        print(f'\nasyncserver, _buffer_extractor, called with buffer: {buffer_}, {client_ip}, {client_port}')
+        extracted_data = buffer_.split('&')
+
+        for data in extracted_data:
+            if data.startswith('€INFO_R'):
+                self._client_info_respond(data, client_ip, client_port)
+                # self._mouse_and_keyboard_controller(data)
+            elif data.startswith('*'):   
+                print(f'monitor>>> {data}')
 
     async def _recive_data_task(self, connection):
         print(f'\nasycnserver, _recive_data_task, task was created with connection:{connection}')
         client_ip = connection['ip']
         client_port = str(connection['port'])
+        failed = 0
         while(True):
             try:
-                head_length = await connection['reader'].read(7)
-                head_length = head_length.decode()
-                head_length = head_length.replace('+', '')
-                head_length = int(head_length)
-                data = await connection['reader'].read(head_length)
-                data = data.decode()
-                print(f"\nasyncserver, _recive_data, data:{data}")
-                self._client_messages_handler(data + '!' + client_ip + '!' + client_port)
-                await asyncio.sleep(self._recive_data_task_s1)
-            # except ConnectionResetError as cr:
-            #     print(f"\nasyncserver, _recive_data, {type(cr)}, {cr}, returning")
-            #     return
+                buffer_ = b''
+                while(buffer_[-1:] != b'&'):
+                    data = await connection['reader'].read(1024)
+                    if not data:
+                        print('\nasyncserver. _recive_data_task, not data -> FAILED')
+                        await asyncio.sleep(0.1)
+                        raise ValueError
+                    else:
+                        buffer_ = buffer_ + data
+                print(f'\nasyncserver, _recive_data_task, client_ip:{client_ip}, client_port:{client_port}'\
+                    f"\nasyncserver, sending to buffer_extractor, buffer: {buffer_.decode()}")
+                
+
+                self._buffer_extractor(buffer_.decode(),  client_ip, client_port)
+
+                failed = 0
+
+            except (AttributeError, ValueError) as ex:
+                print(f'\nasyncclient, in _recive_data_task, {type(ex)}, {ex},  -> sleeping 0.1s + continue [OK]')
+                await asyncio.sleep(0.1)
+                failed += 1
+                if failed > 10:
+                    print('\nasyncclient, in _recive_data_task, reached max failed allowed RAISING EXEPTION')
+                    # raise TasksAborted
+                    return
+                continue
             except Exception as ex:
-                print(f'\nasyncserver, _recive_data_task, EXEPTION, {type(ex)}, {ex} -> RETURNING')
+                print(f'\nasyncclient, in _recive_data_task, {type(ex)}, {ex}, RAISING EXEPTION -> TERMINATING...')
+                # raise ex
                 return
-                # await asyncio.sleep(1)
 
     async def _schedule_recive_data_tasks(self):
 
@@ -296,12 +307,54 @@ class AsyncServer():
                 self._id_list.append(i)
                 return i
         return False
-    
+
+    async def _connections_monitor(self):
+        while(True):
+            connections = self._connected_clients_all
+            for connection in connections:
+                try:
+                    message = self._pack_data('*')
+                    connection['writer'].write(message)
+                    await connection['writer'].drain()
+                except Exception as ex:
+                    print('\nasyncserver, in _connections_monitor, ',  (connection['ip'], connection['port']), type(ex), ' ', ex, ' [CLOSING CONNECTION]')
+                    self._id_list.remove(connection['id'])
+                    print("\nasyncserver, in _connections_monitor removing shortcut:", f"<ctr>+m+{str(connection['id'])}")
+                    was_removed = self._shortcut.remove_shortcut(f"<ctrl>+m+{str(connection['id'])}")
+                    if was_removed:
+                        print("\nasyncserver, in _connections_monitor removing shortcut:", f"<ctr>+m+{str(connection['id'])}, REMOVED")
+                    else:
+                        print("\nasyncserver, in _connections_monitor removing shortcut:", f"<ctr>+m+{str(connection['id'])}, WAS NOT REMOVED")
+
+                    try:
+                        connection['writer'].close()
+                        await connection['writer'].wait_closed()
+                    except (ConnectionAbortedError, ConnectionResetError):
+                        print("\nasyncserver, in _connections_monitor ConnectionAbortedError or ConnectionResetError ->"\
+                              "\nasyncserver, in _connections_monitor, setting self._writer, self._reader to None if equal connection, STANDBY...")
+                        if (self._writer == connection['writer']) or (self._reader == connection['reader']):
+                            self._writer = None
+                            self._reader = None
+                            if self.is_streaming():
+                                self.stop_stream()
+                                print("\nasyncserver, in _connections_monitor, self._writer, self._reader is SET TO NONE + STOPPED STREAM")
+                            else:
+                                print("\nasyncserver, in _connections_monitor, setting self._writer, self._reader is SET NOT TO NONE")
+                        else:
+                            print("\nasyncserver, in _connections_monitor ConnectionAbortedError or ConnectionResetError, self._writer self._reader NOT SET TO None")
+                            
+
+
+                    except Exception as ex:
+                        print('\nasyncserver, in _connections_monitor ', type(ex), ' ', ex)
+                    connections.remove(connection)
+                await asyncio.sleep(self._connections_monitor_s1_)
+            await asyncio.sleep(self._connections_monitor_s2_)
+
     def _shortcut_handler(self, shortcut):
         print(f"\nasyncserver, _shortcut_handler. called with shortcut:{shortcut}")
         if shortcut == '<ctrl>+m+1':
             self.stop_stream()
-            # self.set_active(None, None)
             return
         clients = self._connected_clients_all
         for client in clients:
@@ -314,26 +367,17 @@ class AsyncServer():
                     self.set_active(client['ip'], client['port'])
                     self.start_stream()
 
-    def _defin_ctrl_m_id_shortcut(self, id_):
-        print(f"\nasyncserver, _defin_ctrl_m_id_shortcut, called with id:{id_}'")
-        shortcut_ = '<ctrl>+m+'+str(id_)
-        target_function_ = '_shortcut_handler'
-        self._shortcut.define_shortcut((shortcut_, target_function_))
-        print(f"\nasyncserver, _defin_ctrl_m_id_shortcut, defined shortcut: '<ctrl>+m+{str(id_)}'")
-        return shortcut_, target_function_
-
     async def _server_handler(self, reader, writer):
         if self._abort_tasks:
             return
         addr = writer.get_extra_info('peername')
-        print(f"\nasyncserver, {addr!r} is connected.")
+        print(f"\nasyncserver, _server_handler, {addr!r} is connected.")
 
         id_ = self._get_id()
         if not id_:
             print('\nasyncserver, _handler, all IDs 2->9 are in use, RETURNING...')
-            return
+            raise TasksAborted
 
-        shortcut, target_function = self._defin_ctrl_m_id_shortcut(id_)
 
         self._connected_clients_all.append({'ip' : addr[0],
                                     'port' : addr[1],
@@ -342,8 +386,8 @@ class AsyncServer():
                                    'name' : '',
                                    'rez' : '',
                                    'id' : id_,
-                                   'shortcut' : shortcut,
-                                   'targe_function' : target_function})
+                                   'shortcut' : '',
+                                   'targe_function' : ''})
         
         print("\nasyncserver, _handler, sending info request to client")
         await self._async_send_data_on_writer('$INFO_R', writer)
