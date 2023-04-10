@@ -162,3 +162,12 @@ class ShortcutsHandle():
         else:
             print(f'\nshortcuthadle, remove_shortcut, shortcut:{shortcut} REMOVED')
         return was_removed
+    
+    def remove_all_shortcuts(self):
+        for shortcut_ in self._savedShortcuts:
+            if shortcut_[:-4] == 'PASS':
+                self.remove_shortcut(shortcut_.replace('PASS', ''))
+            elif shortcut_[:-5] == 'DONOT':
+                self.remove_shortcut(shortcut_.replace('DONOT', ''))
+        self._stop_shortcut_listener()
+

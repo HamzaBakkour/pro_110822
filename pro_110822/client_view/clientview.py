@@ -62,6 +62,15 @@ class ClientView(QtWidgets.QWidget):
             if (widget.serverIP == ip) and (widget.port == port):
                 return True
         return False
+    
+    def delete_widget(self, ip, port):
+        for widget in self.widgets:
+            if (widget.serverIP == ip) and (widget.port == port):
+                print(f'\nclientview, delete_widget, deleting {ip}{port}...')
+                widget.deleteLater()
+                self._widgets.remove(widget)
+                print(f'\nclientview, delete_widget, deleting {ip}{port} DELETED')
+
 
 
 

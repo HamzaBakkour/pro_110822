@@ -3,7 +3,7 @@ from PySide6.QtCore import QRunnable, Slot, QObject, Signal, QTimer, SIGNAL
 from typing import Optional
 import time
 from server.asyncserver import AsyncServer
-
+from prologging import Log
 
 # Server emmit signal to main window every 1s
 # -> Server needs a slot that the clien can connect to
@@ -22,7 +22,8 @@ class Server(QRunnable):
         self.port = serverPort
         self._server = AsyncServer(self.ip, self.port)
         self.alive = True
-        self.timer = None       
+        self.timer = None
+        self._log = Log()
 
     @property
     def connected_clients(self):
@@ -43,7 +44,7 @@ class Server(QRunnable):
         self._server.broadcast(message)
 
 
-    def stream_to_client(self):#must set client first
+    def stream_to_client(self):
         self._server.start_stream()
 
     def stop_stream(self):
@@ -56,11 +57,17 @@ class Server(QRunnable):
     @Slot()
     def run(self)-> None:
         try:
-            print('server, run, STARTING the server...')
+            self._log.info(['run'],
+                           message='STARTING the server...')
+            # print('server, run, STARTING the server...')
             self._server.start()
-            print('server, run, server STOPED...')
+            self._log.info(['run'],
+                           message='server STOPPED')
+            # print('server, run, server STOPED...')
         except CancelledError:
-            print(f'\nserver, server was canceled {CancelledError}, returning...')
+            self._log.error(['run'],
+                      message=f'server was canceled {CancelledError}, returning...')
+            # print(f'\nserver, server was canceled {CancelledError}, returning...')
             return
 
 

@@ -1,0 +1,395 @@
+{
+  "todotree": {
+    "tree": [
+      {
+        "key": 1680462455564,
+        "children": [
+          {
+            "key": 1680811955271,
+            "children": [],
+            "todo": {
+              "content": "add print in every task",
+              "id": 1680811955271,
+              "level": "default",
+              "done": true,
+              "start": 1680811955272,
+              "focus": false,
+              "end": 1680857913173
+            }
+          },
+          {
+            "key": 1680811968079,
+            "children": [],
+            "todo": {
+              "content": "raise exception in one if the tasks -> exit gather + cancel tasks one by one (will work?)",
+              "id": 1680811968079,
+              "level": "default",
+              "done": true,
+              "start": 1680811968079,
+              "focus": false,
+              "end": 1680857924605
+            }
+          },
+          {
+            "key": 1680857937483,
+            "children": [
+              {
+                "key": 1680859867924,
+                "children": [],
+                "todo": {
+                  "content": "create server, stop server, repeat",
+                  "id": 1680859867924,
+                  "level": "default",
+                  "done": true,
+                  "start": 1680859867924,
+                  "focus": false,
+                  "end": 1680859897659
+                }
+              }
+            ],
+            "todo": {
+              "content": "check server can stop/start in all scenario",
+              "id": 1680857937483,
+              "level": "default",
+              "done": true,
+              "start": 1680857937483,
+              "focus": false,
+              "end": 1680859909255
+            }
+          },
+          {
+            "key": 1680859426219,
+            "children": [],
+            "todo": {
+              "content": "create server, client connect, stop server, create server [X]",
+              "id": 1680859426219,
+              "level": "default",
+              "done": true,
+              "start": 1680859426219,
+              "focus": false,
+              "end": 1680859833703
+            }
+          }
+        ],
+        "todo": {
+          "content": "server close",
+          "id": 1680462455564,
+          "level": "default",
+          "done": true,
+          "start": 1680462455564,
+          "focus": false,
+          "end": 1680859915042
+        }
+      },
+      {
+        "key": 1680462575434,
+        "children": [
+          {
+            "key": 1680866730311,
+            "children": [],
+            "todo": {
+              "content": "search for server worker, progress bar and add server widget",
+              "id": 1680866730311,
+              "level": "default",
+              "done": true,
+              "start": 1680866730311,
+              "focus": false,
+              "end": 1680965042894
+            }
+          },
+          {
+            "key": 1680861229078,
+            "children": [],
+            "todo": {
+              "content": "server widget on client view",
+              "id": 1680861229078,
+              "level": "default",
+              "done": true,
+              "start": 1680861229078,
+              "focus": false,
+              "end": 1680965045289
+            }
+          },
+          {
+            "key": 1680462879488,
+            "children": [
+              {
+                "key": 1680881490096,
+                "children": [],
+                "todo": {
+                  "content": "create connection",
+                  "id": 1680881490096,
+                  "level": "default",
+                  "done": false,
+                  "start": 1680881490096
+                }
+              },
+              {
+                "key": 1680881515120,
+                "children": [],
+                "todo": {
+                  "content": "close connection",
+                  "id": 1680881515120,
+                  "level": "default",
+                  "done": false,
+                  "start": 1680881515120
+                }
+              },
+              {
+                "key": 1680881529050,
+                "children": [],
+                "todo": {
+                  "content": "re-open connection",
+                  "id": 1680881529050,
+                  "level": "default",
+                  "done": false,
+                  "start": 1680881529050
+                }
+              },
+              {
+                "key": 1680881553094,
+                "children": [],
+                "todo": {
+                  "content": "remove client",
+                  "id": 1680881553094,
+                  "level": "default",
+                  "done": false,
+                  "start": 1680881553094
+                }
+              }
+            ],
+            "todo": {
+              "content": "connec/dissconnect button",
+              "id": 1680462879488,
+              "level": "default",
+              "done": true,
+              "start": 1680462879488,
+              "focus": false,
+              "end": 1680965049400
+            }
+          },
+          {
+            "key": 1680462758638,
+            "children": [],
+            "todo": {
+              "content": "info text box",
+              "id": 1680462758638,
+              "level": "secondary",
+              "done": false,
+              "start": 1680462758638
+            }
+          }
+        ],
+        "todo": {
+          "content": "search for servers, port scanner",
+          "id": 1680462575434,
+          "level": "default",
+          "done": true,
+          "start": 1680462575434,
+          "focus": false,
+          "end": 1680965056957
+        }
+      },
+      {
+        "key": 1680891068325,
+        "children": [],
+        "todo": {
+          "content": "stream mouse and keyboard movement",
+          "id": 1680891068325,
+          "level": "default",
+          "done": true,
+          "start": 1680891068325,
+          "focus": false,
+          "end": 1681077888077
+        }
+      },
+      {
+        "key": 1681107145192,
+        "children": [
+          {
+            "key": 1681107172185,
+            "children": [
+              {
+                "key": 1681107285450,
+                "children": [],
+                "todo": {
+                  "content": "stop the server and do the same thing -> NOT WORKING, FIX!",
+                  "id": 1681107285450,
+                  "level": "secondary",
+                  "done": true,
+                  "start": 1681107285450,
+                  "focus": false,
+                  "end": 1681114091926
+                }
+              },
+              {
+                "key": 1681113595765,
+                "children": [],
+                "todo": {
+                  "content": "stop server while reciving mouse and keyboard",
+                  "id": 1681113595765,
+                  "level": "secondary",
+                  "done": true,
+                  "start": 1681113595765,
+                  "focus": false,
+                  "end": 1681114092622
+                }
+              },
+              {
+                "key": 1681113916163,
+                "children": [],
+                "todo": {
+                  "content": "stop the server while connected (not reciveing mouse and keyboard)",
+                  "id": 1681113916163,
+                  "level": "secondary",
+                  "done": true,
+                  "start": 1681113916163,
+                  "focus": false,
+                  "end": 1681114093328
+                }
+              }
+            ],
+            "todo": {
+              "content": "connect disconnect when server is up at client start (no mouse or keyboard yet)",
+              "id": 1681107172185,
+              "level": "secondary",
+              "done": true,
+              "start": 1681107172185,
+              "focus": false,
+              "end": 1681114101901
+            }
+          }
+        ],
+        "todo": {
+          "content": "remove sever widget correctly",
+          "id": 1681107145192,
+          "level": "default",
+          "done": true,
+          "start": 1681107145192,
+          "focus": false,
+          "end": 1681114102904
+        }
+      },
+      {
+        "key": 1681114217384,
+        "children": [],
+        "todo": {
+          "content": "when stop the server, shortcuts are still active",
+          "id": 1681114217384,
+          "level": "default",
+          "done": true,
+          "start": 1681114217384,
+          "focus": false,
+          "end": 1681115335306
+        }
+      },
+      {
+        "key": 1681115378961,
+        "children": [
+          {
+            "key": 1681115453693,
+            "children": [],
+            "todo": {
+              "content": "log module ,can print to console or text",
+              "id": 1681115453693,
+              "level": "default",
+              "done": false,
+              "start": 1681115453693
+            }
+          }
+        ],
+        "todo": {
+          "content": "log module + .exe + test around",
+          "id": 1681115378961,
+          "level": "default",
+          "done": false,
+          "start": 1681115378961
+        }
+      },
+      {
+        "key": 1681077896063,
+        "children": [
+          {
+            "key": 1681077942255,
+            "children": [],
+            "todo": {
+              "content": ".exe YES!",
+              "id": 1681077942255,
+              "level": "default",
+              "done": false,
+              "start": 1681077942255
+            }
+          }
+        ],
+        "todo": {
+          "content": "test every thing working as intended before supress and hide",
+          "id": 1681077896063,
+          "level": "default",
+          "done": false,
+          "start": 1681077896063
+        }
+      },
+      {
+        "key": 1681077683555,
+        "children": [],
+        "todo": {
+          "content": "supress",
+          "id": 1681077683555,
+          "level": "default",
+          "done": false,
+          "start": 1681077683555
+        }
+      },
+      {
+        "key": 1681077704157,
+        "children": [],
+        "todo": {
+          "content": "hide mouse",
+          "id": 1681077704157,
+          "level": "default",
+          "done": false,
+          "start": 1681077704157
+        }
+      },
+      {
+        "key": 1680891087373,
+        "children": [],
+        "todo": {
+          "content": "tests",
+          "id": 1680891087373,
+          "level": "default",
+          "done": false,
+          "start": 1680891087373
+        }
+      },
+      {
+        "key": 1681114270984,
+        "children": [],
+        "todo": {
+          "content": "jenkins",
+          "id": 1681114270984,
+          "level": "default",
+          "done": false,
+          "start": 1681114270984
+        }
+      }
+    ],
+    "expandKeys": [
+      1680857937483,
+      1681107172185,
+      1681113595765,
+      1680891068325,
+      1681115378961
+    ],
+    "schema": "https://github.com/Saber2pr/vsc-ext-todolist/blob/master/src/api/type.ts#L3",
+    "add_mode": "bottom",
+    "virtual": false,
+    "showLine": false,
+    "playFontSize": 24,
+    "title": "pro_110822_todo",
+    "autoSort": false,
+    "showEndTime": false,
+    "lang": "en",
+    "version": "1681115487271"
+  }
+}

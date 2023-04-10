@@ -10,6 +10,8 @@ from pynput.mouse import Button
 from pynput.keyboard import Controller as KC
 from pynput.keyboard import Key
 
+import sys
+
 class TooManyAttributeErrorValueError(Exception):
     pass
 
@@ -19,6 +21,7 @@ class ServerIsNotConnected(Exception):
 class IntendedAbortGroupTask(Exception):
     pass
 
+
 class AsyncClient():
     def __init__(self) -> None:
         self._reader = None
@@ -26,6 +29,7 @@ class AsyncClient():
         self._connected = False
         self._abort_tasks = False
         self._tasks = []
+        self._raise_exeption_ = False
         self._inbound_queue = queue.Queue()
         self._outbound_queue = queue.SimpleQueue()
         self._mouse = MC()
@@ -34,6 +38,31 @@ class AsyncClient():
         self._y = self._get_screen_resulotion()[1]
         self._recive_message_s1 = 0.1
     
+
+    @property
+    def _raise_exeption(self):
+        return self._raise_exeption_
+    
+    @_raise_exeption.setter
+    def _raise_exeption(self, value):
+        if type(value) != bool:
+            print(f'\nasyncclient, _raise_exption, value:{value} must be of type bool')
+            return
+        if not self._raise_exeption_:
+            self._raise_exeption_ = True
+            try:
+                print(f'\nasyncclient, @_raise_exeption.setter, called by {sys._getframe(1).f_code.co_name}'\
+                      f"\nwith value {value}, _raise_exeption_ is now {self._raise_exeption_ }")
+            except Exception:
+                print('\nasyncclient, @_raise_exeption.setter, _raise_exeption_ is set to True')
+        else:
+            try:
+                print(f'\nasyncclient, @_raise_exeption.setter, called by {sys._getframe(1).f_code.co_name}'\
+                      f"\nwith value {value}, NO CHANGES MADE, _raise_exeption_ is {self._raise_exeption_}")
+            except Exception:
+                print(f'\nasyncclient, @_raise_exeption.setter, called with value {value}  NO CHANGES MADE [OK]')
+
+
     def is_connected(self):
         return self._connected
 
@@ -50,6 +79,11 @@ class AsyncClient():
         try:
             print(f"\nasyncclient, _connect, trying to connect to server {serverIP}:{serverPort}")
             self._reader, self._writer = await asyncio.open_connection(serverIP, serverPort)
+        except ConnectionRefusedError:
+            print(f'\nayncclient, _connect, ConnectionRefusedError {ConnectionRefusedError} -> RAISING')
+            self._raise_exeption = True
+            raise ConnectionRefusedError
+
         except Exception as ex:
             print(f'asyncclient, _connect, CANNOT CONNECT to server {type(ex)}, {ex}')
         else:
@@ -82,14 +116,12 @@ class AsyncClient():
                 buffer_ = b''
                 while(buffer_[-1:] != b'&'):
                     data = await self._reader.read(1024)
-                    # print(f'\nasyncclient, _recive_message, data: {data}')
                     if not data:
                         print('\nasyncclient, _recive_message, not data -> break')
                         await asyncio.sleep(0.1)
                         raise ValueError
                     else:
                         buffer_ = buffer_ + data
-                # print(f'>>> {buffer_}')
                 await self._buffer_extractor(buffer_.decode())
                 
                 failed = 0
@@ -100,6 +132,7 @@ class AsyncClient():
                 failed += 1
                 if failed > 10:
                     print('\nasyncclient, in _recive_message, reached max failed allowed RAISING EXEPTION')
+                    self._raise_exeption = True
                     raise TooManyAttributeErrorValueError
                 continue
             except Exception as ex:
@@ -230,10 +263,12 @@ class AsyncClient():
 
         done, pending = await asyncio.wait(self._tasks , return_when=asyncio.FIRST_EXCEPTION)
 
+        print('')
         for task in done:
-            print(f'\nasyncserver, _main, done tasks:{task}')
+            print(f'asyncserver, _main, done tasks:{task}')
+        print('')
         for task in pending:
-            print(f'\nasyncserver, _main, pending tasks:{task}')
+            print(f'asyncserver, _main, pending tasks:{task}')
 
         await self._close_connection()
 
@@ -243,7 +278,6 @@ class AsyncClient():
             try:
                 print(f'\nCANCELING>>> task:{task}')
                 task.cancel()
-                self._tasks.remove(task)
                 print(f'\ntask:{task.get_name()} <<<CANCELED')
             except Exception as ex:
                 print(f'\nasyncclient, _main, task.cancel(), {type(ex)}, {ex}')
@@ -262,13 +296,30 @@ class AsyncClient():
     def close_connection(self):
         self._abort_tasks = True
 
+    #at raise -> client worker will catch the exeption and emmit a remove server signal to main thread
     def connect(self, serverIP, serverPort):
         try:
             asyncio.run(self._main(serverIP, serverPort))
         except CancelledError:
-            print(f'\asyncclient, connect, {CancelledError}, EXITING...')
+            if self._raise_exeption :
+                print(f'\nasyncclient, connect, tasks group canceled, {type(CancelledError)}, {CancelledError} RAISING EXCEPTION + EXITING')
+                raise CancelledError
+            else:
+                print(f'\nasyncclient, connect, tasks group canceled, {type(CancelledError)}, {CancelledError} EXITING, NO exception raised')   
+        except Exception as ex:
+            if self._raise_exeption :
+                print(f'\nasyncclient, connect, tasks group canceled, {type(ex)}, {ex} RAISING EXCEPTION + EXITING')
+                raise ex
+            else:
+                print(f'\nasyncclient, connect, tasks group canceled, {type(ex)}, {ex} EXITING')
 
-        
+
+
+        # except ConnectionRefusedError:
+        #     print(f'\nasyncclient, connect, {ConnectionRefusedError}, RAISING + EXITING')
+        #     raise ConnectionRefusedError
+        # except CancelledError:
+        #     print(f'\nasyncclient, connect, {CancelledError}, NOT RAISING + EXITING')
             
 
 

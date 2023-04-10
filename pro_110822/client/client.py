@@ -1,7 +1,26 @@
 from PySide6.QtCore import QRunnable, Slot, QObject, Signal
-import time
+from asyncio.exceptions import CancelledError
 from client.asyncclient import AsyncClient
 
+
+# class CSignal(QObject):
+#      recived_messages = Signal(object)
+
+# class ClientSignals(QRunnable):
+#     def __init__(self, recived_messages) -> None:
+#         super(ClientSignals, self).__init__()
+#         self.signal = CSignal()
+#         self.recived_messages = recived_messages
+#         self.alive = True
+#         self.tick = 1
+#     @Slot()
+#     def run(self) -> None:
+#         while(self.alive):
+#             self.signal.recived_messages.emit(self.recived_messages)
+#             time.sleep(self.tick)
+
+class CSignal(QObject):
+     remove_server = Signal(object, object)
 
 class Client(QRunnable):
     def __init__(self, serverIP, serverPort) -> None:
@@ -9,6 +28,7 @@ class Client(QRunnable):
         self._client = AsyncClient()
         self.serverIP = serverIP
         self.serverPort = serverPort
+        self.signals = CSignal()
         self.alive = True
 
     @property
@@ -29,35 +49,53 @@ class Client(QRunnable):
         self._client.close_connection()
 
 
-
-
-
     @Slot()
     def run(self)-> None:
-        print('client, run, started')
-        self._connect()
+        print('client, run, STARTED')
+        try:
+            self._connect()
+        except CancelledError:
+                print('\nclient, run, _connect raised exeption, CancelledError')
+                print(f'\nclient, run, _connect raised exeption, EMMITING REMOVE SIGNAL with {self.serverIP}:{self.serverPort} to mainwindow ->')
+                self.signals.remove_server.emit(self.serverIP, self.serverPort)
+        except Exception as ex:
+                print(f'\nclient, run, _connect raised exeption, {type(ex)}, {ex}')
+                print(f'\nclient, run, _connect raised exeption, EMMITING REMOVE SIGNAL with {self.serverIP}:{self.serverPort} to mainwindow ->')
+                self.signals.remove_server.emit(self.serverIP, self.serverPort)
+        print("\nclient, run, 'asyncclient' did not raise exprion -> NOT EMMITING remove server signal")
+
         print('client, run, ENDED')
-        return
+
+   
 
 
-        
+    # @Slot()
+    # def run(self)-> None:
+    #     print('client, run, started')
+    #     try:
+    #         self._connect()
+    #     except Exception as ex:
+    #         print(f'\nclient, run, _connect raised exeption, {type(ex)}, {ex}')
+    #         print(f'\nclient, run, _connect raised exeption, EMMITING REMOVE SIGNAL with {self.serverIP}:{self.serverPort} to mainwindow ->')
+    #         self.signals.remove_server.emit(self.serverIP, self.serverPort)
+    #     print("\nclient, run, 'asyncclient' did not raise exprion -> NOT EMMITING remove server signal")       
 
 
-class CSignal(QObject):
-     recived_messages = Signal(object)
+# class CSignal(QObject):
+#      recived_messages = Signal(object)
 
-class ClientSignals(QRunnable):
-    def __init__(self, recived_messages) -> None:
-        super(ClientSignals, self).__init__()
-        self.signal = CSignal()
-        self.recived_messages = recived_messages
-        self.alive = True
-        self.tick = 1
-    @Slot()
-    def run(self) -> None:
-        while(self.alive):
-            self.signal.recived_messages.emit(self.recived_messages)
-            time.sleep(self.tick)
+# class ClientSignals(QRunnable):
+#     def __init__(self, recived_messages) -> None:
+#         super(ClientSignals, self).__init__()
+#         self.signal = CSignal()
+#         self.recived_messages = recived_messages
+#         self.alive = True
+#         self.tick = 1
+#     @Slot()
+#     def run(self) -> None:
+#         while(self.alive):
+#             self.signal.recived_messages.emit(self.recived_messages)
+#             time.sleep(self.tick)
 
 
     # def resume_connection(self):
