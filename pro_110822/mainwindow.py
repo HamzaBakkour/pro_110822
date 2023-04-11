@@ -260,13 +260,6 @@ class MainWindow(QMainWindow):
 
 
 
-
-
-
-
-
-                
-
 app = QApplication([])
 window = MainWindow()
 window.show()
@@ -275,6 +268,10 @@ sys.exit(app.exec())
 
 
 
+
+#data.scanCode: ctrl -> 29
+#data.scanCode: m -> 50
+#data.scanCode: 1 -> 2
 
 
 

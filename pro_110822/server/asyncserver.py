@@ -92,10 +92,12 @@ class AsyncServer():
         return self.stream
 
     def start_stream(self):
+        self._capture_input.supress_user_input()
         self._capture_input.start_listning()
         self.stream = True
 
     def stop_stream(self):
+        self._capture_input.unsupress_user_input()
         self.stream = False
         self._capture_input.stop_listning()
 
@@ -441,7 +443,6 @@ class AsyncServer():
     def _shortcut_handler(self, shortcut):
         self._log.info(['_shortcut_handler'],
                     message=f'called with shortcut:{shortcut}')
-        # print(f"\nasyncserver, _shortcut_handler. called with shortcut:{shortcut}")
         if shortcut == '<ctrl>+m+1':
             self.stop_stream()
             return
@@ -488,6 +489,7 @@ class AsyncServer():
         # print("\nasyncserver, _handler, info request sent")
         self._log.info(['_server_handler'],
                     message='info request sent')
+
     async def _start_server(self):
         self._log.info(['_start_server'],
                     message='creating server coro...')
@@ -527,6 +529,8 @@ class AsyncServer():
                     message='tasks appended -> wait')
         done, pending = await asyncio.wait(self._tasks , return_when=asyncio.FIRST_EXCEPTION)
 
+        self._capture_input.unsupress_user_input()
+
         for task in done:
             self._log.info(['_main'],
                         message=f'done tasks:{task}')
@@ -559,23 +563,19 @@ class AsyncServer():
          asyncio.run(self._main(), debug=True)
 
     def close(self):
+        self._capture_input.unsupress_user_input()
         try:
             self._log.info(['close'],
                         message='removing shortcuts')
-            # print('\nasyncserver, close, removing shortcuts')
             self._shortcut.remove_all_shortcuts()
         except Exception as ex:
             self._log.critical(['close'],
                             message=f'excption raised while tyring to remove shortcus, {type(ex)}, {ex}')
-            # print('\nasyncserver, close, removing shortcuts, excption raised while tyring to remove shortcus'\
-                # f'\n{type(ex)}, {ex}')
         else:
             self._log.info(['close'],
                         message='removing shortcuts, shortcus REMOVED')
-            # print('\nasyncserver, close, removing shortcuts, shortcus REMOVED')
         self._log.info(['close'],
                     message='setting _abort_tasks to True...')
-        # print('\nasyncserver, close, setting _abort_tasks to True...')
         self._abort_tasks = True
         
 
