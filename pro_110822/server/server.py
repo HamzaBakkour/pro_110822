@@ -53,6 +53,9 @@ class Server(QRunnable):
     def close_server(self):
         self._server.close()
 
+    def is_stream_on(self):
+        # print(f'return self._server.stream : {self._server.stream}')
+        return self._server.stream
 
     @Slot()
     def run(self)-> None:

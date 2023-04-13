@@ -1,16 +1,17 @@
 from pynput import keyboard
 import inspect
+from prologging import Log
 import os
 import pdb
 
 class ShortcutsHandle():
-    """Define a shortcut and a method to ba called when the shortcut is pressed"""
+    
     def __init__(self, calledObject):
         self._shortcutListener = False
         self._savedShortcuts = []
+        self._log = Log()
         self.calledObject = calledObject
 
-    #Start the listener.
     def _start_shortcut_listener(self, argg):
         if (len(argg) > 0):
             self._shortcutListener =  keyboard.GlobalHotKeys(eval(argg))
@@ -18,63 +19,23 @@ class ShortcutsHandle():
         else:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'Empty argument passed to _shortcutListner')
 
-
-    #Stop the listener and restart it.
     def _refresh_shortcut_listener(self, argg):
         if (len(argg) > 0):
             self._shortcutListener.stop()
+            self._log.info(['_refresh_shortcut_listener'],
+                           message=f'argg:{argg}')
             self._shortcutListener =  keyboard.GlobalHotKeys(eval(argg))
             self._shortcutListener.start()
         else:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', 'Empty argument passed to _refresh_shortcut_lister')
     
-    #Stop the listner.
     def _stop_shortcut_listener(self):
         self._shortcutListener.stop()
 
-
-    #Define the shortcuts that the listener will listen to.
     def define_shortcut(self,*args : list[tuple[str, str]],  addToExist=True, passShortcut=True) -> None:
-        """Define a shortcut.
-        
-        Examples:
-            >>> class HelloClass():
-            ...     def hello_method(self, message):
-            ...         print(f'Hello there! You are here because the shortcut {message} was pressed!')
-            >>> Hello = HelloClass()
-            >>> Shortcut = ShortcutsHandle(Hello)
-            >>> Shortcut.define_shortcut(('<ctrl>+x', 'hello_method'), passShortcut = True)
-            shortcuthandle.py |  define_shortcut |  <module> ||  Started shortcut listener with argument : {'<ctrl>+x': lambda self = self : self.calledObject.hello_method('<ctrl>+x')} [-]
-            >>> from pynput.keyboard import Key, Controller
-            >>> keyboard = Controller()
-            >>> keyboard.press(Key.ctrl)
-            >>> keyboard.press('x')
-            >>> import time
-            >>> time.sleep(0.1)
-            Hello there! You are here because the shortcut <ctrl>+x was pressed!
-            >>> keyboard.release(Key.ctrl)
-            >>> keyboard.release('x')
-            >>> Shortcut.remove_shortcut('<ctrl>+x')
-            >>> keyboard.press(Key.ctrl)
-            >>> keyboard.press('x')
-            >>> time.sleep(0.1)
-            >>> keyboard.release(Key.ctrl)
-            >>> keyboard.release('x')
+        self._log.info(['define_shortcut'],
+                       message=f'called with args:{args}')
 
-        Args:
-            *args (list[tuple[str, str]): The first element in the tuple is the shortcut. The second element is the method to be called when the shortcut is pressed.
-            addToExist (bool) : If true, the passed shortcuts are added to any existing shortcuts   
-                                If false, any existing shortcuts are removed and the passed shortcuts are defined
-            passShortcut (bool) : If true, the pressed shortcut is passed to the method to be called when the shortcut is pressed.   
-                                    PS: Its not possible to pass any arguemnts - other than the pressed shortcut - to the method to be called when the shortcut is pressed.   
-                                        This will be fixed in the future.   
-
-        Returns:
-            None
-
-        """
-        #args: list[(str, str)], the arguemnt passed when the method is called.
-        #self._savedShortcuts: list[(str, str)], the shortcuts that are currently in use.
         if (len(args) == 0):
             if self._shortcutListener:
                 self._stop_shortcut_listener()
@@ -137,37 +98,100 @@ class ShortcutsHandle():
 
         if self._shortcutListener:
             self._refresh_shortcut_listener(argg)
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Started shortcut listener with argument : {argg} [Refresh]')
+            self._log.info(['define_shortcut'],
+                            message=f'Started shortcut listener with argument : {argg} [Refresh]')
         else:
             self._start_shortcut_listener(argg)
-            print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Started shortcut listener with argument : {argg} [-]')
-
+            self._log.info(['define_shortcut'],
+                           message=f'Started shortcut listener with argument : {argg} [-]')
 
     def remove_shortcut(self, shortcut: str)->bool:
-        """"Remove a shortcut. The listener will stop listning to the removed shortcut"""
-        print(f'\nshortcuthadle, remove_shortcut, removing shortcut:{shortcut}')
         was_removed = False
+        temp_list = self._savedShortcuts
+        # print(f'save: {self._savedShortcuts}')
+
+        # pdb.set_trace()
         try:
-            for el in self._savedShortcuts:
+            for el in temp_list:
                 if (el[0] == shortcut + 'PASS' or el[0] == shortcut + 'DONOT'):
-                    self._savedShortcuts.remove(el)
+                    temp_list.remove(el)
                     was_removed = True
         except Exception as ex:
             print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} | ', f'{inspect.stack()[1][3]} || ', f'Exception raised : {ex}')
             return was_removed
 
-        self.define_shortcut(*self._savedShortcuts, addToExist=False, passShortcut=True)
-        if not was_removed:
-            print(f'\nshortcuthadle, remove_shortcut, called with argument {shortcut}, shortcut WAS NOT REMOVED...')
-        else:
-            print(f'\nshortcuthadle, remove_shortcut, shortcut:{shortcut} REMOVED')
-        return was_removed
-    
-    def remove_all_shortcuts(self):
-        for shortcut_ in self._savedShortcuts:
-            if shortcut_[:-4] == 'PASS':
-                self.remove_shortcut(shortcut_.replace('PASS', ''))
-            elif shortcut_[:-5] == 'DONOT':
-                self.remove_shortcut(shortcut_.replace('DONOT', ''))
-        self._stop_shortcut_listener()
+        if len(temp_list) > 1:
+            if temp_list[0][0][-4:] == 'PASS':
+                self.define_shortcut((temp_list[0][0].replace('PASS', ''),
+                                      temp_list[0][1]), 
+                                     addToExist=False, 
+                                     passShortcut=True)
 
+            elif temp_list[0][0][-5:] == 'DONOT':
+                self.define_shortcut((temp_list[0][0].replace('DONOT', ''),
+                                      temp_list[0][1]), 
+                                     addToExist=False, 
+                                     passShortcut=True)
+
+            # pdb.set_trace()
+            
+            for el in temp_list[1:]:
+                if el[0][-4:] == 'PASS':
+                    self.define_shortcut((el[0].replace('PASS', ''),
+                                          el[1]), 
+                                        addToExist=True, 
+                                        passShortcut=True)
+
+                elif el[0][-5:] == 'DONOT':
+                    self.define_shortcut((el[0].replace('DONOT', ''),
+                                          el[1]), 
+                                        addToExist=True, 
+                                        passShortcut=True)
+
+
+        self._log.info(['remove_shortcut'],
+                       message=f'after remove, _savedShortcuts:{self._savedShortcuts}')
+        return was_removed
+
+    def remove_all_shortcuts(self):
+        self._log.info(['remove_all_shortcuts'],
+                       message='REMOVING ALL SHORTCUTS')
+        for shortcut_ in self._savedShortcuts:
+            # pdb.set_trace()
+            if shortcut_[0][-4:] == 'PASS':
+                self.remove_shortcut(shortcut_[0].replace('PASS', ''))
+            elif shortcut_[0][-5:] == 'DONOT':
+                self.remove_shortcut(shortcut_[0].replace('DONOT', ''))
+
+        self._log.info(['remove_all_shortcuts'],
+                       message=f'123123 _savedShortcuts:{self._savedShortcuts}')
+
+        # self._stop_shortcut_listener()
+
+    def refresh(self):
+        
+        self._log.info(['refresh'],
+                       message='REFRESHING')
+        _shortcuts =  []
+
+        for _shortcut in self._savedShortcuts:
+            if _shortcut[0][-4:] == 'PASS':
+                _shortcuts.append((_shortcut[0][:-4], _shortcut[1]))
+
+            elif _shortcut[0][-5:] == 'DONOT':
+                _shortcuts.append((_shortcut[0][:-5], _shortcut[1]))
+                
+        self._log.info(['refresh'],
+                       message='calling remove_all_shortcuts')
+        
+        self.remove_all_shortcuts()
+        
+        self._log.info(['refresh'],
+                        message=f'calling define_shortcut with _shortcuts:{_shortcuts}')
+        
+        
+        for _shortcut in _shortcuts:
+            self.define_shortcut(_shortcut, addToExist=True, passShortcut=True)
+        
+        self._log.info(['refresh'],
+                        message='REDEFINED shortcuts [DONE]')
