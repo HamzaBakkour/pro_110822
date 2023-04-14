@@ -12,7 +12,7 @@ from pynput.keyboard import Key
 
 import sys
 
-class TooManyAttributeErrorValueError(Exception):
+class BadConnection(Exception):
     pass
 
 class ServerIsNotConnected(Exception):
@@ -20,7 +20,6 @@ class ServerIsNotConnected(Exception):
 
 class IntendedAbortGroupTask(Exception):
     pass
-
 
 class AsyncClient():
     def __init__(self) -> None:
@@ -38,7 +37,6 @@ class AsyncClient():
         self._y = self._get_screen_resulotion()[1]
         self._recive_message_s1 = 0.1
     
-
     @property
     def _raise_exeption(self):
         return self._raise_exeption_
@@ -133,7 +131,7 @@ class AsyncClient():
                 if failed > 10:
                     print('\nasyncclient, in _recive_message, reached max failed allowed RAISING EXEPTION')
                     self._raise_exeption = True
-                    raise TooManyAttributeErrorValueError
+                    raise BadConnection('Server closed the connection')
                 continue
             except Exception as ex:
                 print(f'\nasyncclient, in _recive_message, {type(ex)}, {ex}, RAISING EXEPTION -> TERMINATING...')
@@ -296,7 +294,7 @@ class AsyncClient():
     def close_connection(self):
         self._abort_tasks = True
 
-    #at raise -> client worker will catch the exeption and emmit a remove server signal to main thread
+    
     def connect(self, serverIP, serverPort):
         try:
             asyncio.run(self._main(serverIP, serverPort))

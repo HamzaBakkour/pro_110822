@@ -15,11 +15,9 @@ _actions_ = []
 def _append_action(action):
     _actions_.append(action)
 
-
 #Send input to ReicveInput
 #check that recive input is passing
 #the right instruction to mouse and keyboard controlers
-
 
 class TestReciveuserinput(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
@@ -27,8 +25,6 @@ class TestReciveuserinput(unittest.TestCase):
         self.testServerPort = 0
         self.runTestServer = True
         self.testServerConnection = socket.socket()
-
-
 
     def setUp(self):
         self.runTestServer = True
@@ -117,7 +113,3 @@ class TestReciveuserinput(unittest.TestCase):
         #     self._send_message('hello')
         # except Exception:
         #     pass
-   
-        
-
-

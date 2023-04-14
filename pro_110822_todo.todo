@@ -302,8 +302,10 @@
           "content": "log module + .exe + test around",
           "id": 1681115378961,
           "level": "default",
-          "done": false,
-          "start": 1681115378961
+          "done": true,
+          "start": 1681115378961,
+          "focus": false,
+          "end": 1681411855822
         }
       },
       {
@@ -325,8 +327,10 @@
           "content": "test every thing working as intended before supress and hide",
           "id": 1681077896063,
           "level": "default",
-          "done": false,
-          "start": 1681077896063
+          "done": true,
+          "start": 1681077896063,
+          "focus": false,
+          "end": 1681411858472
         }
       },
       {
@@ -336,8 +340,10 @@
           "content": "supress",
           "id": 1681077683555,
           "level": "default",
-          "done": false,
-          "start": 1681077683555
+          "done": true,
+          "start": 1681077683555,
+          "focus": false,
+          "end": 1681411859208
         }
       },
       {
@@ -347,15 +353,62 @@
           "content": "hide mouse",
           "id": 1681077704157,
           "level": "default",
-          "done": false,
-          "start": 1681077704157
+          "done": true,
+          "start": 1681077704157,
+          "focus": false,
+          "end": 1681411860157
         }
       },
       {
         "key": 1680891087373,
-        "children": [],
+        "children": [
+          {
+            "key": 1681411866916,
+            "children": [],
+            "todo": {
+              "content": "asyncclient",
+              "id": 1681411866916,
+              "level": "default",
+              "done": false,
+              "start": 1681411866916
+            }
+          },
+          {
+            "key": 1681411877036,
+            "children": [],
+            "todo": {
+              "content": "client",
+              "id": 1681411877036,
+              "level": "default",
+              "done": false,
+              "start": 1681411877036
+            }
+          },
+          {
+            "key": 1681411884344,
+            "children": [],
+            "todo": {
+              "content": "portscanner",
+              "id": 1681411884344,
+              "level": "default",
+              "done": false,
+              "start": 1681411884344
+            }
+          },
+          {
+            "key": 1681411891373,
+            "children": [],
+            "todo": {
+              "content": "searchforserversworker",
+              "id": 1681411891373,
+              "level": "default",
+              "done": false,
+              "start": 1681411891373
+            }
+          }
+        ],
         "todo": {
-          "content": "tests",
+          "content": "tests - client",
           "id": 1680891087373,
           "level": "default",
           "done": false,
@@ -379,7 +432,7 @@
       1681107172185,
       1681113595765,
       1680891068325,
-      1681115378961
+      1680891087373
     ],
     "schema": "https://github.com/Saber2pr/vsc-ext-todolist/blob/master/src/api/type.ts#L3",
     "add_mode": "bottom",
@@ -390,6 +443,6 @@
     "autoSort": false,
     "showEndTime": false,
     "lang": "en",
-    "version": "1681115487271"
+    "version": "1681412179715"
   }
 }

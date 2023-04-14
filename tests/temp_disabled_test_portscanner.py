@@ -9,7 +9,8 @@ from ipaddress import IPv4Network
 
 # pyright: reportGeneralTypeIssues=true
 
-from pro_110822.portscanner import port_scanner, \
+
+from pro_110822.client.portscanner import port_scanner, \
     get_active_interfaces, \
     get_hosts_list
 
@@ -32,10 +33,10 @@ class TestPortscanner(unittest.TestCase):
         super().__init__(methodName)
         self.socketPort = 0
 
-    @patch('pro_110822.portscanner.get_hosts_list',
+    @patch('pro_110822.client.portscanner.get_hosts_list',
                   return_value = _pre_defined_hosts_list_,
                   autospec=True)
-    @patch('pro_110822.portscanner.get_active_interfaces',
+    @patch('pro_110822.client.portscanner.get_active_interfaces',
                   return_value = _pre_defined_interfaces_list_,
                   autospec=True)
     def test_port_scanner(self, interfacesList, hostsList):
@@ -46,10 +47,10 @@ class TestPortscanner(unittest.TestCase):
         #
         # This test function passes a list of pre-defined ip addresses
         # to port_scanner
-        # two of these ip addresses are valid 
-        # port_scanner should be able to estaplis a TCP connection with them
+        # two of these ip addresses are valid and thus port_scanner
+        # should be able to estaplis a TCP connection with them
 
-        socketThread = threading.Thread(target=self._create_test_socket)
+        socketThread = threading.Thread(target=self._test_socket, args=(2,))
         socketThread.start()
         time.sleep(1)
         PORT = self.socketPort
@@ -119,21 +120,24 @@ class TestPortscanner(unittest.TestCase):
         self.assertEqual(result[200].compressed, '192.168.0.201')
         self.assertEqual(result[253].compressed, '192.168.0.254')
 
-    def _create_test_socket(self):
+    def _test_socket(self, break_at):
         tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         tempSocket.bind(('localhost', 0))
         self.socketPort = tempSocket.getsockname()[1]
         conn = socket.socket()
-        n = 0
+        accepted_requsts = 0
         while(True): 
             tempSocket.listen(1)
             conn, addr = tempSocket.accept()
-            n = n + 1
-            if (n == 2):#One working ip addresses in _pre_defined_hosts_list_
+            accepted_requsts = accepted_requsts + 1
+            if (accepted_requsts == break_at):#One working ip addresses in _pre_defined_hosts_list_
                 break   #Two interfaces
                         #1 * 2 = Two connection requests.
+        self.assertEqual(accepted_requsts,
+                         break_at)
         conn.shutdown(SHUT_RDWR)
-        conn.close()    
+        conn.close()
+        
         
 if __name__ == '__main__':
     unittest.main()
