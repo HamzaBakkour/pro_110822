@@ -12,6 +12,8 @@ from pynput.keyboard import Key
 
 import sys
 
+from pro_110822.prologging import Log
+
 class BadConnection(Exception):
     pass
 
@@ -26,6 +28,7 @@ class AsyncClient():
         self._reader = None
         self._writer = None
         self._connected = False
+        self._log = Log()
         self._abort_tasks = False
         self._tasks = []
         self._raise_exeption_ = False
@@ -60,7 +63,7 @@ class AsyncClient():
             except Exception:
                 print(f'\nasyncclient, @_raise_exeption.setter, called with value {value}  NO CHANGES MADE [OK]')
 
-
+    @property
     def is_connected(self):
         return self._connected
 
@@ -247,8 +250,9 @@ class AsyncClient():
             print('ConnectionResetError')
             await asyncio.sleep(0.1)
         except Exception as ex:
-                print(type(ex), ex, 'Unhandeled')
+                print(type(ex), ex, 'Unhandeledxxx')
 
+    @property
     def recived_messages(self):
         return  list(self._inbound_queue.queue)
 
@@ -293,23 +297,26 @@ class AsyncClient():
 
     def close_connection(self):
         self._abort_tasks = True
-
-    
+ 
     def connect(self, serverIP, serverPort):
         try:
             asyncio.run(self._main(serverIP, serverPort))
         except CancelledError:
             if self._raise_exeption :
-                print(f'\nasyncclient, connect, tasks group canceled, {type(CancelledError)}, {CancelledError} RAISING EXCEPTION + EXITING')
+                self._log.info(['connect'],
+                                  message = 'tasks group canceled, _raise_exeption is TRUE -> RAISING EXCEPTION + EXITING')
                 raise CancelledError
             else:
-                print(f'\nasyncclient, connect, tasks group canceled, {type(CancelledError)}, {CancelledError} EXITING, NO exception raised')   
+                self._log.info(['connect'],
+                                  message = 'tasks group canceled, _raise_exeption is FALSE -> EXITING')
         except Exception as ex:
             if self._raise_exeption :
-                print(f'\nasyncclient, connect, tasks group canceled, {type(ex)}, {ex} RAISING EXCEPTION + EXITING')
+                self._log.error(['connect'],
+                                message=f'tasks group canceled, {type(ex)}, {ex}, _raise_exeption is TRUE -> RAISING EXCEPTION + EXITING')
                 raise ex
             else:
-                print(f'\nasyncclient, connect, tasks group canceled, {type(ex)}, {ex} EXITING')
+                self._log.error(['connect'],
+                                message=f'tasks group canceled, {type(ex)}, {ex}, _raise_exeption is FALSE -> EXITING')
 
 
 

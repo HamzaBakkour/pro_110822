@@ -12,18 +12,26 @@ class Timer(Thread):
         self._done = False
         self.exc = None
 
-    def run(self) -> None:
+
+    def _timer(self):
         was_set_to = self._time
         while not self._done:
             time.sleep(1)
             self._time -= 1
-            print(f'timer: {self._time}')
+            # print(f'timer: {self._time}')
             if (self._time == 0) and (not self._done):
-                raise TimeoutError(f'timer was set to {was_set_to}')
+                raise TimeoutError(f'timer was set to {was_set_to}s.')
+
+
+    def run(self) -> None:
+        try:
+            self._timer()
+        except Exception as ex:
+            self.exc = ex
+
     
     def join(self):
         Thread.join(self)
-
         if self.exc:
             raise self.exc
         

@@ -4,17 +4,17 @@ import threading
 import time
 from socket import SHUT_RDWR
 from asyncio.exceptions import CancelledError
+import timeout_decorator
+
 import pdb
 
 from pro_110822.client.asyncclient import AsyncClient
-from tests.timer import Timer
 
+# from tests.timer import Timer
+# from tests.asyncTimer import Timer
 #connect to server at a given ip and port
-
 #send and recive a message from the server
-
 #recive an info request and send correct respond
-
 #mouse and keyboard controller
 
 
@@ -29,16 +29,14 @@ class TestAsyncclient(unittest.TestCase):
         self._server_socket_accepted_requsts = 0
         self._server_socket_recived_messages = []
 
+    @timeout_decorator.timeout(5)
     def test_connect_to_server(self):
-        timer = Timer(2)
-    
-        timer.start()
-
-        try:
-            timer.join()
-        except TimeoutError:
-            self.fail('Test took too long...')
-
+        # timer = Timer(3)
+        # timer.start()
+        # timer.start()
+        # x = threading.Thread(target=timer.start)
+        # x.start()
+        # x.join()
 
 
         client = AsyncClient()
@@ -54,6 +52,7 @@ class TestAsyncclient(unittest.TestCase):
         self.assertEqual(self._server_socket_accepted_requsts, 1)
         self._server_socket_accepted_requsts = 0
         self._server_socket_port = None
+        # timer.done()
 
 
 

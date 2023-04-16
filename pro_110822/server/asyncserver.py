@@ -565,7 +565,6 @@ class AsyncServer():
 
     async def _main(self):
 
-        # print('\nasyncserver, _main, started')
         self._log.info(['_main'],
                     message='started')
         self._tasks.append(asyncio.create_task(self._start_server()))
@@ -574,7 +573,6 @@ class AsyncServer():
         self._tasks.append(asyncio.create_task(self._start_stream()))
 
 
-        # print('\nasyncserver, _main, tasks appended -> wait')
         self._log.info(['_main'],
                     message='tasks appended -> wait')
         done, pending = await asyncio.wait(self._tasks , return_when=asyncio.FIRST_EXCEPTION)
@@ -586,30 +584,24 @@ class AsyncServer():
         for task in done:
             self._log.info(['_main'],
                         message=f'done tasks:{task}')
-            # print(f'\nasyncserver, _main, done tasks:{task}')
         for task in pending:
             self._log.info(['_main'],
                         message=f'pending tasks:{task}')
-            # print(f'\nasyncserver, _main, pending tasks:{task}')
 
         tasks = asyncio.all_tasks()
         for task in tasks:
             try:
                 self._log.info(['_main'],
                             message=f'CANCELING>>> task:{task}')
-                # print(f'\nCANCELING>>> task:{task}')
                 task.cancel()
                 self._log.info(['_main'],
                             message=f'task:{task.get_name()} <<<CANCELED')
-                # print(f'\ntask:{task.get_name()} <<<CANCELED')
             except Exception as ex:
                 self._log.critical(['_main'],
                                 message=f'task.cancel(), {type(ex)}, {ex}')
-                # print(f'\nasyncserver, _main, task.cancel(), {type(ex)}, {ex}')
         
         self._log.info(['_main'],
                     message='exited.')
-        # print('\nasyncserver, _main() exited.')
 
     def start(self):
          asyncio.run(self._main(), debug=True)
