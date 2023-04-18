@@ -155,10 +155,8 @@ class AsyncClient():
     def _mouse_and_keyboard_controller(self, data):
         try:
             event = data.split('!')[1]
-            # print(f'>>>>>>>>>> {event}')
             match event:
                 case 'M': #Mouse position
-                    # print('>>>>>>>>>> IN')
                     self._mouse.position = (int((float(data.split('!')[2])* self._x)), 
                                             int((float(data.split('!')[3])* self._y)))
                 case 'P': #Mouse button
@@ -179,38 +177,8 @@ class AsyncClient():
                         self._keyboard.release(eval(data.split('!')[2]))
                     except Exception as ex:
                         print(f'asyncclient, control_test, case R {type(ex)}, {ex}')
-
-
-
         except Exception as ex:
             print(f'asyncclient, control_test, {type(ex)}, {ex}')
-
-
-        #     if (data.split('!')[0] == 'M'):#Mouse position
-        #             self._mouse.position = (int((float(data.split('!')[1])*self._get_screen_resulotion()[0])), 
-        #                                     int((float(data.split('!')[2])*self._get_screen_resulotion()[1])))
-        #     elif (data.split('!')[0] == 'P'):#Mouse button
-        #         if (data.split('!')[2] == '1'):#Mouse button pressed
-        #                 self._mouse.press(eval(self.data.split('!')[1]))
-        #         elif (data.split('!')[2] == '0'):#Mouse button released
-        #                 self._mouse.release(eval(self.data.split('!')[1]))
-        #     elif (data.split('!')[0] == 'K'):#Keyboard button
-        #         try:
-        #             if (data[4:7] == 'Key'):#Keyboard button pressed
-        #                 self._keyboard.press(eval(data.split('!')[2]))
-        #             else:
-        #                 self._keyboard.press(data.split('!')[2])
-        #         except Exception as ex:
-        #             print(ex)
-        #     elif (data.split('!')[0] == 'R'):#Keyboard button released
-        #         try:
-        #             self._keyboard.release(eval(data.split('!')[1]))
-        #         except Exception as ex:
-        #             print(ex)
-        #     elif(data == 'SS'):
-        #         print('stopppppppp')
-        # except Exception as ex:
-        #     print(f'asyncclient, control_test, {type(ex)}, {ex}')
 
     async def _group_tasks_terminator(self, sleep_ = 0.5):
         while(True):

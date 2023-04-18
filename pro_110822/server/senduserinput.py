@@ -40,9 +40,9 @@ class SendUserInput():
 
     def _on_click(self, x, y, button, pressed):
         if pressed:
-            event = f'%!P!{button}!1!{x}!{y}!&'
+            event = f'%!P!{button}!1!&'
         else:
-            event = f'%!P!{button}!0!{x}!{y}!&'
+            event = f'%!P!{button}!0!&'#!{x}!{y}
         if self.events_queue.full():
             return
         self.events_queue.put(event)
@@ -74,49 +74,6 @@ class SendUserInput():
         if self.events_queue.full():
             return
         self.events_queue.put(event)
-            
-        #region
-        # tick = 0
-        # pingo = False
-        # pingo_list = []
-        # # print('-----------------------------------------------')
-        # # print(f'self._keyboard_filter_encoded_list:{self._keyboard_filter_encoded_list}')
-        # # print('-----------------------------------------------')
-
-        # for el in self._keyboard_filter_encoded_list:
-        #     if (el.split('!')[0] == '29') and (tick == 0):
-        #         tick += 1
-        #     elif (el.split('!')[0] == '29') and (tick == 1):
-        #         continue
-        #     elif (el.split('!')[0] == '50') and (tick == 1):
-        #         tick += 1
-        #     elif (el.split('!')[0] == '50') and (tick == 2):
-        #         continue
-        #     elif (el.split('!')[0] == '2') and (tick == 2):
-        #         tick += 1
-        #     elif (el.split('!')[0] != '29') or (el.split('!')[0] == '50') or (el.split('!')[0] == '2'):
-        #         self._keyboard_filter_encoded_list = []
-        #     elif (el.split('!')[0] == '29') and (tick == 2):
-        #         self._keyboard_filter_encoded_list = []
-        # if (tick == 3):
-        #     pingo_list = self._keyboard_filter_encoded_list
-        #     self._keyboard_filter_encoded_list = []
-        #     pingo = True
-        # if pingo :
-        #     self._log.info(['_keyboard_filter_encoded_algorithm'],
-        #               message='!!!BINGO!!!')
-
-            # if pressed_long_enough(list_):
-            #     self._log.info(['_keyboard_filter_encoded_algorithm'],
-            #                    message='PRESSED LONG ENOUGH -> unsupress_user_input')
-            #     self.unsupress_user_input()
-            # else:
-            #     self._log.info(['_keyboard_filter_encoded_algorithm'],
-            #                    message='NOT PRESSED LONG ENOUGH ->...')   
-
-    # def _keyboard_filter_encoded_algorithm(self, list_):
-
-        #endregion
 
     def _pressed_long_enough(self):
         iteration = 0
