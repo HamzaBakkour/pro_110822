@@ -117,6 +117,7 @@ class AsyncClient():
                 buffer_ = b''
                 while(buffer_[-1:] != b'&'):
                     data = await self._reader.read(1024)
+                    # print(f'asyncclient, recive_message, data:{data}')
                     if not data:
                         print('\nasyncclient, _recive_message, not data -> break')
                         await asyncio.sleep(0.1)
@@ -148,13 +149,16 @@ class AsyncClient():
                 self._mouse_and_keyboard_controller(data)
             elif data.startswith('$'):   
                 await self._handel_server_messages(data)
-                # print(f'monitor>>> {data}')
+            elif not data.startswith('*') and not data == '':
+                self._inbound_queue.put(data)
 
     def _mouse_and_keyboard_controller(self, data):
         try:
             event = data.split('!')[1]
+            # print(f'>>>>>>>>>> {event}')
             match event:
                 case 'M': #Mouse position
+                    # print('>>>>>>>>>> IN')
                     self._mouse.position = (int((float(data.split('!')[2])* self._x)), 
                                             int((float(data.split('!')[3])* self._y)))
                 case 'P': #Mouse button
