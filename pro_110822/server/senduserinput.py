@@ -11,7 +11,11 @@ import ctypes
 from asyncio.exceptions import CancelledError
 import queue
 import ctypes
-from prologging import Log
+try:
+    from prologging import Log
+except ModuleNotFoundError:
+    from pro_110822.prologging import Log
+
 
 
 class SendUserInput():

@@ -12,7 +12,11 @@ from pynput.keyboard import Key
 
 import sys
 
-from pro_110822.prologging import Log
+try:
+    from prologging import Log
+except ModuleNotFoundError:
+    from pro_110822.prologging import Log
+
 
 class BadConnection(Exception):
     pass
