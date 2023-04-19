@@ -120,8 +120,10 @@
                   "content": "create connection",
                   "id": 1680881490096,
                   "level": "default",
-                  "done": false,
-                  "start": 1680881490096
+                  "done": true,
+                  "start": 1680881490096,
+                  "focus": false,
+                  "end": 1681930727594
                 }
               },
               {
@@ -131,8 +133,10 @@
                   "content": "close connection",
                   "id": 1680881515120,
                   "level": "default",
-                  "done": false,
-                  "start": 1680881515120
+                  "done": true,
+                  "start": 1680881515120,
+                  "focus": false,
+                  "end": 1681930728474
                 }
               },
               {
@@ -142,8 +146,10 @@
                   "content": "re-open connection",
                   "id": 1680881529050,
                   "level": "default",
-                  "done": false,
-                  "start": 1680881529050
+                  "done": true,
+                  "start": 1680881529050,
+                  "focus": false,
+                  "end": 1681930729120
                 }
               },
               {
@@ -153,8 +159,10 @@
                   "content": "remove client",
                   "id": 1680881553094,
                   "level": "default",
-                  "done": false,
-                  "start": 1680881553094
+                  "done": true,
+                  "start": 1680881553094,
+                  "focus": false,
+                  "end": 1681930729661
                 }
               }
             ],
@@ -175,8 +183,10 @@
               "content": "info text box",
               "id": 1680462758638,
               "level": "secondary",
-              "done": false,
-              "start": 1680462758638
+              "done": true,
+              "start": 1680462758638,
+              "focus": false,
+              "end": 1681930730599
             }
           }
         ],
@@ -293,8 +303,10 @@
               "content": "log module ,can print to console or text",
               "id": 1681115453693,
               "level": "default",
-              "done": false,
-              "start": 1681115453693
+              "done": true,
+              "start": 1681115453693,
+              "focus": false,
+              "end": 1681930762261
             }
           }
         ],
@@ -310,19 +322,7 @@
       },
       {
         "key": 1681077896063,
-        "children": [
-          {
-            "key": 1681077942255,
-            "children": [],
-            "todo": {
-              "content": ".exe YES!",
-              "id": 1681077942255,
-              "level": "default",
-              "done": false,
-              "start": 1681077942255
-            }
-          }
-        ],
+        "children": [],
         "todo": {
           "content": "test every thing working as intended before supress and hide",
           "id": 1681077896063,
@@ -395,8 +395,10 @@
               "content": "senduserinput",
               "id": 1681864636596,
               "level": "default",
-              "done": false,
-              "start": 1681864636596
+              "done": true,
+              "start": 1681864636596,
+              "focus": false,
+              "end": 1681930701608
             }
           },
           {
@@ -406,8 +408,10 @@
               "content": "searchforserversworker",
               "id": 1681411891373,
               "level": "default",
-              "done": false,
-              "start": 1681411891373
+              "done": true,
+              "start": 1681411891373,
+              "focus": false,
+              "end": 1681930702726
             }
           },
           {
@@ -428,8 +432,10 @@
           "content": "tests",
           "id": 1680891087373,
           "level": "default",
-          "done": false,
-          "start": 1680891087373
+          "done": true,
+          "start": 1680891087373,
+          "focus": false,
+          "end": 1681930709098
         }
       },
       {
@@ -440,17 +446,20 @@
           "id": 1681114270984,
           "level": "default",
           "done": false,
-          "start": 1681114270984
+          "start": 1681114270984,
+          "focus": false,
+          "end": 1681930711863
         }
       }
     ],
     "expandKeys": [
-      1680857937483,
-      1681107172185,
       1681113595765,
       1680891068325,
       1681411866916,
-      1680891087373
+      1680462879488,
+      1680857937483,
+      1681107172185,
+      1681077896063
     ],
     "schema": "https://github.com/Saber2pr/vsc-ext-todolist/blob/master/src/api/type.ts#L3",
     "add_mode": "bottom",
@@ -461,6 +470,6 @@
     "autoSort": false,
     "showEndTime": false,
     "lang": "en",
-    "version": "1681891799997"
+    "version": "1681930787117"
   }
 }

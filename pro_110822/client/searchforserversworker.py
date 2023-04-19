@@ -48,19 +48,3 @@ class SearchForServersWorker(QRunnable):
 
         print("\nsearchforserversworker, worker done!, EXITING")
         return 1
-
-
-        #train###########################################################
-        # self.signal.infoSignal.emit(1 , 'Searching for servers...')
-        # time.sleep(1)
-        # self.signal.infoSignal.emit(50 , 'Searching for servers...')
-        # time.sleep(2)
-        # self.signal.foundServer.emit('Train-Test-PRO110822', '10.101.1.22', self.serverPort)#found server signak
-        # time.sleep(1)
-        # self.signal.infoSignal.emit(100 , 'Search completed!')
-        # time.sleep(2)
-        # self.signal.infoSignal.emit(999 , ' ')
-        # self.signal.infoSignal.emit(0 , ' ')       
-        # #################################################################
-
-
