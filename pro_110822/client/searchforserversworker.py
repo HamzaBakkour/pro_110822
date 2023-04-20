@@ -6,10 +6,9 @@ import traceback
 import logging
 import time
 import re
-import portscanner
+from client import portscanner
 import pdb
-import inspect
-# pdb.set_trace()
+
 class SearchForServersWorkerSignals(QObject):
     foundServer = Signal(object, object, object)
     infoSignal = Signal(object, object)
@@ -40,19 +39,12 @@ class SearchForServersWorker(QRunnable):
                 self.signal.infoSignal.emit(0 , ' ')
         #################################################################
 
-        #train###########################################################
-        # self.signal.infoSignal.emit(1 , 'Searching for servers...')
-        # time.sleep(1)
-        # self.signal.infoSignal.emit(50 , 'Searching for servers...')
-        # time.sleep(2)
-        # self.signal.foundServer.emit('Train-Test-PRO110822', '10.101.1.22', self.serverPort)#found server signak
-        # time.sleep(1)
-        # self.signal.infoSignal.emit(100 , 'Search completed!')
-        # time.sleep(2)
+        #speed run####################################################
+        # self.signal.foundServer.emit('speed run:8888', '192.168.0.14', 8888)
+        # self.signal.foundServer.emit('speed run:8889', '192.168.0.14', 8889)
         # self.signal.infoSignal.emit(999 , ' ')
-        # self.signal.infoSignal.emit(0 , ' ')       
-        # #################################################################
-        print(f'{os.path.basename(__file__)} | ', f'{inspect.stack()[0][3]} || ', "Search for server worker exiting!")
+        # self.signal.infoSignal.emit(0 , ' ')
+        #################################################################
+
+        print("\nsearchforserversworker, worker done!, EXITING")
         return 1
-
-

@@ -1,0 +1,34 @@
+AsyncServer(asyncio)
+
+send_data(): send message to client
+
+start_stream(): capture input and send it to client
+
+stop_stream()
+
+set_client(clientIP, clientPort): client muset be set before send_data() and start_stream()
+
+connected_clients: returs a list of connected clients (ip, port)
+
+recived_messages: retursn a list of recived messages
+
+run(): starts the server
+
+close(): terminate the server
+
+
+
+
+Server(QRunnable)
+
+send_data()
+
+connected_clients()
+
+recived_messages()
+
+set_client()
+start_stream()
+stop_stream()
+
+close_server()

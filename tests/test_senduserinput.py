@@ -1,128 +1,122 @@
 import unittest
+from unittest.mock import patch
 import time
-import socket
-from pynput.mouse import Controller as MC, Button
+from pynput.mouse import Controller as MC
 from pynput.keyboard import Controller as KC
-from PySide6.QtCore import QThreadPool
+from pynput.keyboard import Key
+import pdb
 
-import sys
-sys.path.append('../pro_110822')
-from senduserinput import SendUserInput
-from reciveuserinput import ReciveUserInput
-from serverworker import ServerWorker
+from pro_110822.server.senduserinput import SendUserInput
 
 
-class SenduserinputTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        print("TEST STARTED")
-        # try:
-        #     cls.serverSocket =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #     cls.serverSocket.bind(('localhost',0))
-        #     cls.serverSocket.listen(5)
-        #     cls.serverPort = cls.serverSocket.getsockname()[1]
-        #     print(f'cls.serverPort {cls.serverPort}')
-        # except Exception as ex:
-        #     print(f'Failed to create server socket\nTests that use server socket will fail\n{ex}')
-
-        # try:
-        #     cls.clientSocket =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #     cls.clientSocket.setblocking(True)
-        #     cls.serverSocket.setblocking(True)
-        #     cls.clientSocket.connect(('localhost', cls.serverPort))
-        #     cls.serverConnection, _ = cls.serverSocket.accept()
-        # except Exception as ex:
-        #     print(f'Failed to create client socket\nTests that use client socket will fail\n{ex}')
-
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        print("TEST ENDED")
-
-    def test_start_stop_listner(self):
-        testedModule = SendUserInput()
-        testedModule.start_listning()
-        self.assertEqual(testedModule.mouseListner.running, True, "mouseListner failed to run")
-        self.assertEqual(testedModule.keyboardListner.running, True, "keyboardListner failed to run")
-        testedModule.stop_listning()
-        self.assertEqual(testedModule.mouseListner.running, False, "mouseListner failed to stop")
-        self.assertEqual(testedModule.keyboardListner.running, False, "keyboardListner failed to stop")
-
-    def test_hide_mouse_pointer_process(self):
-        testedModule = SendUserInput()
-        testedModule.start_listning()
-        testedModule.supress_user_input(True)
-        time.sleep(1)
-        testedModule.supress_user_input(False)
-        testedModule.stop_listning()
-        self.assertEqual(testedModule.coverScreenProcess.returncode, None, "cover screen process error")
-        self.assertEqual(testedModule.mouseListner.running, False, "mouseListner failed to stop")
-        self.assertEqual(testedModule.keyboardListner.running, False, "keyboardListner failed to stop")
-
-    def test_supress_mouse_click(self):
-        mouse = MC()
-        testedModule = SendUserInput()
-        testedModule.start_listning()
-        testedModule.supress_user_input(True)
-        mouse.press(Button.left)
-        time.sleep(1)
-        self.assertEqual(testedModule.mouseListner._suppress, True)
-        mouse.release(Button.left)  
-        testedModule.supress_user_input(False)
-        testedModule.stop_listning()
-        self.assertEqual(testedModule.mouseListner.running, False, "mouseListner failed to stop")
-        self.assertEqual(testedModule.keyboardListner.running, False, "keyboardListner failed to stop")
-
-    def test_supress_keyboard_click(self):
-        keyboard = KC()
-        testedModule = SendUserInput()
-        testedModule.start_listning()
-        testedModule.supress_user_input(True)
-        keyboard.press('A')
-        time.sleep(1)
-        self.assertEqual(testedModule.keyboardListner._suppress, True)
-        keyboard.release('A')
-        testedModule.supress_user_input(False)
-        testedModule.stop_listning()
-        self.assertEqual(testedModule.mouseListner.running, False, "mouseListner failed to stop")
-        self.assertEqual(testedModule.keyboardListner.running, False, "keyboardListner failed to stop")
-
-    def test_send_mouse_input_to_client(self):
-        pass
-        # mouse = MC()
-        # serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # serverSocket.setblocking(False)
-        # serverSocket.bind(('', 12345))
-        # serverWorker = ServerWorker(serverSocket)
-        # threabool = QThreadPool()
-        # threabool.setMaxThreadCount(5)
-        # threabool.start(serverWorker)
-        # serverPort = serverSocket.getsockname()[1]
-        # testedModule2 = ReciveUserInput('localhost', serverPort)
-        # testedModule1 = SendUserInput()
-        # testedModule1.send_input_to_client(testedModule2.reciveSocket)
-        # mouse.move(5,5)
-        # print(testedModule2.run().data)
-        # serverSocket.close()
-        # mouse = MC()
-        # testedModule1 = SendUserInput()
-        # testedModule.start_listning()
-        # SenduserinputTest.clientSocket.setblocking(False)
-        # SenduserinputTest.serverSocket.setblocking(False)
-        # testedModule.send_input_to_client(SenduserinputTest.clientSocket)
-        # mouse.move(5,5)
-        # for _ in range(10):
-        #     print (SenduserinputTest.clientSocket.recv(1).decode())
-        #     time.sleep(1)
+class TestSendUserInput(unittest.TestCase):
+    def __init__(self, methodName: str = "runTest") -> None:
+        super().__init__(methodName)
         
 
+    def test_start_stop_listener(self):
+        sendinput = SendUserInput()
+        sendinput.start_listning()
+        time.sleep(0.1)
+        self.assertTrue(sendinput._mouse_listner.running)
+        self.assertTrue(sendinput._keyboard_listner.running)
 
+        sendinput.stop_listning()
+        time.sleep(0.1)
+        self.assertFalse(sendinput._mouse_listner.running)
+        self.assertFalse(sendinput._keyboard_listner.running)
 
+    @patch('pro_110822.server.senduserinput.SendUserInput.get_screen_resulotion',
+           return_value = (1, 1),
+           autospec=True)
+    def test_mouse_controller(self, screen_res):
+        mouse = MC()
 
+        sendinput = SendUserInput()
+        sendinput.start_listning()
 
+        time.sleep(0.1)
+        mouse.move(1,-1)
+        
+        sendinput.stop_listning()
 
+        self.assertGreater(len(sendinput.events_queue.queue),
+                           0)
+        
+        movement_recorded = False
 
+        for entry in sendinput.events_queue.queue:
+            elements = entry.split('!')
+            if elements[1] == 'M':
+                movement_recorded = True
+                self.assertEqual(len(elements),
+                                5)
 
+                self.assertEqual(elements[0],
+                                '%')
+                self.assertEqual(elements[1],
+                                'M')
+                self.assertEqual(elements[4],
+                                '&')
 
-if __name__ == '__main__':
-    unittest.main()
+                try:
+                    _ = float(elements[2])
+                    _ = float(elements[3])
+                except Exception as ex:
+                    self.fail(f'{type(ex)}, {ex}'\
+                            '\nMouse position elements at index 2 and/or 3 are not float')
+                    
+        self.assertTrue(movement_recorded,
+                        f'{sendinput.events_queue.queue}\n'\
+                            'None of the events in the envent queue are mouse movement.')
+
+    def test_keyboard_controller(self):
+        keyboard = KC()
+
+        sendinput = SendUserInput()
+        sendinput.start_listning()
+
+        time.sleep(0.1)
+        keyboard.press(Key.f3)
+        keyboard.release(Key.f3)
+        
+        sendinput.stop_listning()
+
+        self.assertGreater(len(sendinput.events_queue.queue),
+                           1)
+        key_recorded = 0
+        
+        for entry in sendinput.events_queue.queue:
+            elements = entry.split('!')
+            if (elements[1] == 'K') and (elements[3] == 'Key.f3'):
+                key_recorded += 1
+                self.assertEqual(len(elements),
+                                5)
+
+                self.assertEqual(elements[0],
+                                '%')
+                self.assertEqual(elements[1],
+                                'K')
+                self.assertEqual(elements[2],
+                                's')
+                self.assertEqual(elements[3],
+                                'Key.f3')
+                self.assertEqual(elements[4],
+                                '&')
+                
+            if (elements[1] == 'R') and (elements[2] == 'Key.f3'):
+                key_recorded += 1
+                self.assertEqual(len(elements),
+                                4)
+
+                self.assertEqual(elements[0],
+                                '%')
+                self.assertEqual(elements[1],
+                                'R')
+                self.assertEqual(elements[2],
+                                'Key.f3')
+                self.assertEqual(elements[3],
+                                '&')
+                  
+        self.assertGreater(key_recorded,
+                           1)
