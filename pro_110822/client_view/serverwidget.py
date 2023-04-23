@@ -1,9 +1,8 @@
 from PySide6 import QtWidgets
-
+import time
 from PySide6.QtWidgets import (
     QGridLayout,
     QLabel
-
 )
 
 from . import clientviewserverwidgetbtn1
@@ -17,11 +16,32 @@ class ServerWidget(QtWidgets.QFrame):
         self.serverName = server_name
         self.serverIP = server_IP
         self.port = server_Port
+        self._connected = False
 
         self.setFixedHeight(75)
 
         self._init_ui()
         self._set_style()
+
+
+    @property
+    def connected(self):
+        return self._connected
+
+    @connected.setter
+    def connected(self, value):
+        if type(value) != bool:
+            print(f"\nseverwidget, connected, value:{value} must be of type boolean")
+            return
+        self._connected = value
+        if (self._connected):
+            self.connectButton.change_style_on_checked(True)
+
+
+        else:
+            self.connectButton.change_style_on_checked(False)
+
+
 
 
     def _set_style(self):

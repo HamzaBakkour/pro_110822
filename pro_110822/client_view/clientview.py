@@ -25,6 +25,9 @@ from . import serverwidget
 class ClientView(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self._widgets = []
+
         self.upperFrame = clientviewupperframe.ClientViewUpperFrame()
         self.scrollArea = clientviewscrollarea.ClientViewScrollArea()
         self.bottomFrame = clientviewbuttomframe.ClientViewBottomFrame()
@@ -42,19 +45,34 @@ class ClientView(QtWidgets.QWidget):
         self.layout.addWidget(self.scrollArea, 1, 0)
         self.layout.addWidget(self.bottomFrame, 2, 0)
 
+    @property
+    def last_added_widget(self):
+        return self._widgets[-1]
+    
+    @property
+    def widgets(self):
+        return self._widgets
+
+    def add_widget(self, widget):
+        self.scrollArea.add_device(widget)
+        self._widgets.append(widget)
+
+    def widget_already_exist(self, ip, port):
+        for widget in self.widgets:
+            if (widget.serverIP == ip) and (widget.port == port):
+                return True
+        return False
+    
+    def delete_widget(self, ip, port):
+        for widget in self.widgets:
+            if (widget.serverIP == ip) and (widget.port == port):
+                print(f'\nclientview, delete_widget, deleting {ip}{port}...')
+                widget.deleteLater()
+                self._widgets.remove(widget)
+                print(f'\nclientview, delete_widget, deleting {ip}{port} DELETED')
 
 
 
-        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST1-1001_PRO110822', ('255.255.255.255')))
-        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST2-1001_PRO110822', ('255.255.255.255')))
-        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST3-1001_PRO110822', ('255.255.255.255')))
-        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST3-1001_PRO110822', ('255.255.255.255')))
-        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST3-1001_PRO110822', ('255.255.255.255')))
-        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST3-1001_PRO110822', ('255.255.255.255')))
-        # self.scrollArea.add_device(serverwidget.ServerWidget('QT-TEST3-1001_PRO110822', ('255.255.255.255')))
-
-
-        
 
 
 
