@@ -1,9 +1,0 @@
-LICENSE
-setup.py
-pro_110822/__init__.py
-pro_110822/mainwindow.py
-pro_110822/prologging.py
-pro_110822.egg-info/PKG-INFO
-pro_110822.egg-info/SOURCES.txt
-pro_110822.egg-info/dependency_links.txt
-pro_110822.egg-info/top_level.txt
