@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 
 from prologging import Log
 
+#asd
 
 
 from client_view.clientview import ClientView 
