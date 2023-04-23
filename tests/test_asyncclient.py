@@ -341,8 +341,7 @@ class TestAsyncclient(unittest.TestCase):
             self.assertEqual(element[1][-1:],
                              b'&')  
 
-    #info requests are snet by the server to ask the client about its name, 
-    # screen width and screen hight.
+    #info request is snet by the server to ask the client about its name and screen resolution.
     def test_respond_to_info_requst(self):
         self.assertEqual(len(self._recived_messages__by_server),
                          1)
@@ -350,7 +349,7 @@ class TestAsyncclient(unittest.TestCase):
         self.assertEqual(len(self._sent_messages__by_server),
                          1)
         
-        #info requsts messags are not added to the client's recived messages queu.
+        #info requsts messags are not added to the client's recived messages queue.
         self.assertEqual(len(self._client.recived_messages),
                          0)
         
