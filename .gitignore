@@ -8,3 +8,7 @@ build
 dist
 reports
 pro_110822_venv_11
+docs
+pro_110822.egg-info
+Turn on network discovery.txt
+mkdocs.yml
