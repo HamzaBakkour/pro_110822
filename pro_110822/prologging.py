@@ -97,18 +97,3 @@ class Log:
     if self.disable:
       return    
     self.logger.exception(where + message + '\n')  
-
-# l = Log()
-
-# l.info(['method 1', 'method 2'], message='rasing exption')
-
-# l.info(['method 1', 'method 2'], message='rasing exption')
-
-
-  # def info(self, where, message = 'NO LOG MESSAGE', new_line = True):
-  # def debug(self, where, message = 'NO LOG MESSAGE', new_line = True):
-  # def warning(self, where, message = 'NO LOG MESSAGE', new_line = True):
-  # def error(self, where, message = 'NO LOG MESSAGE', new_line = True):
-  # def critical(self, where, message = 'NO LOG MESSAGE', new_line = True):
-  # def exception(self, where, message = 'NO LOG MESSAGE', new_line = True):
-
