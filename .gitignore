@@ -6,5 +6,9 @@ sturcture.docx
 launch.json
 settings.json
 logs
+build
+dist
+htmlcov
+reports
 
 

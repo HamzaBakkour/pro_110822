@@ -42,13 +42,12 @@ class TestPortscanner(unittest.TestCase):
     def test_port_scanner(self, interfacesList, hostsList):
         #test_port_scanner, pro_110822.portscanner.port_scanner
         #
-        # port_scanner checks if a TCP connection can be established
-        # with local ip addresses on the hosts network
+        # port_scanner scan for open ports on the hosts 
+        # local network
         #
         # This test function passes a list of pre-defined ip addresses
         # to port_scanner
-        # two of these ip addresses are valid and thus port_scanner
-        # should be able to estaplis a TCP connection with them
+        # two of these ip addresses are valid
 
         socketThread = threading.Thread(target=self._test_socket, args=(2,))
         socketThread.start()
@@ -95,7 +94,6 @@ class TestPortscanner(unittest.TestCase):
             numIteration = numIteration + 1
 
     def test_get_active_interfaces(self):
-
         _active_interface_ = get_active_interfaces(False)
         self.assertGreater(len(_active_interface_),
                            0,

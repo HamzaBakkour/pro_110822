@@ -2,26 +2,26 @@ import unittest
 from unittest.mock import patch
 import asyncio
 from random import randint
-from pro_110822.prologging import Log 
+from prologging import Log 
 import pdb
-from pro_110822.client.asyncclient import AsyncClient
+try:
+    from pro_110822.client.asyncclient import AsyncClient
+except ModuleNotFoundError:
+    from client.asyncclient import AsyncClient
 
-
-
-_TESTS_TIMEOUT_ = [{'test_name' : 'test_asyncclient.TestAsyncclient.test_connect_to_test_server',
+_TESTS_TIMEOUT_ = [{'test_name' : 'test_connect_to_test_server',
                     'timeout' : 3},
-                    {'test_name' : 'test_asyncclient.TestAsyncclient.test_send_messages',
+                    {'test_name' : 'test_send_messages',
                      'timeout' : 4},
-                    {'test_name' : 'test_asyncclient.TestAsyncclient.test_recive_messags',
+                    {'test_name' : 'test_recive_messags',
                      'timeout' : 4},
-                    {'test_name' : 'test_asyncclient.TestAsyncclient.test_send_and_recive_messages',
+                    {'test_name' : 'test_send_and_recive_messages',
                      'timeout' : 4},
-                    {'test_name' : 'test_asyncclient.TestAsyncclient.test_respond_to_info_requst',
+                    {'test_name' : 'test_respond_to_info_requst',
                      'timeout' : 3},
-                    {'test_name' : 'test_asyncclient.TestAsyncclient.test_mouse_and_keyboard_controller',
+                    {'test_name' : 'test_mouse_and_keyboard_controller',
                      'timeout' : 5}
                      ]
-
 
 class TestAsyncclient(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
@@ -52,6 +52,7 @@ class TestAsyncclient(unittest.TestCase):
 
     def setUp(self):
         test_name = unittest.TestCase.id(self)
+        test_name = test_name.split('.')[-1]
         timeout = self._get_timeout(test_name)
         if timeout:
             self._log.info(['setUp'],
@@ -93,46 +94,45 @@ class TestAsyncclient(unittest.TestCase):
 
     async def _async_start_test_tasks(self, test_name, timeout):
         match test_name:
-            case 'test_asyncclient.TestAsyncclient.test_connect_to_test_server':
+            case 'test_connect_to_test_server':
                 self._tasks.append(asyncio.create_task(self._client_task()))
                 self._tasks.append(asyncio.create_task(self._server_task()))
 
-            case 'test_asyncclient.TestAsyncclient.test_send_messages':
+            case 'test_send_messages':
                 self._tasks.append(asyncio.create_task(self._client_task()))
                 self._tasks.append(asyncio.create_task(self._server_task()))  
                 self._tasks.append(asyncio.create_task(self._recive_messages_task__by_test_server()))   
                 self._tasks.append(asyncio.create_task(self._send_messages_task__by_client()))
 
-            case 'test_asyncclient.TestAsyncclient.test_recive_messags':
+            case 'test_recive_messags':
                 self._tasks.append(asyncio.create_task(self._client_task()))
                 self._tasks.append(asyncio.create_task(self._server_task()))  
                 self._tasks.append(asyncio.create_task(self._send_messags_task__by_test_server()))
 
-            case 'test_asyncclient.TestAsyncclient.test_send_and_recive_messages':
+            case 'test_send_and_recive_messages':
                 self._tasks.append(asyncio.create_task(self._client_task()))
                 self._tasks.append(asyncio.create_task(self._server_task()))  
                 self._tasks.append(asyncio.create_task(self._send_messags_task__by_test_server()))
                 self._tasks.append(asyncio.create_task(self._send_messages_task__by_client()))
                 self._tasks.append(asyncio.create_task(self._recive_messages_task__by_test_server()))   
 
-            case 'test_asyncclient.TestAsyncclient.test_respond_to_info_requst':
+            case 'test_respond_to_info_requst':
                 self._tasks.append(asyncio.create_task(self._mocked_client_task__info_requst()))
                 self._tasks.append(asyncio.create_task(self._server_task()))  
                 self._tasks.append(asyncio.create_task(self._send_info_requst_task__by_test_server()))
                 self._tasks.append(asyncio.create_task(self._recive_messages_task__by_test_server()))
 
-            case 'test_asyncclient.TestAsyncclient.test_mouse_and_keyboard_controller':
+            case 'test_mouse_and_keyboard_controller':
                 self._tasks.append(asyncio.create_task(self._server_task()))
                 self._tasks.append(asyncio.create_task(self._mocked_client_task__mouse_and_keyboard()))
-                self._tasks.append(asyncio.create_task(self._send_mouse_and_keyboard_events__by_test_server()))  
+                self._tasks.append(asyncio.create_task(self._send_mouse_and_keyboard_events__by_test_server()))
 
         awaitables = asyncio.gather(*self._tasks)
+
         try:
             await asyncio.wait_for(awaitables, timeout=timeout)
         except asyncio.exceptions.TimeoutError:
             pass
-
-
 
     async def _client_task(self):
         self._client = AsyncClient()
@@ -146,10 +146,7 @@ class TestAsyncclient(unittest.TestCase):
             self._addr = addr
             self._test_server_writer = writer
             self._test_server_reader = reader
-
         await asyncio.start_server(_server_handler, '127.0.0.1', 8888)  
-
-
 
     async def _send_messags_task__by_test_server(self):
         await asyncio.sleep(1)
@@ -186,8 +183,6 @@ class TestAsyncclient(unittest.TestCase):
                 await asyncio.sleep(0.1)
                 continue
 
-
-
     @patch('pro_110822.client.asyncclient.AsyncClient._get_pc_name',
            return_value = 'THIS-IS-CLIENT-PC-NAME',
            autospec=True)
@@ -205,8 +200,6 @@ class TestAsyncclient(unittest.TestCase):
         self._test_server_writer.write(message.encode())
         self._sent_messages__by_server.append(message)
         await self._test_server_writer.drain()
-
-
 
     def _mouse_position_set__side_effect(self, pos):
         self._mouse_and_keyboard_events.append({'event' : 'position', 'value' : pos})
@@ -263,8 +256,6 @@ class TestAsyncclient(unittest.TestCase):
             self._test_server_writer.write(event.encode())
             self._sent_messages__by_server.append(event)
             await self._test_server_writer.drain()
-
-
 
     def test_connect_to_test_server(self):
         self.assertEqual(self._addr[0],
@@ -423,6 +414,9 @@ class TestAsyncclient(unittest.TestCase):
         
         self.assertEqual(self._mouse_and_keyboard_events[8]['value'],
                          'alt_r')
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
