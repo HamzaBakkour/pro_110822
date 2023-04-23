@@ -4,23 +4,13 @@ import queue
 from pynput import keyboard
 import time
 
-try:
-    from server.senduserinput import SendUserInput
-except ModuleNotFoundError:
-    from pro_110822.server.senduserinput import SendUserInput
 
-try:
-    from prologging import Log
-except ModuleNotFoundError:
-    from pro_110822.prologging import Log
+from pro_110822.server.senduserinput import SendUserInput
+from pro_110822.prologging import Log
 
 import pdb
 
-from PySide6 import QtCore
-from PySide6.QtWidgets import (
-    QVBoxLayout,
-    QWidget
-)
+
 
 class TasksAborted(Exception):
     pass

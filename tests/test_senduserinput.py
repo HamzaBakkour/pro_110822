@@ -6,6 +6,7 @@ from pynput.keyboard import Controller as KC
 from pynput.keyboard import Key
 import pdb
 
+
 from pro_110822.server.senduserinput import SendUserInput
 
 
@@ -20,7 +21,6 @@ class TestSendUserInput(unittest.TestCase):
         time.sleep(0.1)
         self.assertTrue(sendinput._mouse_listner.running)
         self.assertTrue(sendinput._keyboard_listner.running)
-
         sendinput.stop_listning()
         time.sleep(0.1)
         self.assertFalse(sendinput._mouse_listner.running)
@@ -31,20 +31,15 @@ class TestSendUserInput(unittest.TestCase):
            autospec=True)
     def test_mouse_controller(self, screen_res):
         mouse = MC()
-
         sendinput = SendUserInput()
         sendinput.start_listning()
-
         time.sleep(0.1)
         mouse.move(1,-1)
-        
         sendinput.stop_listning()
-
         self.assertGreater(len(sendinput.events_queue.queue),
                            0)
         
         movement_recorded = False
-
         for entry in sendinput.events_queue.queue:
             elements = entry.split('!')
             if elements[1] == 'M':
@@ -58,7 +53,6 @@ class TestSendUserInput(unittest.TestCase):
                                 'M')
                 self.assertEqual(elements[4],
                                 '&')
-
                 try:
                     _ = float(elements[2])
                     _ = float(elements[3])
@@ -72,20 +66,16 @@ class TestSendUserInput(unittest.TestCase):
 
     def test_keyboard_controller(self):
         keyboard = KC()
-
         sendinput = SendUserInput()
         sendinput.start_listning()
-
         time.sleep(0.1)
         keyboard.press(Key.f3)
         keyboard.release(Key.f3)
-        
         sendinput.stop_listning()
-
         self.assertGreater(len(sendinput.events_queue.queue),
                            1)
-        key_recorded = 0
         
+        key_recorded = 0
         for entry in sendinput.events_queue.queue:
             elements = entry.split('!')
             if (elements[1] == 'K') and (elements[3] == 'Key.f3'):
